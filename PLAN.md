@@ -80,7 +80,16 @@ Parallelism: after M0 the JSON contracts in `contracts/` are the seam. C builds 
 8. **4 minutes for 7 beats is ~30 s per beat.** The supplier report card is cut from the live demo (it stays in the app for Q&A), and the simulator gets ~20 s showing one slider plus the pessimistic preset.
 9. **The 98%-reliable supplier question and exploration share.** The Promise model gives new or low-volume suppliers a shrunk prior plus a small exploration share, so a supplier we down-ranked can still earn its way back. That answers "you're killing my suppliers".
 
-## 6. Key technical decisions (committed)
+## 6. Additions after M0 (gaps against the brief)
+
+1. **Relevance in ranking.** The transparent score adds distance to the client's area or anchor, star fit vs filter, family fit (occupancy, pool), popularity among same-source-market agents (from the booking log) and content completeness, alongside True Price and Promise. Every term is a `ScoreTerm` (weight × value), shown as "why ranked here" chips with a full breakdown popover. Sightseeing uses popularity, duration fit, rating and True Price.
+2. **Access types + activity options.** `access_type` (standard / skip-the-line / VIP / time-slot) and `activity_option` (sunset slot, with drink, guide language) are in the activity schema and the DNA strip. The catalogue now includes Grand Palace standard vs skip-the-line vs English guide, and a rooftop skywalk by day vs sunset vs with drink.
+3. **Enrichment made visible.** The hotel detail page has a Before/After toggle: one supplier's sparse listing vs the golden record, with sources on hover. It's a short beat in DEMO.md.
+4. **DNA-only filters.** "Free cancellation", "breakfast included", "hotel pickup", "skip-the-line" and "lunch included". Each filter shows how many cards match via Variant DNA vs what keyword search on raw supplier text finds today, so the gain is measured, not claimed.
+
+Contract change: the listing endpoint returns **both** views in one payload (`HotelSearch.today` + `.samesame`), so the stage toggle is instant and never shows a spinner.
+
+## 7. Key technical decisions (committed)
 
 - **Storage:** DuckDB file `data/build/samesame.duckdb` plus parquet. The API reads precomputed tables, and nothing heavy runs at request time except the sandbox and the simulator.
 - **Matching thresholds (precision-first):** auto-merge if p ≥ τ_hi, where τ_hi is picked on the validation fold for precision ≥ 0.99. Gray zone [τ_lo, τ_hi) goes to the LLM (target 5–10% of candidate pairs), and if there is no LLM or it isn't confident, to the human queue. Hard never-merge rules override the model: different chain sub-brand; >1.5 km apart with a different phone; different external map id when both exist.

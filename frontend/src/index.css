@@ -7,3 +7,13 @@ body { @apply bg-paper-warm text-ink antialiased; font-feature-settings: "tnum" 
 
 /* Leaflet with no tile server: the map canvas is our own basemap */
 .leaflet-container { background: #eef1ef; font-family: inherit; }
+.leaflet-tooltip { font-size: 13px; font-weight: 600; }
+.map-line-label { background: #dc2626; color: #fff; border: none; box-shadow: none; }
+.map-line-label::before { display: none; }
+
+/* DNA segment that differs from its siblings */
+@keyframes dna-glow { 0%, 100% { box-shadow: 0 0 0 2px rgb(11 122 112 / .55), 0 0 12px rgb(15 148 136 / .35); } 50% { box-shadow: 0 0 0 2px rgb(11 122 112 / .9), 0 0 20px rgb(15 148 136 / .6); } }
+.dna-glow { animation: dna-glow 1.8s ease-in-out infinite; }
+
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgb(220 38 38 / .5); } 100% { box-shadow: 0 0 0 14px rgb(220 38 38 / 0); } }
+.pulse-danger { animation: pulse-ring 1.2s ease-out 3; }

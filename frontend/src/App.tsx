@@ -1,8 +1,14 @@
 import { BarChart3, Building2, ClipboardCheck, Ship, SlidersHorizontal } from "lucide-react";
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { useApi } from "@/lib/api";
+import { Presenter } from "@/lib/presenter";
 import type { Meta } from "@/contracts";
 import HotelsPage from "@/pages/HotelsPage";
+import HotelDetailPage from "@/pages/HotelDetailPage";
+import SightseeingPage from "@/pages/SightseeingPage";
+import OpsPage from "@/pages/OpsPage";
+import SimulatorPage from "@/pages/SimulatorPage";
+import SuppliersPage from "@/pages/SuppliersPage";
 import { Empty } from "@/components/States";
 
 const NAV = [
@@ -30,7 +36,7 @@ function ModeBadge() {
 export default function App() {
   return (
     <div className="flex h-full">
-      <aside className="flex w-60 shrink-0 flex-col border-r border-paper-line bg-paper px-4 py-6">
+      <aside className="flex w-56 shrink-0 flex-col border-r border-paper-line bg-paper px-4 py-6">
         <div className="px-2">
           <div className="text-2xl font-extrabold tracking-tight">Same<span className="text-accent-600">Same</span></div>
           <div className="mt-1 text-sm leading-snug text-ink-mute">Same same, but different.</div>
@@ -46,7 +52,7 @@ export default function App() {
         <div className="mt-auto space-y-4 px-2">
           <ModeBadge />
           <div className="text-xs leading-relaxed text-ink-mute">
-            Built for TBO · Track 2<br />Map data © OpenStreetMap contributors, ODbL
+            Built for TBO · Track 2<br />Suppliers are fictional, data synthetic, images illustrative.<br />Map data © OpenStreetMap contributors, ODbL
           </div>
         </div>
       </aside>
@@ -54,11 +60,15 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/hotels" replace />} />
           <Route path="/hotels" element={<HotelsPage />} />
-          {NAV.slice(1).map(({ to, label }) => (
-            <Route key={to} path={to} element={<Empty title={label}>Arrives in Milestone 1.</Empty>} />
-          ))}
+          <Route path="/hotels/:id" element={<HotelDetailPage />} />
+          <Route path="/sightseeing" element={<SightseeingPage />} />
+          <Route path="/ops" element={<OpsPage />} />
+          <Route path="/suppliers" element={<SuppliersPage />} />
+          <Route path="/simulator" element={<SimulatorPage />} />
+          <Route path="*" element={<Empty title="Page not found" />} />
         </Routes>
       </main>
+      <Presenter />
     </div>
   );
 }

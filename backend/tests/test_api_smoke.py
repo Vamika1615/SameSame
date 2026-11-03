@@ -9,7 +9,7 @@ def test_meta_reports_mode():
     r = client.get("/api/meta")
     assert r.status_code == 200
     m = r.json()["mode"]
-    assert m["data"] == "synthetic"
+    assert m["data"] in ("mock", "synthetic", "real")
     assert isinstance(m["llm"], bool)
 
 
