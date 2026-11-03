@@ -1,0 +1,10 @@
+OpenStreetMap snapshot for SameSame (data (c) OpenStreetMap contributors, ODbL 1.0)
+pulled_at_utc: 2026-11-03T18:56:59Z
+osm_base[hotels]: 2026-11-03T18:53:35Z
+osm_base[river]: 2026-11-03T18:54:36Z
+osm_base[roads]: 2026-11-03T18:54:36Z
+osm_base[districts]: 2026-11-03T18:55:32Z
+query[hotels]: [out:json][timeout:120];area["name:en"="Bangkok"]["admin_level"="4"]->.a;nwr["tourism"="hotel"](area.a);out center tags;
+query[river]: [out:json][timeout:120];way["waterway"="river"]["name:en"~"Chao Phraya"](13.64,100.42,13.89,100.68);out geom;
+query[roads]: [out:json][timeout:180];way["highway"~"^(motorway|trunk|primary)$"](13.64,100.42,13.89,100.68);out geom;
+query[districts]: [out:json][timeout:180];area["name:en"="Bangkok"]["admin_level"="4"]->.a;rel["boundary"="administrative"]["admin_level"="6"](area.a);out geom;

@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+body { @apply bg-paper-warm text-ink antialiased; font-feature-settings: "tnum" 1; }
+
+/* Leaflet with no tile server: the map canvas is our own basemap */
+.leaflet-container { background: #eef1ef; font-family: inherit; }
