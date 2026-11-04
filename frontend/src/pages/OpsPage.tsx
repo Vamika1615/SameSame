@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { ReviewAck, ReviewItem, ReviewSide } from "@/contracts";
 import { getJSON } from "@/lib/api";
 import { Empty, ErrorState, Loading } from "@/components/States";
-import { DataBadge, Illustrative, SupplierBadge, cn } from "@/components/ui";
+import { Illustrative, SupplierBadge, cn } from "@/components/ui";
 
 type Audit = { audit_id: string; pair_id: string; label: string; reviewer: string; truth: string; correct: boolean; undone?: boolean };
 const LABEL = { S: "SAME", V: "VARIANT", D: "DIFFERENT" } as const;
@@ -66,8 +66,8 @@ export default function OpsPage() {
       <div>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight">Spot the Twin <DataBadge kind="mock" /></h1>
-            <p className="mt-1 text-ink-mute">Pairs the model wasn't sure enough to merge. Nothing here was auto-merged. Every label goes back into training data.</p>
+            <h1 className="text-3xl font-bold tracking-tight">Spot the Twin</h1>
+            <p className="mt-1 text-ink-mute">Pairs the Twin Finder wasn't sure enough to merge, or that a never-merge rule blocked. Nothing here was auto-merged. <a href="/label" className="underline">Blind-set labelling →</a></p>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 font-bold text-amber-700"><Flame className="h-5 w-5" />streak {streak}</div>
@@ -95,15 +95,15 @@ export default function OpsPage() {
                 <motion.div key="ack" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
                   className={cn("mt-5 rounded-xl p-5", !ack.model_was_right ? "bg-danger-50" : "bg-ok-50")}>
                   <div className="text-xl font-bold">
-                    You said {LABEL[ack.label]} · ground truth {ack.truth}
+                    You said {LABEL[ack.label]} · generator label {ack.truth}
                     {LABEL[ack.label] === ack.truth ? " ✓" : " ✗"}
                   </div>
                   {!ack.model_was_right && (
                     <div className="mt-1 flex items-center gap-2 text-lg font-semibold text-danger-700">
-                      <ShieldAlert className="h-5 w-5" />Model error caught: it said {item.model_relation}. Precision-first routing stopped a wrong merge, so no wrong booking.
+                      <ShieldAlert className="h-5 w-5" />Model error caught: it leaned {item.model_relation} (p {item.model_p.toFixed(2)}). Precision-first routing stopped a wrong merge, so no wrong booking.
                     </div>
                   )}
-                  <div className="mt-2 text-sm text-ink-mute">Label {ack.audit_id} written to the training set · reversible (U) · press any label key or Enter for the next pair.</div>
+                  <div className="mt-2 text-sm text-ink-mute">Label {ack.audit_id} saved: the next build trains on it and treats it as a must-link / cannot-link · reversible (U) · any label key or Enter for the next pair.</div>
                 </motion.div>
               ) : (
                 <motion.div key="keys" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mt-5 grid grid-cols-3 gap-3">
@@ -131,7 +131,7 @@ export default function OpsPage() {
           {audit.map((a) => (
             <li key={a.audit_id} className={cn("rounded-lg border border-paper-line px-3 py-2", a.undone && "opacity-40 line-through")}>
               <div className="flex justify-between"><span className="font-mono">{a.audit_id}</span><span>{a.pair_id}</span></div>
-              <div className="text-ink-mute">{a.reviewer} labelled {LABEL[a.label as keyof typeof LABEL]} · truth {a.truth}</div>
+              <div className="text-ink-mute">{a.reviewer} labelled {LABEL[a.label as keyof typeof LABEL]} · generator {a.truth}</div>
             </li>
           ))}
         </ul>

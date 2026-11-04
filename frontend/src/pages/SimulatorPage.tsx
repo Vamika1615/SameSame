@@ -4,6 +4,7 @@ import { inr } from "@/lib/api";
 import { usePresenterAction } from "@/lib/presenter";
 import { ErrorState, Loading } from "@/components/States";
 import { cn } from "@/components/ui";
+import { MatcherQuality } from "@/components/MatcherQuality";
 
 const DEFAULTS: SimParams = { sessions: 50000, price_sensitivity: 0.6, dup_abandon: 0.08, failure_scale: 1.0, seed: 7 };
 // Pessimistic: agents ignore duplicates, chase sticker hard, suppliers fail half as often as profiled
@@ -37,6 +38,7 @@ export default function SimulatorPage() {
     <div className="mx-auto max-w-[1400px] px-8 pb-20 pt-6">
       <h1 className="text-3xl font-bold tracking-tight">Session simulator</h1>
       <p className="mt-1 text-ink-mute">{p.sessions.toLocaleString("en-IN")} simulated agent sessions: Today vs SameSame. The assumptions are yours to attack. Move them.</p>
+      <div className="mt-5"><MatcherQuality /></div>
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[420px_1fr]">
         <div className="rounded-2xl border border-paper-line bg-paper p-5">
           {SLIDERS.map((s) => (

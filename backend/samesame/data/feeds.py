@@ -7,6 +7,7 @@ import re
 
 import numpy as np
 
+from samesame import config
 from samesame.data.world import RATE_PLANS, RATE_TEXT, STYLE
 
 AMENITIES = ["Outdoor pool", "Fitness centre", "Free Wi-Fi", "Airport shuttle (paid)", "Kids' club", "Spa", "Restaurant",
@@ -39,8 +40,14 @@ def _m_to_deg(m):
 
 
 # ------------------------------------------------------------------ naming chaos
-def hotel_name(name: str, sup: str, st: dict, rng, corr: list) -> str:
+def hotel_name(name: str, sup: str, st: dict, rng, corr: list, holdout: bool = False) -> str:
     n = name
+    if holdout and rng.random() < 0.35:
+        # corruption family the matcher never sees in training: Thai-style romanisation of common words
+        for a, b in (("Sukhumvit", "Sukhumwit"), ("Bangkok", "Krungthep"), ("Asoke", "Asok"), ("Silom", "Seelom")):
+            if a in n:
+                n = n.replace(a, b)
+        corr.append("holdout_romanisation")
     if not re.search(r"bangkok", n, re.I) and rng.random() < 0.4:
         n += " Bangkok"
     if sup == "heron" and re.search(r"Sukhumvit (\d+)", n):
@@ -64,6 +71,18 @@ def hotel_name(name: str, sup: str, st: dict, rng, corr: list) -> str:
     if st["case"] == "upper":
         n = n.upper()
     return re.sub(r"\s+", " ", n).strip()
+
+
+FORMER = ["Grand", "Royal", "City", "Park", "Golden", "Garden", "Plaza", "Palace", "Residence", "View"]
+
+
+def former_name(h: dict, rng, corr: list) -> str:
+    """A supplier still using the hotel's pre-rebrand name: nothing in common with the current name but the location."""
+    corr.append("former_name")
+    a, b = rng.choice(FORMER, size=2, replace=False)
+    street = h["street"] if h["street"] and len(h["street"].split()) <= 3 else None
+    area = (street or h["district"] or "Bangkok").replace(" Road", "").split(" Soi")[0]
+    return f"{area} {a} {b} Hotel"
 
 
 def phone(p: str, style: str) -> str:
@@ -152,9 +171,26 @@ def room_name(r, sup, rng, corr):
     return f"{tier} Room {bed}" + (f" {view} View" if view else "")
 
 
+_USED: set[str] = set()
+
+
+def _new_id(prefix: str, rng) -> str:
+    """Supplier codes look random but must be unique (a collision silently merges two listings downstream)."""
+    while True:
+        lid = f"{prefix}{int(rng.integers(10_000, 99_999))}"
+        if lid not in _USED:
+            _USED.add(lid)
+            return lid
+
+
 # ------------------------------------------------------------------ the feed
 def generate(hotels: list[dict], rng: np.random.Generator):
+    _USED.clear()
     listings, truth, rooms_all, sup_rooms, room_truth, offers = [], [], [], [], [], []
+    # chain-wide reservations numbers: some suppliers list the brand's central line for every branch
+    chain_line = {f: "+66 2 " + "".join(str(d) for d in rng.integers(0, 10, 3)) + " " + "".join(str(d) for d in rng.integers(0, 10, 4))
+                  for f in sorted({h["family"] for h in hotels if h["family"]})}
+    uses_chain_line = {(sup, f): rng.random() < 0.5 for sup in ("kestrel", "sunbird", "bulbul") for f in chain_line}
     for h in hotels:
         if h["hotel_id"] == GOLDEN_HOTEL:
             h["base_rate"] = GOLDEN_BASE_RATE
@@ -172,7 +208,7 @@ def generate(hotels: list[dict], rng: np.random.Generator):
             if h["hotel_id"] == GOLDEN_HOTEL or rng.random() < min(p, 0.97):
                 copies = 2 if rng.random() < st["dup_rate"] else 1
                 for c in range(copies):
-                    lid = f"{sup}:{sup[:2].upper()}{int(rng.integers(10_000, 99_999))}"
+                    lid = _new_id(f"{sup}:{sup[:2].upper()}", rng)
                     corr = ["supplier_duplicate"] if c else []
                     lat, lng = h["lat"], h["lng"]
                     if rng.random() < st["centroid_geocode"]:
@@ -193,6 +229,8 @@ def generate(hotels: list[dict], rng: np.random.Generator):
                     ph = None if rng.random() < st["phone_missing"] else phone(h["phone"], st["phone"])
                     if ph is None:
                         corr.append("phone_missing")
+                    elif h["family"] and uses_chain_line.get((sup, h["family"])) and h["hotel_id"] != GOLDEN_HOTEL:
+                        ph = phone(chain_line[h["family"]], st["phone"]); corr.append("chain_phone")
                     k_img = int(rng.integers(st["images"][0], st["images"][1] + 1))
                     amen = [a for a in amen_true if rng.random() < st["amenity_share"]]
                     if rng.random() < 0.04:                    # suppliers also claim things that aren't there
@@ -200,7 +238,8 @@ def generate(hotels: list[dict], rng: np.random.Generator):
                         if wrong:
                             amen.append(str(rng.choice(wrong))); corr.append("wrong_amenity")
                     listings.append({
-                        "listing_id": lid, "supplier_id": sup, "name": hotel_name(h["name"], sup, st, rng, corr),
+                        "listing_id": lid, "supplier_id": sup, "name": (former_name(h, rng, corr) if rng.random() < 0.03 and h["hotel_id"] != GOLDEN_HOTEL
+                                 else hotel_name(h["name"], sup, st, rng, corr, config.is_holdout(h["family"] or h["hotel_id"]))),
                         "lat": round(lat, 6), "lng": round(lng, 6), "address": address(h, sup, rng), "phone": ph, "star": star,
                         "checkin_time": "15:00" if sup == "bulbul" and rng.random() < 0.5 else h["checkin_time"],
                         "amenities": amen, "description": description(h, sup, st, rng), "n_images": k_img,

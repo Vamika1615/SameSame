@@ -235,9 +235,11 @@ function RoomsSection({ d }: { d: HotelDetail }) {
               {r.members.map((m) => (
                 <li key={m.supplier + m.raw_name} className="flex items-center justify-between gap-2 text-sm">
                   <span className="flex min-w-0 items-center gap-2"><SupplierBadge name={m.supplier} small /><span className="truncate font-mono text-ink-soft">{m.raw_name}</span></span>
-                  {m.confidence == null
-                    ? <Tip content={<>Room mapping comes from the generator's truth table until the M3 room matcher lands.</>}><span className="cursor-help text-xs font-semibold uppercase text-warn-500">truth</span></Tip>
-                    : <span className="tabular-nums text-ink-mute">{Math.round(m.confidence * 100)}%</span>}
+                  <Tip content={<>{m.note ?? "Tier, bed and view parsed from the supplier's room name."}</>}>
+                    <span className={cn("cursor-help tabular-nums", (m.confidence ?? 1) < 0.8 ? "font-semibold text-warn-500" : "text-ink-mute")}>
+                      {m.confidence == null ? "—" : `${Math.round(m.confidence * 100)}%`}
+                    </span>
+                  </Tip>
                 </li>
               ))}
             </ul>

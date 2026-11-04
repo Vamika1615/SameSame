@@ -45,7 +45,9 @@ def test_activity_groups_and_filters():
     for q, n_raw in [("floating market", 9), ("grand palace", 6), ("skywalk", 6)]:
         r = c.get("/api/activities/search", params={"q": q}).json()
         assert r["raw_count"] == n_raw
-        assert len(r["groups"][0]["variants"]) == 3
+        variants = r["groups"][0]["variants"]
+        # 3 sellable variants; a listing that doesn't say which option it sells is kept apart and flagged, never guessed
+        assert len([v for v in variants if "in review" not in v["name"]]) == 3
         assert any(s["differs"] for v in r["groups"][0]["variants"] for s in v["dna"])
 
 

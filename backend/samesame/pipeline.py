@@ -2,7 +2,8 @@
 
     python -m samesame.pipeline
 
-Stages: base (OSM curation) -> feeds (6 supplier hotel feeds) -> activities -> booking log -> images.
+Stages: base (OSM curation) -> feeds (6 supplier hotel feeds) -> activities -> booking log -> images
+-> matcher (hotels, rooms, Variant DNA) -> evaluation report.
 Tables are written as parquet and registered as views in samesame.duckdb. Truth tables (*_truth, rooms,
 hard_negatives) are for evaluation and the data card only; the matcher (M3) must never read them.
 """
@@ -49,8 +50,12 @@ def main(skip_images: bool = False):
         for name in TABLES:
             if data[name]:
                 con.execute(f"CREATE VIEW {name} AS SELECT * FROM read_parquet('{(config.BUILD / f'{name}.parquet').as_posix()}')")
+    from samesame.matching import run as matcher
+    matcher.main()
+    from samesame.eval import report
+    report.main()
     counts = {k: len(v) for k, v in data.items()}
-    manifest = {"built_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "seed": config.SEED, "stages": ["m0", "m2"],
+    manifest = {"built_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "seed": config.SEED, "stages": ["m0", "m2", "m3"],
                 "counts": counts, "seconds": round(time.time() - t0, 1)}
     (config.BUILD / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     print("pipeline:", json.dumps(counts), f"in {manifest['seconds']}s")

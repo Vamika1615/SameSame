@@ -54,6 +54,13 @@ def norm(s: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9@. ]+", " ", s)).strip()
 
 
+_GENERIC = {"the", "hotel", "hotels", "boutique", "bangkok", "by", "and", "resort", "residence", "suites", "inn", "a"}
+
+
+def _core(n: str) -> frozenset:
+    return frozenset(t for t in n.split() if t not in _GENERIC)
+
+
 def family(name: str, brand: str | None) -> str | None:
     n = norm(name)
     for f in FAMILIES:
@@ -83,6 +90,17 @@ def _district_rings(bm):
             segs = [(a, b) for line in f["geometry"]["coordinates"] for a, b in zip(line, line[1:])]
             out.append((f["properties"]["name"].replace(" District", ""), segs))
     return out
+
+
+_RINGS = None
+
+
+def district_at(lat: float, lng: float) -> str | None:
+    """Bangkok district containing a point (offline OSM boundaries)."""
+    global _RINGS
+    if _RINGS is None:
+        _RINGS = _district_rings(_basemap())
+    return next((n for n, segs in _RINGS if _inside(lat, lng, segs)), None)
 
 
 def _inside(lat, lng, segs) -> bool:
@@ -160,8 +178,11 @@ def curate(rng: np.random.Generator):
     cands.sort(key=lambda x: (-x["richness"], x["osm_id"]))
     kept, dups = [], []
     for x in cands:
-        twin = next((k for k in kept if abs(k["lat"] - x["lat"]) < 0.003 and fuzz.token_sort_ratio(k["n"], x["n"]) >= 92
-                     and haversine_m(k["lat"], k["lng"], x["lat"], x["lng"]) < OSM_DUP_M), None)
+        twin = next((k for k in kept if abs(k["lat"] - x["lat"]) < 0.003 and (
+            (fuzz.token_sort_ratio(k["n"], x["n"]) >= 92 and haversine_m(k["lat"], k["lng"], x["lat"], x["lng"]) < OSM_DUP_M)
+            # same distinctive words, practically the same spot ("Coach Boutique Hotel" / "The Coach Hotel", 29 m; "Windsor Suites" / "... Hotel", 61 m;
+            # found by the M3 matcher, which kept merging them)
+            or (_core(k["n"]) and _core(k["n"]) == _core(x["n"]) and haversine_m(k["lat"], k["lng"], x["lat"], x["lng"]) < 120))), None)
         if twin:
             dups.append({"kept": twin["osm_id"], "dropped": x["osm_id"], "name_kept": twin["name"], "name_dropped": x["name"],
                          "distance_m": round(haversine_m(twin["lat"], twin["lng"], x["lat"], x["lng"]))})

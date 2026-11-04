@@ -2,7 +2,79 @@
 
 _Update after every milestone. Newest first._
 
-## Status: M2 done → M3 next
+## Status: M3 done → M4 next
+
+### Done: M3, Twin Finder + Variant DNA + blind set (2026-11-04)
+Every stack, room mapping and sightseeing variant on screen is now **predicted from the supplier feeds**; generator truth no longer reaches the UI. Numbers below are from [METRICS.md](METRICS.md), which `samesame.eval.report` regenerates on every build.
+
+- **Hotel Twin Finder** (`matching/`):
+  1. Blocking: 2 km plus a shared distinctive word, the same brand, or within 100 m. That gives 36,981 candidate pairs.
+  2. 17 features: name similarities, MiniLM cosine, distance, phone, stars, address, postcode, image perceptual hash, amenities, check-in.
+  3. LightGBM trained on 23,967 pairs with held-out families excluded.
+  4. Constrained union-find clustering: never merge across brand families or branch numbers, or beyond 1.5 km, checked across whole clusters.
+  5. Gray zone and rule-blocked pairs go to the review queue.
+
+  Whole catalogue: precision **1.000**, recall **0.978** (0 false merges, 47 missed). 0 of 74 real look-alike pairs were merged.
+- **Thresholds** are chosen on a grouped validation split of trainable families, with policy floors on top: never auto-merge below p 0.90, and review from p 0.30 or lower. Validation alone picked p 0.44 because synthetic pairs separate almost perfectly, so the floor wins.
+- **Rooms:** a rule parser handles tier, bed and view from the abbreviation chaos. A missing view is borrowed only from a unique sibling name, with lower confidence. Whole catalogue: precision 1.000, recall 0.980. Confidence is shown per supplier name.
+- **Sightseeing Variant DNA** (`variants/dna.py`):
+  - Rules extract pickup, meals, access, option, cancellation, stops, duration and slot.
+  - Inclusions must match exactly; descriptive fields tolerate "not stated".
+  - A listing that fits two variants is kept apart and sent to review (one Kestrel SkyWalk ticket).
+
+  Precision 1.000, recall 0.959; 9 Floating Market listings → 3 variants.
+- **Real Spot the Twin queue** (`review.py`), 65 items:
+  - gray-zone hotel pairs first (most likely merge first), then rule-blocked ones, one item per cluster pair
+  - low-confidence room names
+  - ambiguous activities
+
+  Labels are saved with both ids. The next build uses them as training labels and as must-link / cannot-link constraints. The first item is a real near-miss: Sofitel vs "Paradox Krungthep Sukhumwit", 73 m apart, p 0.86 but DIFFERENT.
+- **Blind set** (`eval/blind.py`): 147 pairs (77 hotel, 40 room, 30 activity) sampled only from held-out families or attractions, frozen in `data/blind/pairs.jsonl` and committed.
+  - All 147 are correct on precision; recall is 1.000 for hotels and rooms and 0.867 for activities.
+  - **The labelling tool for C** is at `/label` (linked from Ops). It shows no score and no generator label, and writes to `data/blind/labels.jsonl`. METRICS.md then reports precision and recall vs C's labels plus every human-vs-generator disagreement.
+- **Metrics in the UI:** a blind-set precision/recall panel on the Simulator page (beat 7), read from `/api/metrics`.
+- **Tests: 37 passing.** The new `test_matching.py` covers:
+  - the never-merge rules
+  - that a chain of pairs can't smuggle a merge
+  - that no final cluster breaks a rule
+  - human must-link / cannot-link, including undo
+  - that held-out families never train
+  - the threshold floors
+
+### Computed numbers right now (M3)
+| Thing | Value |
+|---|---|
+| Demo search (500 m of Asok BTS, 4★+) | 135 listings → 31 hotels, 104 duplicates collapsed |
+| Offer A: Kestrel, room only, NRF, ₹18,600 | True Price **₹23,926** (sticker #1 → True #3) |
+| Offer B: Mynah, breakfast, free cancel 7 d, ₹20,100 | True Price **₹20,763** (sticker #3 → True #1) |
+| Book both, seed 1 (first seed tried) | Kestrel sold out → SAME twin via Sunbird ₹19,200; Mynah first time |
+| Same basket, seeds 1–1,000 | Kestrel: 78.7% clean, 2.2% paid a rise, 19.1% failover. Mynah: 97.2% / 1.1% / 1.6% / 0.1% failed |
+| Look-alike in the demo search | Citadines Sukhumvit 16 ↔ 8, 537 m (95% of one hotel's listings within 110 m) |
+| Blind set | hotel P 1.000 / R 1.000 (77), room 1.000 / 1.000 (40), activity 1.000 / 0.867 (30) |
+| Routing | 5.8% of likely pairs to human review, 0% to LLM (no key) |
+
+### Decisions made without asking
+- **New corruption families**, because synthetic data came out too easy (precision 1.0, recall 0.998, 3 pairs in review). These are not a demo trick: they're the cases we expect in real feeds.
+  - chain-wide reservation phones (120)
+  - former pre-rebrand names (43)
+  - romanisation only in held-out families (39)
+- **The OSM dedupe was tightened twice, because the matcher found real OSM duplicates our dedupe missed:** "Coach Boutique Hotel"/"The Coach Hotel" (29 m) and "Windsor Suites"/"Windsor Suites Hotel" (61 m). The rule is now "same distinctive words within 120 m". Disclosed in DATA.md.
+- **Supplier listing codes are now unique.** Three random codes had collided and silently merged listings; a test now guards this. Fixing it shifted the random stream, so the blind set was resampled before anyone had labelled it. From now on it is frozen.
+- **The golden hotel is found by name** ("Radisson Blu Plaza"), not by a generator id.
+- **Sightseeing rules and the room parser were refined while looking at errors across the whole catalogue.** METRICS.md says their numbers are not blind; only C's labels are.
+
+### Next: M4, Promise model (B)
+- Beta-binomial Promise model with a prior, shrunk per supplier × product × lead bucket.
+- True Price on fitted rates, with a golden integration test through the API.
+- Review-label retrain path: `start.py --rebuild` already picks labels up. Add a "labels since last build" counter on Ops.
+
+### Known issues
+- The simulator is still the M1 closed form (labelled MOCK). The real Monte-Carlo comes in M5.
+- **Room and sightseeing numbers are not blind** (see METRICS caveats). The hotel numbers are an upper bound because we wrote both sides.
+- **Blind-set recall for activities is 0.867.** The misses are template listings whose descriptions don't state the option, so they get split instead of merged. The LLM extractor is M6.
+- **Today shows 135 cards.** The merge animation's frame rate hasn't been measured on the demo laptop.
+- The first build needs network once, for the 87 MB MiniLM model. Without it, the matcher drops that feature and records it.
+- Windows is still untested.
 
 ### Done: M2, synthetic supplier layer (2026-11-04)
 `python -m samesame.pipeline` builds every table in ~10 s, deterministic from the seed. `start.py` reruns it whenever a generator file changes. Full data card: [DATA.md](DATA.md).
@@ -60,28 +132,3 @@ Both golden values sit inside the brief's bands (A 23,500–24,500; B 20,400–2
 - **Booking-panel labels are computed from the offer's ranks** ("booked on sticker · cheapest, True Price #4"), so they can't go stale.
 - **`mock.py` is deleted.** The review queue and simulator moved to `placeholders.py` and stay labelled MOCK until M3 / M5.
 - **`/api/hotels/demo`** is a presenter alias for the golden hotel, so beat URLs survive data changes.
-
-### Next: M3, Twin Finder (A) + blind set (C)
-- **Blocking:** geo cells + brand family + name tokens.
-- **Features:**
-  - name similarity
-  - MiniLM embedding similarity
-  - distance (vs the 100 m twin radius)
-  - phone digits
-  - address tokens
-  - star delta
-  - image phash overlap
-- **Model:** LightGBM, trained on generator-labelled pairs that exclude the blind set.
-- **Clustering:** constrained; never-merge on different brand family or > 1.5 km.
-- **Gray zone** goes to the review queue, which replaces `placeholders.REVIEW`.
-- **Room matcher:** parse tier, bed and view from the abbreviation chaos.
-- **Blind set:** C labels ~150 pairs with a small labelling tool into `data/blind/`. Report precision and recall per entity type.
-- Then swap `store.cluster_of` / `room_of` to the matcher output.
-
-### Known issues
-- The simulator is still the M1 closed form (labelled MOCK). The real Monte-Carlo comes in M5.
-- The review queue is still the 6 M1 mock pairs (labelled MOCK). Its rv-1 refers to Novotel Sukhumvit 20, which is no longer the golden hotel.
-- **Today shows 131 cards.** I couldn't measure the merge animation's frame rate in the background browser pane. Check it on the demo laptop; if it stutters, cap the animated ghosts to on-screen cards.
-- Dev mode under React StrictMode can log a harmless Leaflet canvas error on hot reload; production (`--demo`) is clean.
-- Vite warns that the JS chunk is > 500 kB (Leaflet + framer-motion). Harmless offline.
-- Windows is still untested; a teammate needs to run `py start.py --demo`.

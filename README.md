@@ -38,5 +38,7 @@ py start.py
 - Supplier feeds, room names, offers, activities, booking logs: synthetic, generated from the base truth with a fixed seed by `python -m samesame.pipeline` (~10 s; `start.py` runs it when needed).
 - Images: procedural, never photos of real hotels. Licences in `data/build/images/LICENSES.csv` (CC0, own work). All are labelled "illustrative" in the UI.
 - **[DATA.md](DATA.md)** lists exactly what is real, what is synthetic, and the few fixed inputs (the brief's golden-case offers).
+- The first build downloads the MiniLM sentence-embedding model (87 MB) into `data/models/` once; after that everything runs offline. Without network the matcher drops that one feature and records it in `data/build/matcher.json`.
+- **Matcher quality:** [METRICS.md](METRICS.md) is regenerated on every build from the frozen blind set in `data/blind/`. Teammates label that set (without seeing the model's answer) at http://localhost:8000/label.
 
 _Architecture diagram, metrics and honest limitations: coming in later milestones (see PLAN.md, PROGRESS.md)._

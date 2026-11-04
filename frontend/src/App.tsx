@@ -10,6 +10,7 @@ import SightseeingPage from "@/pages/SightseeingPage";
 import OpsPage from "@/pages/OpsPage";
 import SimulatorPage from "@/pages/SimulatorPage";
 import SuppliersPage from "@/pages/SuppliersPage";
+import LabelPage from "@/pages/LabelPage";
 import { Empty } from "@/components/States";
 
 const NAV = [
@@ -68,6 +69,7 @@ export default function App() {
           <Route path="/ops" element={<OpsPage />} />
           <Route path="/suppliers" element={<SuppliersPage />} />
           <Route path="/simulator" element={<SimulatorPage />} />
+          <Route path="/label" element={<LabelPage />} />
           <Route path="*" element={<Empty title="Page not found" />} />
         </Routes>
       </main>

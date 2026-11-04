@@ -41,7 +41,7 @@ export interface HotelSearch {
 
 export interface Source { supplier: string; value: string; trust: number }
 export interface SourcedFact { key: string; label: string; value: string; sources: Source[] }
-export interface CanonicalRoom { room_id: string; name: string; attrs: Record<string, string>; members: { supplier: string; raw_name: string; confidence: number | null }[] }
+export interface CanonicalRoom { room_id: string; name: string; attrs: Record<string, string>; members: { supplier: string; raw_name: string; confidence: number | null; note?: string | null }[] }
 export interface Promise_ {
   supplier_id: string; supplier: string; lead_bucket: string; honour_rate: number;
   ci_low: number; ci_high: number; n: number; p_price_change: number; p_sold_out: number; p_error: number; exp_increase_pct: number;

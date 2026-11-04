@@ -7,12 +7,13 @@ from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from samesame import config, images, placeholders, service, store
-from samesame.data.feeds import GOLDEN_HOTEL
+from samesame import config, images, placeholders, review, service, store
+from samesame.labelling.api import router as labelling_router
 from samesame.schemas import (ActivitySearch, BookResponse, BookStats, HotelDetail, HotelSearch, Meta, Mode, ReviewAck, ReviewItem,
                               ReviewLabel, SimParams, SimResult, SupplierRow)
 
 app = FastAPI(title="SameSame", version="0.0.1")
+app.include_router(labelling_router)
 
 
 @lru_cache
@@ -37,7 +38,8 @@ DATA_SOURCE = "synthetic"
 SOURCES = {"hotels": "6 synthetic supplier feeds over 300 real OSM hotels",
            "clusters": store.CLUSTER_SOURCE,
            "promise": "estimated from the 24,000-attempt booking log",
-           "review_queue": "mock pairs until the M3 matcher",
+           "review_queue": "the matcher's gray-zone and blocked pairs",
+           "metrics": "rebuilt every build: METRICS.md",
            "simulator": "closed-form mock until M5"}
 
 
@@ -47,7 +49,7 @@ def meta():
     build = json.loads(manifest.read_text(encoding="utf-8")) if manifest.exists() else {}
     return Meta(mode=Mode(**{**config.mode(), "data": DATA_SOURCE}), city=config.CITY, currency=config.CURRENCY, build=build,
                 sources=SOURCES,
-                demo={"book_offers": service.demo_basket(), "book_seed": service.DEMO_SEED, "golden_hotel": GOLDEN_HOTEL,
+                demo={"book_offers": service.demo_basket(), "book_seed": service.DEMO_SEED, "golden_hotel": service.demo_hotel(),
                       "book_seed_note": "Seed 1 is the first seed tried; it happens to show a failover. Press Fresh seed for new draws, or Run 1,000× for the distribution."})
 
 
@@ -59,7 +61,7 @@ def hotels_search():
 @app.get("/api/hotels/{cluster_id}", response_model=HotelDetail)
 def hotel(cluster_id: str):
     if cluster_id == "demo":                     # presenter alias for the golden-case hotel
-        cluster_id = GOLDEN_HOTEL
+        cluster_id = service.demo_hotel()
     if cluster_id not in store.get().listings_of:
         raise HTTPException(404, f"no hotel {cluster_id}")
     return service.hotel_detail(cluster_id)
@@ -98,23 +100,31 @@ def activities(q: str = "floating market"):
 
 @app.get("/api/review/queue", response_model=list[ReviewItem])
 def review_queue():
-    return placeholders.review_queue()
+    return review.queue()
 
 
 @app.post("/api/review/{pair_id}/label", response_model=ReviewAck)
 def review_label(pair_id: str, body: ReviewLabel):
-    r = placeholders.label(pair_id, body.label, body.reviewer)
+    if pair_id not in {it.pair_id for it in review.queue()}:
+        raise HTTPException(404, f"{pair_id} is not in the review queue")
+    r = review.label(pair_id, body.label, body.reviewer)
     return ReviewAck(ok=True, audit_id=r["audit_id"], streak=r["streak"], model_was_right=r["model_was_right"], truth=r["truth"])
 
 
 @app.post("/api/review/undo/{audit_id}")
 def review_undo(audit_id: str):
-    return {"ok": placeholders.undo(audit_id)}
+    return {"ok": review.undo(audit_id)}
 
 
 @app.get("/api/review/audit")
 def review_audit():
-    return placeholders.audit_log()
+    return review.audit_log()
+
+
+@app.get("/api/metrics")
+def metrics():
+    """Evaluation report written by samesame.eval.report at build time (also rendered to METRICS.md)."""
+    return json.loads((config.BUILD / "metrics.json").read_text(encoding="utf-8"))
 
 
 @app.post("/api/sim", response_model=SimResult)

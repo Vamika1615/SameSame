@@ -7,6 +7,7 @@ category template.
 """
 import numpy as np
 
+from samesame.data.feeds import _new_id
 from samesame.data.world import SUPPLIERS
 
 DNA_KEYS = ["pickup", "meals", "duration", "stops", "access", "option", "cancel"]
@@ -46,21 +47,21 @@ FIXED = {
         ("fm-rail-shared", "Floating + Railway Market · shared transfer",
          {"pickup": "Shared hotel pickup", "meals": "No meals", "duration": "6 h · half day", "stops": "Floating + Maeklong Railway",
           "access": "Standard", "option": "Boat ride extra", "cancel": "Free until 24 h"}, ["pickup", "free_cancel"], 6, [
-            ("kestrel", "Damnoen Saduak Floating Market & Maeklong Railway Market Tour", 1850, 4.5, "Join-in tour. Pick-up from central Bangkok hotels."),
-            ("mynah", "Railway Market + Floating Market Half Day (Join-in)", 2050, 4.6, "Shared van with hotel pickup. Free cancellation up to 24h."),
+            ("kestrel", "Damnoen Saduak Floating Market & Maeklong Railway Market Tour", 1850, 4.5, "Join-in tour, approx. 6 hours. Pick-up from central Bangkok hotels."),
+            ("mynah", "Railway Market + Floating Market Half Day (Join-in)", 2050, 4.6, "Shared van with hotel pickup. Duration 6 h. Free cancellation up to 24h."),
             ("hornbill", "Maeklong Train Market and Damnoen Saduak Floating Market Trip from Bangkok", 1990, 4.4, "Collection from your hotel in a shared minivan.")]),
         ("fm-morning", "Floating Market only · morning, meet at Siam",
          {"pickup": "Meeting point (Siam)", "meals": "No meals", "duration": "4.5 h · morning", "stops": "Floating market only",
           "access": "Standard", "option": "Boat ride included", "cancel": "Non-refundable"}, [], 4.5, [
-            ("sunbird", "Damnoen Saduak Floating Market Morning Tour", 1250, 4.3, "Meet at Siam BTS exit 4. Boat ride included."),
+            ("sunbird", "Damnoen Saduak Floating Market Morning Tour", 1250, 4.3, "Meet at Siam BTS exit 4. Boat ride included. About 4.5 hours."),
             ("kestrel", "Floating Market Early Morning (SIC)", 1190, 4.1, "SIC basis from meeting point. NRF."),
             ("bulbul", "Damnoen Saduak Floating Mkt - Half Day Morning", 1320, 4.2, "Boat included. Assemble at Siam Paragon.")]),
         ("fm-private-lunch", "Floating + Railway Market · private car, Thai lunch",
          {"pickup": "Private hotel pickup", "meals": "Thai lunch", "duration": "8 h · full day", "stops": "Floating + Maeklong Railway",
           "access": "Standard", "option": "Private guide (English)", "cancel": "Free until 48 h"}, ["pickup", "free_cancel", "lunch"], 8, [
-            ("heron", "Private Floating & Railway Market Tour with Thai Lunch", 4600, 4.8, "Private car and driver, hotel pickup, lunch included."),
+            ("heron", "Private Floating & Railway Market Tour with Thai Lunch", 4600, 4.8, "Private car and driver, hotel pickup, lunch included. Approx. 8 hours."),
             ("mynah", "Floating Market + Railway Market Private Car incl. Lunch", 4450, 4.7, "Private transfer from hotel. Lunch. Free cancellation 48h."),
-            ("bulbul", "PVT Damnoen Saduak + Maeklong w/ lunch", 4800, 4.6, "PVT car ex-hotel, lunch at local restaurant.")]),
+            ("bulbul", "PVT Damnoen Saduak + Maeklong w/ lunch", 4800, 4.6, "PVT car ex-hotel, lunch at local restaurant. Duration 8 h.")]),
     ],
     "grand-palace": [
         ("gp-standard", "Entry ticket · standard queue",
@@ -150,6 +151,9 @@ def _title(base: str, suffix: str, sup: str, rng) -> str:
 
 def _desc(tags: list[str], dna: dict, rng) -> str:
     bits = []
+    if rng.random() < 0.6:
+        h = dna["duration"].split(" ")[0]
+        bits.append(str(rng.choice([f"duration {h} h", f"approx. {h} hours", f"about {h} hrs"])))
     for t in tags:
         if rng.random() < 0.85:                      # suppliers don't always mention what's included
             bits.append(str(rng.choice(PHRASES[t])))
@@ -171,7 +175,7 @@ def generate(rng: np.random.Generator):
             for vid, vname, dna, tags, h, members in FIXED[aid]:
                 variants.append({"variant_id": vid, "attraction_id": aid, "name": vname, "dna": dna, "tags": tags, "hours": h})
                 for sup, title, p, rating, desc in members:
-                    lid = f"{sup}:A{int(rng.integers(10_000, 99_999))}"
+                    lid = _new_id(f"{sup}:A", rng)
                     listings.append({"listing_id": lid, "supplier_id": sup, "title": title, "description": desc, "price_pp": float(p),
                                      "rating": rating, "reviews": int(rng.integers(40, 2400)), "lat": lat, "lng": lng})
                     truth.append({"listing_id": lid, "variant_id": vid, "attraction_id": aid})
@@ -187,7 +191,7 @@ def generate(rng: np.random.Generator):
             n = int(rng.integers(2, 4))
             for sup in rng.choice(sups, size=n, replace=False, p=w):
                 sup = str(sup)
-                lid = f"{sup}:A{int(rng.integers(10_000, 99_999))}"
+                lid = _new_id(f"{sup}:A", rng)
                 p = price * pm * {"kestrel": 0.94, "sunbird": 0.97}.get(sup, 1.0) * float(np.exp(rng.normal(0, 0.06)))
                 listings.append({"listing_id": lid, "supplier_id": sup, "title": _title(name, suffix, sup, rng),
                                  "description": _desc(tags, dna, rng), "price_pp": float(round(p, -1)),

@@ -37,3 +37,14 @@ NEVER_MERGE_DISTANCE_M = 1500
 
 def mode() -> dict:
     return {"llm": LLM_ENABLED, "llm_model": LLM_MODEL if LLM_ENABLED else None, "data": "synthetic"}
+
+# Held-out partition: ~15% of brand families (or single hotels) and attractions. The matcher never trains or
+# tunes on them, the generator applies one extra corruption family only to them, and the evaluation set is
+# sampled only from them. Decided by a hash, so no code needs to read the evaluation files to respect it.
+HOLDOUT_PCT = 15
+EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+
+
+def is_holdout(key: str) -> bool:
+    import hashlib
+    return int(hashlib.md5(f"holdout:{key}".encode()).hexdigest()[:8], 16) % 100 < HOLDOUT_PCT

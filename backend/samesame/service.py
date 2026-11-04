@@ -6,7 +6,7 @@ Same contracts as the M1 mock, now computed from data/build:
 - Promise (honour rate, reprice / sold-out odds, typical increase) is estimated from the booking log;
 - popularity is counted in the booking log (Indian agents, last 90 days);
 - the breakfast fill cost is the catalogue median of BB-minus-RO supplements.
-Clusters and canonical rooms come from store.py (generator truth until M3; the UI says so).
+Clusters, canonical rooms and sightseeing variants are the matcher's predictions (store.py).
 """
 import random
 import re
@@ -21,8 +21,7 @@ from samesame import config, store
 from samesame.booking import sandbox
 from samesame.data import world
 from samesame.data.booking_log import ANCHOR
-from samesame.data.feeds import GOLDEN_HOTEL
-from samesame.data.osm_base import family, norm
+from samesame.data.osm_base import district_at, family, norm
 from samesame.pricing import true_price as tp
 from samesame.ranking import score as rk
 from samesame.schemas import (ActivityGroup, ActivityListing, ActivitySearch, ActivityVariant, CanonicalRoom, DnaFilter,
@@ -98,6 +97,15 @@ def hotel_needs() -> list[tp.Need]:
 
 
 # ------------------------------------------------------------------ trust + golden records
+def _street(address: str | None) -> str | None:
+    """The street part of a supplier address: the first component that isn't a house number."""
+    for part in (address or "").split(","):
+        part = part.strip()
+        if part and not re.fullmatch(r"[\d/\- ]+[a-z]?", part.lower()):
+            return part.title() if part.isupper() else part
+    return None
+
+
 def _digits(p):
     return re.sub(r"\D", "", p)[-8:] if p else None
 
@@ -163,7 +171,7 @@ def golden(hid: str) -> dict:
     return dict(name=name, lat=lat, lng=lng, star=star, phone=phone, address=address, checkin=checkin, amenities=amenities,
                 description=desc_l["description"], description_source=desc_l["supplier_id"], listings=ls,
                 pool=any("pool" in a.lower() for a in amenities), family=("Family rooms" in amenities) or any(
-                    r["max_occupancy"] >= 4 for r in s.rooms_of.get(hid, [])), district=s.hotels[hid]["district"],
+                    r["max_occupancy"] >= 4 for r in s.rooms_of.get(hid, [])), district=district_at(lat, lng), street=_street(address),
                 family_key=family(name, None))
 
 
@@ -267,8 +275,8 @@ def _lookalikes(hids: list[str]) -> dict[str, Lookalike]:
             reasons = [LookalikeReason(kind="distance", text=f"{d:,.0f} m apart (95% of one hotel's listings sit within {twin_radius_m()} m)")]
             if _digits(ga["phone"]) != _digits(gb["phone"]):
                 reasons.append(LookalikeReason(kind="phone", text=f"Different phones: {ga['phone']} vs {gb['phone']}"))
-            sa, sb = store.get().hotels[a]["street"], store.get().hotels[b]["street"]
-            if sa != sb:
+            sa, sb = ga["street"], gb["street"]
+            if sa and sb and norm(sa) != norm(sb):
                 reasons.append(LookalikeReason(kind="branch", text=f"Different branch: {sa} vs {sb}"))
             out[a] = Lookalike(other_card_id=b, other_name=gb["name"], distance_m=round(d), reasons=reasons)
     return out
@@ -397,7 +405,8 @@ def hotel_detail(hid: str) -> HotelDetail:
         offers_by_room.setdefault(o["room_id"], set()).add(o["supplier_room_id"])
     rooms = []
     for r in s.rooms_of[hid]:
-        members = [{"supplier": SUPPLIERS[s.supplier_rooms[x]["supplier_id"]], "raw_name": s.supplier_rooms[x]["raw_name"], "confidence": None}
+        members = [{"supplier": SUPPLIERS[s.supplier_rooms[x]["supplier_id"]], "raw_name": s.supplier_rooms[x]["raw_name"],
+                    "confidence": s.supplier_rooms[x]["confidence"], "note": s.supplier_rooms[x]["note"]}
                    for x in sorted(offers_by_room.get(r["room_id"], []))]
         if members:
             rooms.append(CanonicalRoom(room_id=r["room_id"], name=r["name"], members=members,
@@ -410,9 +419,17 @@ def hotel_detail(hid: str) -> HotelDetail:
 
 
 # ------------------------------------------------------------------ booking (the sandbox stands in for the real supplier)
+DEMO_HOTEL_NAME = "Radisson Blu Plaza"     # the brief's golden case lives here (see DATA.md); found by name like an agent would
+
+
+@lru_cache
+def demo_hotel() -> str:
+    return max(candidates(), key=lambda h: fuzz.token_sort_ratio(norm(golden(h)["name"]), norm(DEMO_HOTEL_NAME)))
+
+
 def demo_basket() -> list[str]:
     """Golden case A (Kestrel room-only NRF, Shah family) and B (Mynah breakfast + free cancel, Patel family)."""
-    offs = priced_offers(GOLDEN_HOTEL)
+    offs = priced_offers(demo_hotel())
     a = next(o for o in offs if o.supplier_id == "kestrel" and o.board == "Room only" and o.refundable_until is None)
     b = next(o for o in offs if o.supplier_id == "mynah" and o.board == "Breakfast" and o.refundable_until is not None)
     return [a.offer_id, b.offer_id]
@@ -428,7 +445,7 @@ def book(offer_ids: list[str], seed: int):
     results = []
     for oid in offer_ids:
         hid = s.offer[oid]["hotel_id"]
-        vol = s.hotels[hid]["volatility"]
+        vol = store.world_hotel(s.offer[oid]["listing_id"])["volatility"]   # the sandbox is the world, not the app
         pool = [_bookable(o) for o in s.offers_of[hid]]
         offer = next(b for b in pool if b.offer_id == oid)
         results.append(sandbox.book(offer, pool, lambda name: sandbox.Profile(*world.behaviour(NAME_TO_ID[name], "hotel", LEAD_DAYS, vol)), rng))
@@ -446,14 +463,17 @@ DNA_LABELS = {"pickup": "Pickup", "meals": "Meals", "duration": "Duration", "sto
 def diff_sentence(v: dict, ref: dict, limit: int = 3) -> str:
     """Template fallback for the LLM diff sentence: what you get vs the reference variant."""
     priority = ["pickup", "meals", "access", "option", "duration", "cancel", "stops"]   # what a client notices first
-    diffs = [k for k in priority if v["dna"][k] != ref["dna"][k]]
+    diffs = [k for k in priority if v["dna"].get(k, NS) != ref["dna"].get(k, NS) and NS not in (v["dna"].get(k, NS), ref["dna"].get(k, NS))]
     parts = [f"{v['dna'][k]} (not {ref['dna'][k]})" for k in diffs[:limit]]
     more = f" +{len(diffs) - limit} more" if len(diffs) > limit else ""
     return f"vs #{ref['rank']}: " + "; ".join(parts) + more + "."
 
 
-def _refund_days(cancel: str):
-    if cancel == "Non-refundable":
+NS = "Not stated"
+
+
+def _refund_days(cancel: str | None):
+    if cancel in (None, "Non-refundable"):                     # not stated: assume the worst for True Price
         return None
     m = re.search(r"(\d+)\s*h", cancel)
     return max(1, int(m.group(1)) // 24) if m else 1
@@ -483,7 +503,7 @@ def activity_search(q: str) -> ActivitySearch:
         today += listings
         needs = [tp.Need("pickup", "Hotel pickup", PICKUP_PP * PARAMS.adults, f"{PARAMS.adults} x {tp.inr(PICKUP_PP)} taxi (assumption)")]
         includes = {"pickup"} if "pickup" in v["tags"] else set()
-        refund = _refund_days(v["dna"]["cancel"])
+        refund = _refund_days(v["dna"].get("cancel"))
         tps = []
         for m in members:
             twins = [x["price_pp"] for x in members if x["listing_id"] != m["listing_id"]]
@@ -492,7 +512,11 @@ def activity_search(q: str) -> ActivitySearch:
         bi = min(range(len(members)), key=lambda i: tps[i].total)
         reviews = sum(m["reviews"] for m in members)
         rating = round(sum(m["rating"] * m["reviews"] for m in members) / reviews, 1)
-        built.append(dict(vid=v["variant_id"], name=v["name"], dna=v["dna"], tags=v["tags"], hours=v["hours"], listings=listings,
+        short = att["name"].split(" (")[0].split(",")[0]
+        shown = {**{k: NS for k in DNA_LABELS}, **{k: x for k, x in v["dna"].items() if k in DNA_LABELS}}
+        shown["stops"] = f"{short} {v['dna']['stops']}" if v["dna"]["stops"].startswith("+") else f"{short} only"
+        name = v["name"] + (" · option not stated (in review)" if v["ambiguous"] else "")
+        built.append(dict(vid=v["variant_id"], name=name, dna=shown, tags=v["tags"], hours=v["hours"], listings=listings,
                           tp=tps[bi], best_sup=members[bi]["supplier_id"], rating=rating, pop=pop.get(v["variant_id"], 0)))
     lo, hi = min(b["tp"].total for b in built), max(b["tp"].total for b in built)
     max_pop = max([b["pop"] for b in built] + [1])
@@ -500,10 +524,11 @@ def activity_search(q: str) -> ActivitySearch:
     for b in built:
         honour = promise(b["best_sup"], "activity").honour_rate
         feats = {"true_price": rk.price_value(b["tp"].total, lo, hi), "promise": honour, "popularity": b["pop"] / max_pop,
-                 "duration_fit": 1.0 if b["hours"] <= 6 else 0.5, "rating": max(0.0, (b["rating"] - 3.5) / 1.5)}
+                 "duration_fit": 0.75 if b["hours"] is None else 1.0 if b["hours"] <= 6 else 0.5, "rating": max(0.0, (b["rating"] - 3.5) / 1.5)}
         details = {"true_price": f"True Price {tp.inr(b['tp'].total)} for {PARAMS.adults}", "promise": f"{SUPPLIERS[b['best_sup']]} {honour:.0%} honoured",
                    "popularity": f"Booked {b['pop']}× by Indian agents (90d)",
-                   "duration_fit": f"{b['hours']:g} h fits a family day" if b["hours"] <= 6 else f"{b['hours']:g} h is a long day",
+                   "duration_fit": "Duration not stated" if b["hours"] is None else
+                   f"{b['hours']:g} h fits a family day" if b["hours"] <= 6 else f"{b['hours']:g} h is a long day",
                    "rating": f"Rated {b['rating']}"}
         items.append({**b, "score": rk.score(feats, details, rk.ACTIVITY_WEIGHTS), "honour": honour})
     rk.rank(items)

@@ -4,14 +4,20 @@ from pathlib import Path
 
 import numpy as np
 
-from samesame import store
+import polars as pl
+
+from samesame import config, store
 from samesame.data import feeds, osm_base, world
 from samesame.ranking.score import haversine_m
 from samesame.service import promise
 
 
+def _t(name):
+    return pl.read_parquet(config.BUILD / f"{name}.parquet").to_dicts()
+
+
 def test_base_is_deduplicated_osm():
-    hotels = list(store.get().hotels.values())
+    hotels = _t("base_hotels")
     assert 280 <= len(hotels) <= 320
     for i, a in enumerate(hotels):
         for b in hotels[i + 1:]:
@@ -20,21 +26,22 @@ def test_base_is_deduplicated_osm():
 
 
 def test_at_least_20_real_hard_negatives():
-    s = store.get()
-    hn = s.hard_negatives
+    hotels = {h["hotel_id"]: h for h in _t("base_hotels")}
+    hn = _t("hard_negatives")
     assert len(hn) >= 20
     for p in hn:
-        a, b = s.hotels[p["a"]], s.hotels[p["b"]]
+        a, b = hotels[p["a"]], hotels[p["b"]]
         assert a["family"] == b["family"] and a["osm_id"] != b["osm_id"]
         assert haversine_m(a["lat"], a["lng"], b["lat"], b["lng"]) < osm_base.HARD_NEG_MAX_M
 
 
 def test_six_suppliers_with_corruption():
-    s = store.get()
-    assert {l["supplier_id"] for l in s.listings.values()} == set(world.SUPPLIERS)
+    truth = {t["listing_id"]: t["hotel_id"] for t in _t("hotel_truth")}
+    listings = _t("hotel_listings")
+    assert {l["supplier_id"] for l in listings} == set(world.SUPPLIERS)
     names = {}
-    for l in s.listings.values():
-        names.setdefault(s.cluster_of[l["listing_id"]], set()).add(l["name"])
+    for l in listings:
+        names.setdefault(truth[l["listing_id"]], set()).add(l["name"])
     assert sum(len(v) > 1 for v in names.values()) / len(names) > 0.8      # most hotels are named differently by suppliers
 
 
@@ -48,8 +55,9 @@ def test_booking_log_size_and_profile():
 
 
 def test_golden_case_inputs_present():
-    s = store.get()
-    offers = [o for o in s.offers_of[feeds.GOLDEN_HOTEL] if o["room_id"].endswith(":R1")]
+    truth = {t["listing_id"]: t["hotel_id"] for t in _t("hotel_truth")}
+    room = {t["supplier_room_id"]: t["room_id"] for t in _t("room_truth")}
+    offers = [o for o in _t("offers") if truth[o["listing_id"]] == feeds.GOLDEN_HOTEL and room[o["supplier_room_id"]].endswith(":R1")]
     a = [o for o in offers if o["supplier_id"] == "kestrel" and o["board"] == "RO"]
     b = [o for o in offers if o["supplier_id"] == "mynah" and o["board"] == "BB"]
     assert a[0]["nightly"] * 3 == 18600 and a[0]["refundable_days"] is None
@@ -64,11 +72,20 @@ def test_generation_is_deterministic():
 
 
 def test_truth_tables_stay_out_of_the_app():
-    """Only the generator, the pipeline, the store (until M3) and evaluation may read generator truth."""
+    """Only the generator, the pipeline, evaluation, the trainer (labels) and store.py's two world_* helpers may read truth."""
     root = Path(__file__).resolve().parents[1] / "samesame"
-    allowed = {"store.py", "pipeline.py"}
+    allowed = {"store.py", "pipeline.py", "matching/train.py"}
     for f in root.rglob("*.py"):
         rel = f.relative_to(root)
         if rel.parts[0] in ("data", "eval") or str(rel) in allowed:
             continue
         assert not re.search(r"\b(hotel|room|activity)_truth\b|hard_negatives", f.read_text(encoding="utf-8")), f"{rel} reads generator truth"
+
+
+def test_listing_ids_unique():
+    import polars as pl
+    from samesame import config
+    for t in ("hotel_listings", "activity_listings"):
+        ids = pl.read_parquet(config.BUILD / f"{t}.parquet")["listing_id"]
+        assert ids.n_unique() == len(ids)
+    _ = store
