@@ -6,7 +6,11 @@ import { getJSON, inr, useApi } from "@/lib/api";
 import { usePresenterAction } from "@/lib/presenter";
 import { SupplierBadge, cn } from "./ui";
 
-const FAMILIES = ["Shah family · booked on sticker", "Patel family · booked on True Price"];
+const FAMILIES = ["Shah family", "Patel family"];
+// Labels come from the offer's own ranks, so they stay true whatever the data says
+const why = (o: Offer, i: number) => i === 0
+  ? `booked on sticker · ${o.sticker_rank === 1 ? "cheapest" : `#${o.sticker_rank} cheapest`}, True Price #${o.true_rank}`
+  : `booked on True Price · #${o.true_rank}, sticker #${o.sticker_rank}`;
 
 export function BookingPanel({ offers, active }: { offers: Offer[]; active: boolean }) {
   const meta = useApi<Meta>("/api/meta");
@@ -78,7 +82,7 @@ export function BookingPanel({ offers, active }: { offers: Offer[]; active: bool
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         {chosen.map((o, i) => (
-          <BookingCard key={o.offer_id} family={FAMILIES[i] ?? "Booking"} offer={o} result={resp?.results.find((r) => r.offer_id === o.offer_id)} clock={clock} />
+          <BookingCard key={o.offer_id} family={`${FAMILIES[i] ?? "Booking"} · ${why(o, i)}`} offer={o} result={resp?.results.find((r) => r.offer_id === o.offer_id)} clock={clock} />
         ))}
       </div>
 

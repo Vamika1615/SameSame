@@ -15,13 +15,18 @@ def test_hotel_search_both_views():
     for card in r["samesame"]:
         assert set(card["member_ids"]) <= today_ids          # every stack member exists in Today (animation anchors)
         assert card["score"] and all(t["detail"] for t in card["score"])
-    assert sum(1 for x in r["samesame"] if x["lookalike"]) == 2
+    looks = {x["card_id"]: x["lookalike"]["other_card_id"] for x in r["samesame"] if x["lookalike"]}
+    assert len(looks) >= 2                                   # the Citadines trap at least
+    shown = {x["card_id"] for x in r["samesame"]}
+    assert all(other in shown for other in looks.values())   # both pins are on the map
 
 
 def test_hotel_detail_golden_flip():
-    d = c.get("/api/hotels/novotel-suk20").json()
+    a_id, b_id = c.get("/api/meta").json()["demo"]["book_offers"]
+    d = c.get("/api/hotels/demo").json()
     offers = {o["offer_id"]: o for o in d["offers"]}
-    a, b = offers["novotel-suk20:kestrel:RO"], offers["novotel-suk20:mynah:BB"]
+    a, b = offers[a_id], offers[b_id]
+    assert (a["supplier"], a["price"], b["supplier"], b["price"]) == ("Kestrel", 18600, "Mynah", 20100)
     assert a["price"] < b["price"]
     assert a["true_price"]["total"] > b["true_price"]["total"]
     assert d["enrichment"]["after_amenities"]
@@ -32,7 +37,7 @@ def test_unknown_hotel_404():
 
 
 def test_book_is_reproducible():
-    body = {"offer_ids": ["novotel-suk20:kestrel:RO", "novotel-suk20:mynah:BB"], "seed": 11}
+    body = {"offer_ids": c.get("/api/meta").json()["demo"]["book_offers"], "seed": 11}
     assert c.post("/api/book", json=body).json() == c.post("/api/book", json=body).json()
 
 

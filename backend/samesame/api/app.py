@@ -7,7 +7,8 @@ from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from samesame import config, images, mock
+from samesame import config, images, placeholders, service, store
+from samesame.data.feeds import GOLDEN_HOTEL
 from samesame.schemas import (ActivitySearch, BookResponse, BookStats, HotelDetail, HotelSearch, Meta, Mode, ReviewAck, ReviewItem,
                               ReviewLabel, SimParams, SimResult, SupplierRow)
 
@@ -32,7 +33,12 @@ def _osm_hotels() -> list[dict]:
     return out
 
 
-DATA_SOURCE = "mock"   # M1: hand-written inputs in samesame.mock; becomes "synthetic" once M2 lands
+DATA_SOURCE = "synthetic"
+SOURCES = {"hotels": "6 synthetic supplier feeds over 300 real OSM hotels",
+           "clusters": store.CLUSTER_SOURCE,
+           "promise": "estimated from the 24,000-attempt booking log",
+           "review_queue": "mock pairs until the M3 matcher",
+           "simulator": "closed-form mock until M5"}
 
 
 @app.get("/api/meta", response_model=Meta)
@@ -40,20 +46,23 @@ def meta():
     manifest = config.BUILD / "manifest.json"
     build = json.loads(manifest.read_text(encoding="utf-8")) if manifest.exists() else {}
     return Meta(mode=Mode(**{**config.mode(), "data": DATA_SOURCE}), city=config.CITY, currency=config.CURRENCY, build=build,
-                demo={"book_offers": mock.DEMO_BASKET, "book_seed": mock.DEMO_SEED,
+                sources=SOURCES,
+                demo={"book_offers": service.demo_basket(), "book_seed": service.DEMO_SEED, "golden_hotel": GOLDEN_HOTEL,
                       "book_seed_note": "Seed 1 is the first seed tried; it happens to show a failover. Press Fresh seed for new draws, or Run 1,000× for the distribution."})
 
 
 @app.get("/api/hotels/search", response_model=HotelSearch)
 def hotels_search():
-    return mock.hotel_search()
+    return service.hotel_search()
 
 
 @app.get("/api/hotels/{cluster_id}", response_model=HotelDetail)
 def hotel(cluster_id: str):
-    if cluster_id not in mock.LISTINGS:
+    if cluster_id == "demo":                     # presenter alias for the golden-case hotel
+        cluster_id = GOLDEN_HOTEL
+    if cluster_id not in store.get().listings_of:
         raise HTTPException(404, f"no hotel {cluster_id}")
-    return mock.hotel_detail(cluster_id)
+    return service.hotel_detail(cluster_id)
 
 
 class BookRequest(BaseModel):
@@ -63,15 +72,18 @@ class BookRequest(BaseModel):
 
 @app.post("/api/book", response_model=BookResponse)
 def book(req: BookRequest):
-    return BookResponse(seed=req.seed, results=mock.book(req.offer_ids, req.seed))
+    unknown = [o for o in req.offer_ids if o not in store.get().offer]
+    if unknown:
+        raise HTTPException(404, f"unknown offers {unknown}")
+    return BookResponse(seed=req.seed, results=service.book(req.offer_ids, req.seed))
 
 
 @app.get("/api/book/stats", response_model=BookStats)
-def book_stats(offer_ids: str = ",".join(mock.DEMO_BASKET), runs: int = 1000):
-    ids = offer_ids.split(",")
+def book_stats(offer_ids: str = "", runs: int = 1000):
+    ids = offer_ids.split(",") if offer_ids else service.demo_basket()
     agg = {i: {"offer_id": i, "confirmed_first_time": 0, "paid_price_rise": 0, "via_failover": 0, "failed": 0} for i in ids}
     for seed in range(1, min(runs, 5000) + 1):
-        for r in mock.book(ids, seed):
+        for r in service.book(ids, seed):
             repriced = any(st.event == "price_changed" for st in r.steps)
             key = ("failed" if r.status == "failed" else "via_failover" if r.via_failover
                    else "paid_price_rise" if repriced else "confirmed_first_time")
@@ -81,38 +93,38 @@ def book_stats(offer_ids: str = ",".join(mock.DEMO_BASKET), runs: int = 1000):
 
 @app.get("/api/activities/search", response_model=ActivitySearch)
 def activities(q: str = "floating market"):
-    return mock.activity_search(q)
+    return service.activity_search(q)
 
 
 @app.get("/api/review/queue", response_model=list[ReviewItem])
 def review_queue():
-    return mock.review_queue()
+    return placeholders.review_queue()
 
 
 @app.post("/api/review/{pair_id}/label", response_model=ReviewAck)
 def review_label(pair_id: str, body: ReviewLabel):
-    r = mock.label(pair_id, body.label, body.reviewer)
+    r = placeholders.label(pair_id, body.label, body.reviewer)
     return ReviewAck(ok=True, audit_id=r["audit_id"], streak=r["streak"], model_was_right=r["model_was_right"], truth=r["truth"])
 
 
 @app.post("/api/review/undo/{audit_id}")
 def review_undo(audit_id: str):
-    return {"ok": mock.undo(audit_id)}
+    return {"ok": placeholders.undo(audit_id)}
 
 
 @app.get("/api/review/audit")
 def review_audit():
-    return mock.audit_log()
+    return placeholders.audit_log()
 
 
 @app.post("/api/sim", response_model=SimResult)
 def sim(p: SimParams):
-    return mock.simulate(p)
+    return placeholders.simulate(p)
 
 
 @app.get("/api/suppliers", response_model=list[SupplierRow])
 def supplier_report():
-    return mock.suppliers()
+    return service.suppliers()
 
 
 @app.get("/api/img/{kind}/{key}.svg", include_in_schema=False)
@@ -130,6 +142,11 @@ def basemap():
 def base_hotels():
     """M0: raw OSM base truth, before any supplier layer exists."""
     return {"source": "OpenStreetMap (ODbL)", "hotels": _osm_hotels()}
+
+
+# generated illustrative images (procedural; see data/build/images/LICENSES.csv)
+(config.BUILD / "images").mkdir(parents=True, exist_ok=True)
+app.mount("/api/images", StaticFiles(directory=config.BUILD / "images"), name="images")
 
 
 # ---- demo mode: serve the built SPA from the same port (one process on stage)

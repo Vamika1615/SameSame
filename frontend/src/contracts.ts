@@ -6,7 +6,8 @@ export type EntityType = "hotel" | "room" | "activity";
 export interface Mode { llm: boolean; llm_model: string | null; data: "synthetic" | "mock" | "real" }
 export interface Meta {
   mode: Mode; city: string; currency: string; build: Record<string, unknown>;
-  demo: { book_offers?: string[]; book_seed?: number; book_seed_note?: string };
+  demo: { book_offers?: string[]; book_seed?: number; book_seed_note?: string; golden_hotel?: string };
+  sources: Record<string, string>;
 }
 export interface BookStats {
   runs: number;
@@ -40,7 +41,7 @@ export interface HotelSearch {
 
 export interface Source { supplier: string; value: string; trust: number }
 export interface SourcedFact { key: string; label: string; value: string; sources: Source[] }
-export interface CanonicalRoom { room_id: string; name: string; attrs: Record<string, string>; members: { supplier: string; raw_name: string; confidence: number }[] }
+export interface CanonicalRoom { room_id: string; name: string; attrs: Record<string, string>; members: { supplier: string; raw_name: string; confidence: number | null }[] }
 export interface Promise_ {
   supplier_id: string; supplier: string; lead_bucket: string; honour_rate: number;
   ci_low: number; ci_high: number; n: number; p_price_change: number; p_sold_out: number; p_error: number; exp_increase_pct: number;
@@ -92,5 +93,5 @@ export interface SimResult { params: SimParams; arms: SimArm[]; lift_bookings_pc
 
 export interface SupplierRow {
   supplier_id: string; supplier: string; honour_rate_hotel: number; honour_rate_activity: number;
-  n_attempts: number; duplicate_share: number; price_spread_pct: number;
+  n_attempts: number; duplicate_share: number; price_spread_pct: number; hotel?: Promise_ | null; activity?: Promise_ | null;
 }

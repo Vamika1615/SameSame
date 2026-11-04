@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { ReviewAck, ReviewItem, ReviewSide } from "@/contracts";
 import { getJSON } from "@/lib/api";
 import { Empty, ErrorState, Loading } from "@/components/States";
-import { Illustrative, SupplierBadge, cn } from "@/components/ui";
+import { DataBadge, Illustrative, SupplierBadge, cn } from "@/components/ui";
 
 type Audit = { audit_id: string; pair_id: string; label: string; reviewer: string; truth: string; correct: boolean; undone?: boolean };
 const LABEL = { S: "SAME", V: "VARIANT", D: "DIFFERENT" } as const;
@@ -66,7 +66,7 @@ export default function OpsPage() {
       <div>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Spot the Twin</h1>
+            <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight">Spot the Twin <DataBadge kind="mock" /></h1>
             <p className="mt-1 text-ink-mute">Pairs the model wasn't sure enough to merge. Nothing here was auto-merged. Every label goes back into training data.</p>
           </div>
           <div className="flex items-center gap-4">

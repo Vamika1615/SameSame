@@ -2,65 +2,86 @@
 
 _Update after every milestone. Newest first._
 
-## Status: M1 done → M2 next
+## Status: M2 done → M3 next
 
-### Done: M1, vertical slice (2026-11-04)
-All 7 demo beats work end-to-end in `--demo` mode at 1920×1080, with zero console errors and zero non-localhost requests.
-- **Engines that are already real** (only their inputs are mocked):
-  - `pricing/true_price.py`: mutually exclusive outcomes, every term with its assumption
-  - `ranking/score.py`: transparent weighted score plus an honour-floor guardrail
-  - `booking/sandbox.py`: seeded outcome draws; failover to SAME twins only, never to worse cancellation terms
-- **Mock inputs** (`samesame/mock.py`, `mode.data = "mock"`, badge in the UI):
-  - 12 real OSM hotels around Asok BTS
-  - 37 supplier listings with naming chaos
-  - the brief's golden-case offers at Novotel Sukhumvit 20
-  - 3 sightseeing products (Floating Market, Grand Palace, SkyWalk) × 3 variants
-  - 6 review pairs
-  - placeholder supplier profiles
-- **Additions from the brief review:** relevance features in ranking (distance, star fit, family fit, source-market popularity, content) shown as "why" chips with a score breakdown; `access_type` / `activity_option` in schema and DNA strip; Before/After enrichment; DNA-only filters that show measured keyword-search recall.
-- **UI:**
-  - listing page with Today/SameSame toggle (layout-animated stacks, 570 ms), duplicate counter, look-alike badge + map line, DNA filters
-  - hotel detail with golden record (sources on hover), Before/After, canonical rooms, offers table with 5 comparison columns, flip-board True Price and Promise gauges
-  - booking sandbox (Book both, Fresh seed, Run 1,000×)
-  - sightseeing variants with glowing DNA diffs
-  - Spot-the-Twin queue (S/V/D/U, streak, audit log, truth reveal)
-  - simulator with sliders + pessimistic preset (MOCK placeholder)
-  - supplier report
-- **Presenter mode:** keys 1–7, ←/→, Space = the beat's action, `.` = step indicator.
-- **Tests: 23 passing:**
-  - True Price golden case: A ₹23,912 vs B ₹20,744
-  - failover-only-to-SAME (4 cases)
-  - every endpoint against the contract
-  - blind-set isolation
-  - tests can never write into `data/build` (conftest)
+### Done: M2, synthetic supplier layer (2026-11-04)
+`python -m samesame.pipeline` builds every table in ~10 s, deterministic from the seed. `start.py` reruns it whenever a generator file changes. Full data card: [DATA.md](DATA.md).
+- **Base:** 300 real OSM hotels.
+  - 35 OSM self-duplicates collapsed first, each listed.
+  - 72 real hard-negative pairs (same brand, < 3 km).
+  - Districts by point-in-polygon on OSM boundaries.
+  - Stars, phone and street come from OSM where present; otherwise they are synthetic and flagged per field.
+- **Six supplier feeds:** 1,195 listings, 4,345 supplier room names, 7,039 rates.
+  - Every corruption is recorded in truth tables: abbreviation, case, typos, dropped branch numbers, coordinate jitter, centroid geocodes, phone formats, half-stars, missing fields, same-supplier duplicates, wrong amenities, view-less room names.
+  - Board and cancellation vocabularies differ by supplier.
+- **Sightseeing:** 25 attractions → 67 variants (access type and option in the DNA) → 168 listings with varied phrasing.
+- **Images:** 5,102 procedural JPEGs, i.e. base images plus supplier copies.
+  - Copies are cropped, recompressed and colour-shifted; some are watermarked.
+  - 40 copies show a sibling hotel's photo.
+  - Licences in `LICENSES.csv`.
+- **Booking log:** 24,000 attempts over 180 days from the supplier-behaviour model, with lead-time buckets and per-hotel volatility. 40% of attempts come from Indian agents.
+- **API swapped from `mock.py` to `service.py`** (same contracts, `mode.data = "synthetic"`):
+  - Promise is estimated from the log, with a Wilson CI; the supplier report now shows real CIs and n.
+  - Popularity is counted in the log.
+  - The breakfast fill is the catalogue median (₹560).
+  - The golden record is a trust-weighted vote, where trust is measured agreement with the cluster majority. Images are de-duplicated by perceptual hash.
+  - Look-alike reasons are computed (distance vs the measured 95th-percentile twin radius, phone, branch).
+  - The booking sandbox draws from the behaviour model.
+- **Tests: 30 passing.** New `test_data.py`:
+  - OSM dedupe, ≥ 20 hard negatives, corruption present
+  - the log has ≥ 20k rows and reflects the behaviour model
+  - golden inputs present, determinism
+  - no app module reads truth tables
 
-### Computed numbers right now (mock inputs; will change in M2–M4)
+### Computed numbers right now (M2 synthetic data; clusters still generator truth)
 | Thing | Value |
 |---|---|
-| Offer A: Kestrel, room only, NRF, ₹18,600 | True Price **₹23,912** (sticker #1 → True #7) |
-| Offer B: Mynah, breakfast, free cancel to 7 d, ₹20,100 | True Price **₹20,744** (sticker #6 → True #1) |
-| Book both, seed 1 (first seed tried) | Kestrel price change ₹18,600→₹20,860 → SAME twin via Heron ₹19,400; Mynah first time |
-| Same basket, seeds 1–1,000 | Kestrel: 72.0% clean, 4.2% paid a rise, 23.8% failover. Mynah: 96.7% / 1.6% / 1.7% |
-| Breakfast filter | DNA: 35 listings; keyword search on supplier text: 19 |
-| Free-cancellation filter | DNA: 19 listings; keyword search: 11 |
+| Demo search (500 m of Asok BTS, 4★+) | 131 listings → 29 hotels, 102 duplicates collapsed |
+| Offer A: Kestrel, room only, NRF, ₹18,600 | True Price **₹23,859** (sticker #1 → True #4) |
+| Offer B: Mynah, breakfast, free cancel to 7 d, ₹20,100 | True Price **₹20,799** (sticker #4 → True #1) |
+| Kestrel hotel Promise at 15-45 d | 72.9% honoured (n = 2,553); reprices 19.1% |
+| Book both, seed 1 (first seed tried) | Kestrel ₹18,600 → ₹20,860 → SAME twin via Sunbird ₹18,930; Mynah first time |
+| Same basket, seeds 1–1,000 | Kestrel: 68.5% clean, 0% paid a rise, 31.3% failover, 0.2% failed. Mynah: 96.6% / 1.6% / 1.8% / 0% |
+| Look-alikes in the demo search | Citadines Sukhumvit 16 ↔ 8 (580 m); Citadines (Asok Montri) → 16 (723 m) |
+| Breakfast filter (listings) | Variant DNA: 97; keyword search on rate text: 48 |
+| Free-cancellation filter | 59 vs 27 |
+| Floating Market | 9 listings → 3 variants; hotel pickup: DNA 6, keyword 2 |
 
-B's True Price (₹20,744) sits just above the brief's ₹20,500–20,700 band. The cause is the cancel-timing assumption: cancellations are spread uniformly over the 21-day lead, so 7/21 of the 9% fall in the penalty window. We kept the formula and report the number.
+Both golden values sit inside the brief's bands (A 23,500–24,500; B 20,400–20,900).
 
 ### Decisions made without asking
-- **True Price terms are computed for the booked product.** Failover twins must have the same room and board, and equal or better cancellation (`cancel_rank`).
-- **"Book both" means two families on the same hotel:** Shah books the sticker-cheapest offer, Patel books the True-Price pick. This retells the True Price story through the booking beat.
-- **Demo seed:** 1, the first seed tried. It is disclosed on screen, along with "Run 1,000×" for the distribution.
-- **Review labels** are appended to `data/build/review_labels.jsonl` (label + undo events) for the M3 retrain.
-- **DNA filters are measured per listing** (DNA truth vs keyword search on raw text). Measuring per hotel hid the gap.
+- **The golden case moved from Novotel Sukhumvit 20 to Radisson Blu Plaza.** Novotel is 745 m from Asok, and a radius that includes it puts 270 cards on the Today screen. Radisson's room list, base rate and the two brief offers are fixed inputs, disclosed in DATA.md.
+  - A side effect is that Radisson ranks #1 in the list.
+  - Kestrel is no longer guaranteed the cheapest sticker by construction. It currently is, from generated prices.
+- **Clusters and room mappings come from generator truth until M3**, behind `store.py` (one swap point). They are labelled in the sidebar tooltip, and room mappings show "truth" instead of a confidence.
+- **Feed tables carry no truth.** Hotel and room ids live only in `*_truth` tables, and a test enforces it.
+- **Keyword search for DNA filters reads only the rate text** (breakfast, cancellation) and amenity text (pool). Including amenities gave false "breakfast" hits from "Indian breakfast options".
+- **Breakfast isn't sold everywhere** (by star, lower for serviced apartments, ~80% of suppliers load it). Otherwise the breakfast filter matched every listing.
+- **Booking-panel labels are computed from the offer's ranks** ("booked on sticker · cheapest, True Price #4"), so they can't go stale.
+- **`mock.py` is deleted.** The review queue and simulator moved to `placeholders.py` and stay labelled MOCK until M3 / M5.
+- **`/api/hotels/demo`** is a presenter alias for the golden hotel, so beat URLs survive data changes.
 
-### Next: M2, synthetic supplier layer (A + B)
-- A: curate ~300 base hotels from OSM (de-duplicate OSM's own twins first), generate 6 bird-supplier feeds with all corruptions, ≥20 real hard negatives (the 159 same-family pairs under 3 km), rooms with naming chaos, 25 attractions → activity variants (including access types and options), raster illustrative images + corrupted copies.
-- B: behaviour profiles by lead time → booking-attempt log of ≥20k rows.
-- Then swap `mock.py` out behind the same payload builders. `DATA_SOURCE` becomes "synthetic".
+### Next: M3, Twin Finder (A) + blind set (C)
+- **Blocking:** geo cells + brand family + name tokens.
+- **Features:**
+  - name similarity
+  - MiniLM embedding similarity
+  - distance (vs the 100 m twin radius)
+  - phone digits
+  - address tokens
+  - star delta
+  - image phash overlap
+- **Model:** LightGBM, trained on generator-labelled pairs that exclude the blind set.
+- **Clustering:** constrained; never-merge on different brand family or > 1.5 km.
+- **Gray zone** goes to the review queue, which replaces `placeholders.REVIEW`.
+- **Room matcher:** parse tier, bed and view from the abbreviation chaos.
+- **Blind set:** C labels ~150 pairs with a small labelling tool into `data/blind/`. Report precision and recall per entity type.
+- Then swap `store.cluster_of` / `room_of` to the matcher output.
 
 ### Known issues
-- The simulator is a closed-form MOCK. In it, the failed-at-booking reduction doesn't move with `failure_scale`. The real Monte-Carlo comes in M5.
-- Supplier report CIs on the activity/hotel gauges reuse the point estimate (mock).
+- The simulator is still the M1 closed form (labelled MOCK). The real Monte-Carlo comes in M5.
+- The review queue is still the 6 M1 mock pairs (labelled MOCK). Its rv-1 refers to Novotel Sukhumvit 20, which is no longer the golden hotel.
+- **Today shows 131 cards.** I couldn't measure the merge animation's frame rate in the background browser pane. Check it on the demo laptop; if it stutters, cap the animated ghosts to on-screen cards.
 - Dev mode under React StrictMode can log a harmless Leaflet canvas error on hot reload; production (`--demo`) is clean.
-- Vite warns that the JS chunk is >500 kB (Leaflet + framer-motion). Harmless offline; fix it if load time matters.
+- Vite warns that the JS chunk is > 500 kB (Leaflet + framer-motion). Harmless offline.
 - Windows is still untested; a teammate needs to run `py start.py --demo`.

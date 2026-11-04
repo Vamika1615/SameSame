@@ -23,8 +23,8 @@ export default function SuppliersPage() {
           {res.data.map((r) => (
             <tr key={r.supplier_id} className="border-b border-paper-line last:border-0">
               <td className="px-4 py-3"><SupplierBadge name={r.supplier} /></td>
-              <td className="px-4 py-2 text-center"><PromiseMeter rate={r.honour_rate_hotel} n={r.n_attempts} lo={r.honour_rate_hotel} hi={r.honour_rate_hotel} /></td>
-              <td className="px-4 py-2 text-center"><PromiseMeter rate={r.honour_rate_activity} n={r.n_attempts} lo={r.honour_rate_activity} hi={r.honour_rate_activity} /></td>
+              <td className="px-4 py-2 text-center"><PromiseMeter rate={r.honour_rate_hotel} n={r.hotel?.n ?? r.n_attempts} lo={r.hotel?.ci_low ?? r.honour_rate_hotel} hi={r.hotel?.ci_high ?? r.honour_rate_hotel} /></td>
+              <td className="px-4 py-2 text-center"><PromiseMeter rate={r.honour_rate_activity} n={r.activity?.n ?? r.n_attempts} lo={r.activity?.ci_low ?? r.honour_rate_activity} hi={r.activity?.ci_high ?? r.honour_rate_activity} /></td>
               <td className="px-4 py-3 text-right tabular-nums">{r.n_attempts.toLocaleString("en-IN")}</td>
               <td className="px-4 py-3 text-right tabular-nums">{Math.round(r.duplicate_share * 100)}%</td>
               <td className="px-4 py-3 text-right tabular-nums">±{r.price_spread_pct.toFixed(1)}%</td>

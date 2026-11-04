@@ -35,7 +35,8 @@ py start.py
 ## Data provenance and licences
 
 - Hotel base truth, river, roads and district outlines: © OpenStreetMap contributors, licensed under the [ODbL 1.0](https://opendatacommons.org/licenses/odbl/). Snapshot in `data/raw/osm/` (see `SNAPSHOT.txt` for timestamps and queries). Pulled once with `backend/scripts/pull_osm.py`.
-- Supplier feeds, room names, offers, booking logs: synthetic, generated from the base truth with a fixed seed.
-- Images: see `data/images/LICENSES.csv`. All are labelled "illustrative" in the UI.
+- Supplier feeds, room names, offers, activities, booking logs: synthetic, generated from the base truth with a fixed seed by `python -m samesame.pipeline` (~10 s; `start.py` runs it when needed).
+- Images: procedural, never photos of real hotels. Licences in `data/build/images/LICENSES.csv` (CC0, own work). All are labelled "illustrative" in the UI.
+- **[DATA.md](DATA.md)** lists exactly what is real, what is synthetic, and the few fixed inputs (the brief's golden-case offers).
 
 _Architecture diagram, metrics and honest limitations: coming in later milestones (see PLAN.md, PROGRESS.md)._

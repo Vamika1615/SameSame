@@ -118,6 +118,7 @@ class Meta(BaseModel):
     currency: str
     build: dict = {}                    # artifact timestamps, counts
     demo: dict = {}                     # scenario defaults (book seed + offers); shown on screen, never hidden
+    sources: dict = {}                  # where each part of the screen comes from (synthetic / truth / mock)
 
 
 class BookStats(BaseModel):
@@ -444,3 +445,5 @@ class SupplierRow(BaseModel):
     n_attempts: int
     duplicate_share: float              # share of its listings that have a twin elsewhere
     price_spread_pct: float             # median |price - cluster median| / cluster median
+    hotel: Optional[Promise] = None   # full estimates behind the two honour rates (CI, n)
+    activity: Optional[Promise] = None

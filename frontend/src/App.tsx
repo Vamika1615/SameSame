@@ -3,6 +3,7 @@ import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { useApi } from "@/lib/api";
 import { Presenter } from "@/lib/presenter";
 import type { Meta } from "@/contracts";
+import { Tip } from "@/components/ui";
 import HotelsPage from "@/pages/HotelsPage";
 import HotelDetailPage from "@/pages/HotelDetailPage";
 import SightseeingPage from "@/pages/SightseeingPage";
@@ -25,7 +26,9 @@ function ModeBadge() {
   const { llm, llm_model, data } = meta.data.mode;
   return (
     <div className="space-y-1.5 text-xs">
-      <div className="rounded-md bg-warn-50 px-2 py-1 font-semibold uppercase tracking-wide text-warn-500">{data} data</div>
+      <Tip content={<ul className="space-y-1">{Object.entries(meta.data.sources ?? {}).map(([k, v]) => <li key={k}><b>{k.replace("_", " ")}:</b> {v}</li>)}</ul>}>
+        <div className="cursor-help rounded-md bg-warn-50 px-2 py-1 font-semibold uppercase tracking-wide text-warn-500">{data} data</div>
+      </Tip>
       <div className={`rounded-md px-2 py-1 ${llm ? "bg-accent-50 text-accent-700" : "bg-paper-warm text-ink-mute"}`}>
         {llm ? `LLM on · ${llm_model}` : "LLM off · rules + human queue"}
       </div>
