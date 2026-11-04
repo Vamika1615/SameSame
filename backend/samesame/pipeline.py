@@ -18,7 +18,7 @@ from samesame import config
 from samesame.data import activities, booking_log, feeds, images_gen, osm_base
 
 TABLES = ["base_hotels", "osm_duplicates", "hard_negatives", "hotel_listings", "hotel_truth", "rooms", "supplier_rooms",
-          "room_truth", "offers", "attractions", "activity_variants", "activity_listings", "activity_truth", "booking_log", "images"]
+          "room_truth", "offers", "osm_reference", "attractions", "activity_variants", "activity_listings", "activity_truth", "booking_log", "images"]
 
 
 def _rng(stage: str) -> np.random.Generator:
@@ -38,7 +38,7 @@ def main(skip_images: bool = False):
     attractions, variants, act_listings, act_truth = activities.generate(_rng("activities"))
     log = booking_log.generate(hotels, listings, truth, offers, attractions, act_listings, act_truth, _rng("log"))
     imgs = [] if skip_images else images_gen.generate(hotels, listings, truth, attractions, act_listings, act_truth, hard, _rng("images"))
-    data = dict(base_hotels=hotels, osm_duplicates=dups, hard_negatives=hard, hotel_listings=listings, hotel_truth=truth,
+    data = dict(osm_reference=osm_base.reference(), base_hotels=hotels, osm_duplicates=dups, hard_negatives=hard, hotel_listings=listings, hotel_truth=truth,
                 rooms=rooms, supplier_rooms=sup_rooms, room_truth=room_truth, offers=offers, attractions=attractions, activity_variants=variants,
                 activity_listings=act_listings, activity_truth=act_truth, booking_log=log, images=imgs)
     for name in TABLES:

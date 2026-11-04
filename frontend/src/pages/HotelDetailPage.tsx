@@ -2,7 +2,7 @@ import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { AlertTriangle, ArrowDown, ArrowLeft, ArrowUp, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import type { HotelDetail, Offer, SourcedFact } from "@/contracts";
+import type { HotelDetail, Offer, SourcedFact, Reference } from "@/contracts";
 import { inr, useApi } from "@/lib/api";
 import { usePresenterAction } from "@/lib/presenter";
 import { ErrorState, Loading } from "@/components/States";
@@ -77,6 +77,7 @@ function Detail({ d }: { d: HotelDetail }) {
         </p>
       </section>
 
+      {d.reference && <section className="mt-10"><ReferenceSection r={d.reference} /></section>}
       <section className="mt-10"><RoomsSection d={d} /></section>
 
       <div ref={bookRef} className="scroll-mt-6">
@@ -217,6 +218,27 @@ function OffersTable({ offers, tpOn }: { offers: Offer[]; tpOn: boolean }) {
           );
         })}
       </LayoutGroup>
+    </div>
+  );
+}
+
+/** Real public data for the matched property: shown beside the supplier vote, never mixed into it. */
+function ReferenceSection({ r }: { r: Reference }) {
+  return (
+    <div className="rounded-2xl border border-paper-line bg-paper p-5">
+      <h2 className="text-2xl font-bold">Reference data</h2>
+      <p className="mt-1 text-ink-mute">Matched to <a className="underline" href={r.url} target="_blank" rel="noreferrer">OpenStreetMap {r.osm_id}</a> ({r.match}). Real, public data, not from any supplier.</p>
+      <dl className="mt-3 grid grid-cols-[120px_1fr] gap-y-1.5">
+        {([["Name", r.name], ["Address", r.address], ["Phone", r.phone], ["Website", r.website], ["Stars", r.stars && `${r.stars}★`]] as const)
+          .filter(([, v]) => v).map(([k, v]) => <div key={k} className="contents"><dt className="text-ink-mute">{k}</dt><dd>{v}</dd></div>)}
+      </dl>
+      <div className="mt-1 text-xs text-ink-mute">{r.license}</div>
+      {r.description && (
+        <div className="mt-4 border-t border-paper-line pt-3">
+          <p className="text-[15px] leading-relaxed">{r.description.text}</p>
+          <div className="mt-1 text-xs text-ink-mute">From Wikipedia, <a className="underline" href={r.description.source} target="_blank" rel="noreferrer">{r.description.title}</a> · {r.description.license}</div>
+        </div>
+      )}
     </div>
   );
 }

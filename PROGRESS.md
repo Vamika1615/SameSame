@@ -2,7 +2,59 @@
 
 _Update after every milestone. Newest first._
 
-## Status: M3 done → M4 next
+## Status: M3 + review fixes done → M4 next
+
+### Done: M3 review fixes + real content (2026-11-04)
+**The seven review findings are fixed.**
+1. **Out-of-fold scoring** (5 folds grouped by hotel): no hotel is scored, or has thresholds chosen, by a model that saw its labels.
+   - With honest scores the data got harder, and that exposed real weaknesses. Each was fixed with a general rule, not a special case:
+     - Chain-wide phones and photos shared across separate sites are ignored as evidence.
+     - Two established clusters merge only if their names agree and their sites are < 300 m apart.
+     - Marriott Executive Apartments is its own brand family.
+   - Two more OpenStreetMap self-duplicates were found by the matcher and collapsed (Courtyard by Marriott, Windsor Suites).
+2. **Wording:** "blind" is now "held-out" everywhere, with the disclosure that we saw aggregate held-out numbers while building and resampled the set 7 times. It was last resampled before anyone labelled it.
+3. **The look-alike claim** now says 3 of the 68 pairs are fully held out and the rest are scored out-of-fold.
+4. **Listing and room ids** are hashes of what they identify, so they are stable across generator changes. The report also flags any frozen pair whose listing has changed.
+5. **METRICS.md** has no timestamp, so builds don't dirty git.
+6. **Review counts:** the report gives the real number of review items, plus pairs that were never compared.
+7. **Validation leak:** gone with fix 1.
+
+**README** now says `python3`.
+
+**Real content** (one-time `backend/scripts/pull_wiki.py`; results committed in `data/raw/wiki`, 19 MB):
+- **Photos:** Wikimedia Commons only, CC0 / CC BY / CC BY-SA / public domain, every one credited on hover.
+  - 41 photos of 16 real Bangkok hotels.
+  - 45 attraction photos.
+  - 229 stock photos of hotel rooms, pools and lobbies elsewhere.
+  - Hotel photos must name the hotel as a phrase and be in Bangkok or Thailand. The loose first pass had attached a Radisson in Oslo and a fighter jet.
+  - Every stock photo was reviewed by eye, with 121 rejects.
+  - 251 of 300 hotels, and every hotel on the demo screen, now have a real photo. Badges say PHOTO / STOCK PHOTO · NOT THIS EXACT PLACE / ILLUSTRATIVE.
+- **A Reference data card** on each hotel page: the matched OSM record (address, phone, website, stars) and the Wikipedia summary where one exists.
+- **Wikipedia summaries** on sightseeing pages.
+- **Supplier image crops** were reduced to 1–5% (disclosed); 3–15% was harsher than real feeds.
+
+**Tests: 38 passing.** The new one checks that every photo carries a free licence and credit, and that no two hotels within 2.5 km share a stock photo; it caught a real bug during the work.
+
+### Computed numbers right now
+| Thing | Value |
+|---|---|
+| Demo search | 135 listings → 36 hotels, 99 duplicates collapsed |
+| Offer A: Kestrel ₹18,600 | True Price **₹23,671** (sticker #1 → True #3) |
+| Offer B: Mynah ₹20,100 | True Price **₹20,794** (sticker #4 → True #1) |
+| Book both, seed 1 | Kestrel ₹18,600 → ₹20,860 → SAME twin via Heron ₹19,140; Mynah first time |
+| Seeds 1–1,000 | Kestrel 77.3% clean / 1.6% paid a rise / 21.1% failover; Mynah 97.0 / 1.6 / 1.4 |
+| Hotels, whole catalogue (out-of-fold) | precision 1.000, recall 0.944; held-out families 1.000 / 0.964 |
+| Look-alikes merged | 0 of 68 |
+| Held-out set (149 pairs) | hotel 1.000 / 0.950, room 1.000 / 0.900, activity 1.000 / 1.000 |
+| Routing | 58 hotel review items, 0% to LLM |
+| First ops item | two different "Citadines", 832 m apart, p 0.9934 vs bar 0.9938 |
+
+### Still open
+- C hand-labels the held-out set at http://localhost:8000/label.
+- **Crop-robust image matching** (ORB keypoints) comes in M5. Perceptual hashes can't see through heavy crops.
+- **SkyWalk has no licensed photos** (illustrative).
+- **Some attraction photos may need another look.** About 49 hotels still fall back to illustrations.
+- The simulator is still mock (M5). Windows is untested.
 
 ### Done: M3, Twin Finder + Variant DNA + blind set (2026-11-04)
 Every stack, room mapping and sightseeing variant on screen is now **predicted from the supplier feeds**; generator truth no longer reaches the UI. Numbers below are from [METRICS.md](METRICS.md), which `samesame.eval.report` regenerates on every build.

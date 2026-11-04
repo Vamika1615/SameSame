@@ -18,7 +18,12 @@ export interface WhyChip { label: string; kind: "price" | "promise" | "content" 
 export interface ScoreTerm { feature: string; label: string; value: number; weight: number; contribution: number; detail: string }
 export interface LookalikeReason { kind: "distance" | "phone" | "branch" | "brand" | "address"; text: string }
 export interface Lookalike { other_card_id: string; other_name: string; distance_m: number; reasons: LookalikeReason[] }
-export interface ImageRef { url: string; illustrative: boolean; source?: string | null }
+export interface ImageRef { url: string; illustrative: boolean; source?: string | null; kind?: "photo" | "stock" | "generated"; credit?: string | null; credit_url?: string | null }
+export interface WikiText { text: string; title: string; source: string; license: string; license_url: string }
+export interface Reference {
+  source: string; osm_id: string; url: string; name: string; address?: string | null; phone?: string | null; website?: string | null;
+  stars?: string | null; match: string; license: string; description?: WikiText | null;
+}
 
 export interface SearchParams {
   city: string; area: string; area_lat: number; area_lng: number; checkin: string; nights: number;
@@ -60,6 +65,7 @@ export interface Enrichment {
 export interface HotelDetail {
   cluster_id: string; name: string; facts: SourcedFact[]; hero: ImageRef | null; images: ImageRef[];
   rooms: CanonicalRoom[]; offers: Offer[]; params: SearchParams; enrichment: Enrichment; lookalike?: Lookalike | null;
+  reference?: Reference | null;
 }
 
 export interface BookingStep {
@@ -77,7 +83,7 @@ export interface ActivityVariant {
   price_from: number; true_price_from?: number | null; rank: number; why: WhyChip[]; score: ScoreTerm[];
   diff_sentence?: string | null; diff_source: "llm" | "template";
 }
-export interface ActivityGroup { group_id: string; base_product: string; variants: ActivityVariant[] }
+export interface ActivityGroup { group_id: string; base_product: string; variants: ActivityVariant[]; description?: WikiText | null }
 export interface ActivitySearch { query: string; raw_count: number; today: ActivityListing[]; groups: ActivityGroup[]; filters: DnaFilter[] }
 
 export interface ReviewSide { id: string; supplier: string; title: string; fields: Record<string, string>; image?: ImageRef | null }

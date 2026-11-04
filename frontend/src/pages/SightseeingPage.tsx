@@ -53,8 +53,14 @@ function Results({ data, view }: { data: ActivitySearch; view: "today" | "samesa
   const visibleVariants = variants.filter((v) => active.every((k) => v.dna_tags.includes(k)));
   const visibleToday = data.today.filter((l) => active.every((k) => l.dna_tags.includes(k)));
   const filters = data.filters.filter((f) => f.count > 0 || f.today_count > 0);
+  const about = data.groups[0]?.description;
   return (
     <>
+      {about?.text && (
+        <p className="mt-4 max-w-[1100px] text-[15px] leading-relaxed text-ink-soft">
+          {about.text} <span className="text-xs text-ink-mute">(Wikipedia, <a className="underline" href={about.source} target="_blank" rel="noreferrer">{about.title}</a> · {about.license})</span>
+        </p>
+      )}
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-paper-line bg-paper px-5 py-3">
         <div className="text-lg">
           {view === "today"

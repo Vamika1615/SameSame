@@ -61,7 +61,7 @@ def test_human_labels_link_and_split(tmp_path, monkeypatch):
 
 def test_held_out_families_never_train():
     pairs = pl.read_parquet(config.BUILD / "hotel_pairs.parquet")
-    _, _, ok = train.labels(pairs["a"].to_list(), pairs["b"].to_list())
+    _, _, _, ok = train.labels(pairs["a"].to_list(), pairs["b"].to_list())
     truth = dict(pl.read_parquet(config.BUILD / "hotel_truth.parquet").select("listing_id", "hotel_id").iter_rows())
     base = {h["hotel_id"]: h["family"] or h["hotel_id"] for h in pl.read_parquet(config.BUILD / "base_hotels.parquet").to_dicts()}
     for a, b, k in zip(pairs["a"], pairs["b"], ok):

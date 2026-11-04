@@ -64,8 +64,12 @@ export function Illustrative({ img, className, label = true }: { img: ImageRef |
   return (
     <div className={cn("relative overflow-hidden bg-paper-line", className)}>
       {img && <img src={img.url} alt="" className="h-full w-full object-cover" draggable={false} />}
-      {label && img?.illustrative && (
-        <span className="absolute bottom-1 left-1 rounded bg-black/55 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white">illustrative</span>
+      {label && img && (
+        <span title={img.credit ?? undefined}
+          className="absolute bottom-1 left-1 max-w-[95%] truncate rounded bg-black/55 px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-white">
+          {img.kind === "photo" ? "PHOTO" : img.kind === "stock" ? "STOCK PHOTO · NOT THIS EXACT PLACE" : "ILLUSTRATIVE"}
+          {img.credit && img.kind !== "generated" ? <span className="normal-case opacity-80"> · {img.credit}</span> : null}
+        </span>
       )}
     </div>
   );

@@ -3,6 +3,7 @@
 Each corruption applied to a listing is recorded in hotel_truth.corruptions (truth tables never reach
 the matcher; they exist for evaluation and the data card). Prices are nightly, for 2 adults.
 """
+import hashlib
 import re
 
 import numpy as np
@@ -174,13 +175,16 @@ def room_name(r, sup, rng, corr):
 _USED: set[str] = set()
 
 
-def _new_id(prefix: str, rng) -> str:
-    """Supplier codes look random but must be unique (a collision silently merges two listings downstream)."""
+def _new_id(prefix: str, key: str) -> str:
+    """Supplier codes look random but are a hash of what they identify, so they survive generator changes (the
+    frozen evaluation set refers to them), and they must be unique (a collision silently merges two listings)."""
+    salt = 0
     while True:
-        lid = f"{prefix}{int(rng.integers(10_000, 99_999))}"
+        lid = f"{prefix}{int(hashlib.md5(f'{key}|{salt}'.encode()).hexdigest()[:8], 16) % 90_000 + 10_000}"
         if lid not in _USED:
             _USED.add(lid)
             return lid
+        salt += 1
 
 
 # ------------------------------------------------------------------ the feed
@@ -208,7 +212,7 @@ def generate(hotels: list[dict], rng: np.random.Generator):
             if h["hotel_id"] == GOLDEN_HOTEL or rng.random() < min(p, 0.97):
                 copies = 2 if rng.random() < st["dup_rate"] else 1
                 for c in range(copies):
-                    lid = _new_id(f"{sup}:{sup[:2].upper()}", rng)
+                    lid = _new_id(f"{sup}:{sup[:2].upper()}", f"{h['hotel_id']}|{sup}|{c}")
                     corr = ["supplier_duplicate"] if c else []
                     lat, lng = h["lat"], h["lng"]
                     if rng.random() < st["centroid_geocode"]:
@@ -252,7 +256,7 @@ def generate(hotels: list[dict], rng: np.random.Generator):
                                or h["hotel_id"] == GOLDEN_HOTEL and i < 2]
                     for r in carried:
                         rc = []
-                        sr_id = f"{lid}:{len(sup_rooms)}"
+                        sr_id = f"{lid}:{r['room_id'].rsplit(':', 1)[1]}"
                         sup_rooms.append({"supplier_room_id": sr_id, "listing_id": lid, "supplier_id": sup, "raw_name": room_name(r, sup, rng, rc)})
                         room_truth.append({"supplier_room_id": sr_id, "room_id": r["room_id"], "corruptions": rc})
                         for board, refund, pay, mult in RATE_PLANS[sup]:

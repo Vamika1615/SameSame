@@ -175,7 +175,7 @@ def generate(rng: np.random.Generator):
             for vid, vname, dna, tags, h, members in FIXED[aid]:
                 variants.append({"variant_id": vid, "attraction_id": aid, "name": vname, "dna": dna, "tags": tags, "hours": h})
                 for sup, title, p, rating, desc in members:
-                    lid = _new_id(f"{sup}:A", rng)
+                    lid = _new_id(f"{sup}:A", f"{vid}|{sup}")
                     listings.append({"listing_id": lid, "supplier_id": sup, "title": title, "description": desc, "price_pp": float(p),
                                      "rating": rating, "reviews": int(rng.integers(40, 2400)), "lat": lat, "lng": lng})
                     truth.append({"listing_id": lid, "variant_id": vid, "attraction_id": aid})
@@ -191,7 +191,7 @@ def generate(rng: np.random.Generator):
             n = int(rng.integers(2, 4))
             for sup in rng.choice(sups, size=n, replace=False, p=w):
                 sup = str(sup)
-                lid = _new_id(f"{sup}:A", rng)
+                lid = _new_id(f"{sup}:A", f"{vid}|{sup}")
                 p = price * pm * {"kestrel": 0.94, "sunbird": 0.97}.get(sup, 1.0) * float(np.exp(rng.normal(0, 0.06)))
                 listings.append({"listing_id": lid, "supplier_id": sup, "title": _title(name, suffix, sup, rng),
                                  "description": _desc(tags, dna, rng), "price_pp": float(round(p, -1)),

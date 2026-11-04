@@ -1,11 +1,16 @@
-"""Procedural illustrative images (no real photos of real hotels, by design) and supplier copies.
+"""Hotel and attraction images, and the corrupted copies each supplier carries.
 
-Each hotel gets four base images (facade, room, pool or lobby, view); each attraction gets three.
-Supplier listings carry corrupted copies of those: cropped, resized, recompressed, colour-shifted,
+Base images, in order of preference: real Wikimedia Commons photos of that very hotel / attraction
+(data/raw/wiki, credited per file); real "stock" photos of other hotels' rooms, pools and lobbies (labelled
+"stock photo, not this hotel" in the UI); procedural illustrations only when neither exists.
+
+Each hotel gets up to four of its own photos, topped up to three with one stock room and one stock pool
+(or lobby) photo; each attraction gets up to three. Supplier listings carry corrupted copies of those: cropped, resized, recompressed, colour-shifted,
 sometimes watermarked, and occasionally a sibling hotel's image (a real-world photo mix-up). M5's
 perceptual-hash matcher has to see through the corruption and catch the mix-up.
 """
 import hashlib
+import json
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageEnhance
@@ -96,7 +101,7 @@ def activity_image(key: str, i: int) -> Image.Image:
 def corrupt(im: Image.Image, sup: str, rng) -> tuple[Image.Image, list[str]]:
     corr = []
     w, h = im.size
-    c = float(rng.uniform(0.85, 0.97))
+    c = float(rng.uniform(0.95, 0.99))       # real feeds mostly resize + recompress; heavy crops were unrealistic (M3 review)
     dx, dy = int(rng.integers(0, int(w * (1 - c)) + 1)), int(rng.integers(0, int(h * (1 - c)) + 1))
     im = im.crop((dx, dy, dx + int(w * c), dy + int(h * c))); corr.append(f"crop{c:.2f}")
     tw = SUP_WIDTH[sup]
@@ -111,32 +116,94 @@ def corrupt(im: Image.Image, sup: str, rng) -> tuple[Image.Image, list[str]]:
     return im, corr
 
 
+WIKI = config.DATA / "raw" / "wiki"
+STOCK_REUSE_MIN_M = 2500          # reused only by hotels this far apart: blocking never compares hotels > 2 km apart
+
+
+def _photos() -> list[dict]:
+    f = WIKI / "photos.json"
+    return json.loads(f.read_text(encoding="utf-8")) if f.exists() else []
+
+
+def _credit(p: dict | None) -> dict:
+    if not p:
+        return {"photo_kind": "generated", "credit": "Procedural illustration (CC0, own work)", "credit_url": None}
+    kind = "photo" if p["kind"] in ("hotel", "attraction") else "stock"
+    return {"photo_kind": kind, "credit": f"{p['author']} · {p['license']} · Wikimedia Commons", "credit_url": p["source"]}
+
+
+def _load(p: dict) -> Image.Image:
+    im = Image.open(WIKI / "photos" / p["file"]).convert("RGB")
+    return im.resize((W, int(W * im.size[1] / im.size[0]))) if im.size[0] != W else im
+
+
+def _assign_stock(hotels, pool: list[dict], rng, avoid: dict | None = None, users: dict | None = None) -> dict[str, dict]:
+    """Give each hotel one photo from `pool`, reusing a photo only between hotels > STOCK_REUSE_MIN_M apart
+    (and never the photo `avoid` already gave that hotel)."""
+    from samesame.ranking.score import haversine_m
+    users = {} if users is None else users          # shared across passes over the same pool
+    out = {}
+    order = list(rng.permutation(len(pool))) if pool else []
+    for h in hotels:
+        for k in order:
+            if (avoid or {}).get(h["hotel_id"]) is pool[k]:
+                continue
+            if all(haversine_m(h["lat"], h["lng"], u["lat"], u["lng"]) > STOCK_REUSE_MIN_M for u in users.get(k, [])):
+                users.setdefault(k, []).append(h)
+                out[h["hotel_id"]] = pool[k]
+                order.append(order.pop(order.index(k)))          # rotate so photos spread evenly
+                break
+    return out
+
+
 def generate(hotels, listings, truth, attractions, act_listings, act_truth, hard_negatives, rng):
     out_dir = config.BUILD / "images"
     (out_dir / "base").mkdir(parents=True, exist_ok=True)
     (out_dir / "feed").mkdir(parents=True, exist_ok=True)
     rows = []
-    base: dict[str, list[tuple[str, Image.Image]]] = {}
+    base: dict[str, list[tuple[str, Image.Image, dict]]] = {}
+    photos = _photos()
+    own: dict[str, list] = {}
+    for p in photos:
+        own.setdefault(p["subject"], []).append(p)
+    # hand out stock photos from the demo area outwards, so the hotels on screen are the ones that get them
+    from samesame.data.osm_base import ASOK
+    from samesame.ranking.score import haversine_m
+    d = {h["hotel_id"]: haversine_m(*ASOK, h["lat"], h["lng"]) for h in hotels}
+    near_first = sorted(hotels, key=lambda h: (not (d[h["hotel_id"]] <= 600 and h["star"] >= 4), d[h["hotel_id"]]))
+    room_users: dict = {}
+    stock = {k: _assign_stock(near_first, [p for p in photos if p["kind"] == k], rng, users=room_users if k == "stock_room" else None)
+             for k in ("stock_room", "stock_pool", "stock_lobby")}
+    # second stock photo for hotels whose pool / lobby slot ran dry: another room, never the same one
+    room2 = _assign_stock(near_first, [p for p in photos if p["kind"] == "stock_room"], rng, avoid=stock["stock_room"], users=room_users)
+
+    def add(owner_kind, owner, key, im, p):
+        im.save(out_dir / "base" / f"{key}.jpg", quality=85)
+        cred = _credit(p)
+        rows.append({"image_id": key, "path": f"base/{key}.jpg", "owner_kind": owner_kind, "owner_id": owner, "derived_from": None,
+                     "corruptions": [], "true_owner_id": owner, **cred})
+        base.setdefault(owner, []).append((key, im, cred))
+
     for h in hotels:
-        imgs = []
-        for kind in ("facade", "room", "pool", "view"):
-            key = f"{h['hotel_id']}-{kind}"
-            im = hotel_image(key, kind, h["pool"])
-            im.save(out_dir / "base" / f"{key}.jpg", quality=85)
-            rows.append({"image_id": key, "path": f"base/{key}.jpg", "owner_kind": "hotel", "owner_id": h["hotel_id"],
-                         "derived_from": None, "corruptions": [], "true_owner_id": h["hotel_id"]})
-            imgs.append((key, im))
-        base[h["hotel_id"]] = imgs
+        mine = own.get(h["osm_id"], [])[:4]                     # real photos of this very hotel first
+        for i, p in enumerate(mine):
+            add("hotel", h["hotel_id"], f"{h['hotel_id']}-own{i}", _load(p), p)
+        second = stock["stock_pool" if h["pool"] else "stock_lobby"].get(h["hotel_id"]) or room2.get(h["hotel_id"])
+        fill = [stock["stock_room"].get(h["hotel_id"]), second]
+        for kind, p in zip(("room", "pool" if h["pool"] else "lobby"), fill):
+            if len(base.get(h["hotel_id"], [])) >= 3:
+                break
+            add("hotel", h["hotel_id"], f"{h['hotel_id']}-{kind}", _load(p) if p else hotel_image(f"{h['hotel_id']}-{kind}", kind, h["pool"]), p)
+        while len(base.get(h["hotel_id"], [])) < 2:              # offline / no stock left: procedural illustration
+            kind = ("facade", "view")[len(base.get(h["hotel_id"], [])) % 2]
+            add("hotel", h["hotel_id"], f"{h['hotel_id']}-{kind}", hotel_image(f"{h['hotel_id']}-{kind}", kind, h["pool"]), None)
     for a in attractions:
-        imgs = []
-        for i in range(3):
-            key = f"{a['attraction_id']}-{i}"
-            im = activity_image(a["attraction_id"], i)
-            im.save(out_dir / "base" / f"{key}.jpg", quality=85)
-            rows.append({"image_id": key, "path": f"base/{key}.jpg", "owner_kind": "attraction", "owner_id": a["attraction_id"],
-                         "derived_from": None, "corruptions": [], "true_owner_id": a["attraction_id"]})
-            imgs.append((key, im))
-        base[a["attraction_id"]] = imgs
+        for i, p in enumerate(own.get(a["attraction_id"], [])[:3]):
+            add("attraction", a["attraction_id"], f"{a['attraction_id']}-own{i}", _load(p), p)
+        i = 0
+        while len(base.get(a["attraction_id"], [])) < 1:      # illustration only when there is no real photo at all
+            add("attraction", a["attraction_id"], f"{a['attraction_id']}-{i}", activity_image(a["attraction_id"], i), None)
+            i += 1
 
     sibling = {}
     for p in hard_negatives:
@@ -153,14 +220,16 @@ def generate(hotels, listings, truth, attractions, act_listings, act_truth, hard
             extra = []
             if kind == "hotel" and owner in sibling and rng.random() < 0.03:
                 src_owner = sibling[owner]; extra = ["sibling_mixup"]          # wrong building's photo
-            key, im = base[src_owner][idx % len(base[src_owner])]
+            key, im, cred = base[src_owner][idx % len(base[src_owner])]
             cim, corr = corrupt(im, sup, rng)
             fid = f"{l['listing_id'].replace(':', '-')}-{j}"
             cim.save(out_dir / "feed" / f"{fid}.jpg", quality=SUP_QUALITY[sup])
             rows.append({"image_id": fid, "path": f"feed/{fid}.jpg", "owner_kind": "listing", "owner_id": l["listing_id"],
-                         "derived_from": key, "corruptions": corr + extra, "true_owner_id": src_owner})
+                         "derived_from": key, "corruptions": corr + extra, "true_owner_id": src_owner, **cred})
     with open(out_dir / "LICENSES.csv", "w", encoding="utf-8") as f:
-        f.write("path,source,license,illustrative,note\n")
-        f.write("base/*.jpg,generated by samesame.data.images_gen,CC0-1.0 (own work),true,procedural; not a photo of any real hotel\n")
-        f.write("feed/*.jpg,derived from base/*.jpg,CC0-1.0 (own work),true,supplier copies with synthetic corruption\n")
+        f.write("path,kind,credit,source\n")
+        for r in rows:
+            if r["derived_from"] is None:
+                f.write(f'{r["path"]},{r["photo_kind"]},"{r["credit"].replace(chr(34), chr(39))}",{r["credit_url"] or ""}\n')
+        f.write('feed/*.jpg,derived,"resized / cropped / recompressed copies of the base image they derive from (same credit)",\n')
     return rows

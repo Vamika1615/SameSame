@@ -45,6 +45,9 @@ class Store:
     act_listings_of: dict                # variant_id -> [listing]
     variant_of: dict                     # activity listing_id -> variant_id
     images_of: dict                      # owner_id -> [image row]
+    image_meta: dict                     # path -> image row (photo kind + credit)
+    osm_reference: list                  # real OSM fields for every named Bangkok hotel (reference data, not truth)
+    descriptions: dict                   # Wikipedia summaries by attraction id / osm id
     pairs: pl.DataFrame                  # every scored hotel candidate pair
     matcher: dict
     log: pl.DataFrame
@@ -83,11 +86,17 @@ def get() -> Store:
         offers_of=_group(offers, "hotel_id"), offers_by_listing=_group(offers, "listing_id"), offer={o["offer_id"]: o for o in offers},
         attractions={a["attraction_id"]: a for a in _rows("attractions")}, variants_of=variants_of,
         act_listings_of=act_listings_of, variant_of={m["listing_id"]: m["group_id"] for m in amap},
-        images_of=_group(images, "owner_id"), pairs=pl.read_parquet(config.BUILD / "hotel_pairs.parquet"),
+        images_of=_group(images, "owner_id"), image_meta={im["path"]: im for im in images},
+        osm_reference=_rows("osm_reference"), descriptions=_descriptions(), pairs=pl.read_parquet(config.BUILD / "hotel_pairs.parquet"),
         matcher=json.loads((config.BUILD / "matcher.json").read_text(encoding="utf-8")),
         log=pl.read_parquet(config.BUILD / "booking_log.parquet"),
         manifest=json.loads((config.BUILD / "manifest.json").read_text(encoding="utf-8")),
     )
+
+
+def _descriptions() -> dict:
+    f = config.DATA / "raw" / "wiki" / "descriptions.json"
+    return json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
 
 
 # ------------------------------------------------------------------ the world behind the feeds (not for matching or display)

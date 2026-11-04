@@ -20,13 +20,13 @@ Windows (PowerShell):
 py start.py
 ```
 
-| Command | What it does |
+| Command (Windows: `py` instead of `python3`) | What it does |
 |---|---|
-| `python start.py` | dev: API on :8000, UI on :5173 with hot reload |
-| `python start.py --demo` | stage mode: builds the UI once and serves everything from http://localhost:8000 |
-| `python start.py --rebuild` | re-run the data/model pipeline |
-| `python start.py --test` | run backend tests |
-| `python start.py --skip-install` | offline start, no pip/npm |
+| `python3 start.py` | dev: API on :8000, UI on :5173 with hot reload |
+| `python3 start.py --demo` | stage mode: builds the UI once and serves everything from http://localhost:8000 |
+| `python3 start.py --rebuild` | re-run the data/model pipeline |
+| `python3 start.py --test` | run backend tests |
+| `python3 start.py --skip-install` | offline start, no pip/npm |
 
 **macOS + LightGBM:** if `lightgbm` fails to import, run `brew install libomp`. `start.py` also tries an automatic venv-only fallback that uses the libomp bundled with scikit-learn.
 

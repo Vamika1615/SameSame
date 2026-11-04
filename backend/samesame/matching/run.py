@@ -31,7 +31,7 @@ def main():
     P = hm.prep(listings)
     pairs = hm.block(P)
     emb = hm.embed([p["_n"] for p in P])
-    hashes = hm.image_hashes(_rows("images")) if (config.BUILD / "images.parquet").exists() else {}
+    hashes = hm.image_hashes(_rows("images"), P) if (config.BUILD / "images.parquet").exists() else {}
     t_feat = time.time()
     feats = [hm.pair_features(P[i], P[j], float(emb[i] @ emb[j]) if emb is not None else np.nan,
                               hm.img_sim(hashes.get(P[i]["listing_id"], []), hashes.get(P[j]["listing_id"], [])))
@@ -39,9 +39,8 @@ def main():
     X = np.array([[f[k] for k in hm.FEATURES] for f in feats], dtype=float)
     a_ids = [P[i]["listing_id"] for i, _ in pairs]
     b_ids = [P[j]["listing_id"] for _, j in pairs]
-    y, grp, ok = train.labels(a_ids, b_ids)
-    booster, info = train.fit(X, y, grp, ok)
-    p = booster.predict(X)
+    y, ha, hb, ok = train.labels(a_ids, b_ids)
+    booster, p, info = train.fit(X, y, ha, hb, ok)
     cluster_of, decisions = clu.cluster(P, pairs, p, info["auto_merge"], info["gray_low"])
     dec = {k: (d, r) for k, d, r in decisions}
     pl.DataFrame(infer_schema_length=None, data=[{"a": a_ids[k], "b": b_ids[k], "p": float(p[k]), "decision": dec[k][0], "reason": dec[k][1], **feats[k]}

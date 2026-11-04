@@ -181,6 +181,9 @@ class ImageRef(BaseModel):
     url: str
     illustrative: bool = True
     source: Optional[str] = None
+    kind: Literal["photo", "stock", "generated"] = "generated"   # photo: this very place; stock: real photo, not this hotel
+    credit: Optional[str] = None                                 # "Author · CC BY-SA 4.0 · Wikimedia Commons"
+    credit_url: Optional[str] = None
 
 
 class HotelCard(BaseModel):
@@ -301,6 +304,7 @@ class HotelDetail(BaseModel):
     params: SearchParams                # the scenario the True Price was computed for
     enrichment: Enrichment
     lookalike: Optional[Lookalike] = None
+    reference: Optional[dict] = None    # real OpenStreetMap / Wikipedia data for the linked property, with sources
 
 
 class BookingStep(BaseModel):
@@ -362,6 +366,7 @@ class ActivityGroup(BaseModel):
     group_id: str
     base_product: str
     variants: list[ActivityVariant]
+    description: Optional[dict] = None  # {text, source, license} from Wikipedia
 
 
 class ActivitySearch(BaseModel):

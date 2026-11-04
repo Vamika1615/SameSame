@@ -41,12 +41,34 @@ def digits(p: str | None) -> str | None:
     return re.sub(r"\D", "", p)[-8:] if p else None
 
 
+CHAIN_LINE_M = 600   # a number listed at places this far apart is a central reservations line, not the hotel's
+
+
+def spans_sites(points: list[tuple[float, float]]) -> bool:
+    """True if the points form 3+ separate sites (600 m single linkage), or 2 sites with 2+ listings each.
+    One misplaced pin of the hotel's own listing makes a lone extra site and is not enough."""
+    sites: list[list] = []
+    for p in points:
+        hit = [s for s in sites if any(haversine_m(*p, *q) <= CHAIN_LINE_M for q in s)]
+        merged = [p] + [q for s in hit for q in s]
+        sites = [s for s in sites if s not in hit] + [merged]
+    return len(sites) >= 3 or sum(len(s) >= 2 for s in sites) >= 2
+
+
 def prep(listings: list[dict]) -> list[dict]:
     out = []
     for l in listings:
         n = norm(l["name"])
         out.append({**l, "_n": n, "_core": core(n), "_num": numbers(n), "_fam": brand_family(n, None),
                     "_phone": digits(l["phone"]), "_addr": norm(l["address"]), "_amen": set(l["amenities"] or [])})
+    # suppliers list a chain's central number for every branch: such a phone says nothing about which building it is
+    at: dict = {}
+    for p in out:
+        if p["_phone"]:
+            at.setdefault(p["_phone"], []).append((p["lat"], p["lng"]))
+    shared = {ph for ph, pts in at.items() if spans_sites(pts)}
+    for p in out:
+        p["_chain_phone"] = p["_phone"] in shared
     return out
 
 
@@ -94,7 +116,7 @@ def pair_features(a: dict, b: dict, emb_cos: float, img: tuple[float, int]) -> d
         "name_partial": fuzz.partial_ratio(na, nb) / 100, "core_jaccard": len(a["_core"] & b["_core"]) / len(u) if u else 0.0,
         "num_match": num, "family_match": fam,
         "dist_log": float(np.log1p(haversine_m(a["lat"], a["lng"], b["lat"], b["lng"]))),
-        "phone_match": _tri(a["_phone"], b["_phone"]),
+        "phone_match": 0 if a["_chain_phone"] or b["_chain_phone"] else _tri(a["_phone"], b["_phone"]),
         "star_delta": abs(a["star"] - b["star"]) if a["star"] is not None and b["star"] is not None else np.nan,
         "addr_sort": fuzz.token_sort_ratio(a["_addr"], b["_addr"]) / 100, "postcode_match": _tri(a["postcode"], b["postcode"]),
         "emb_cos": emb_cos, "img_min_ham": img[0], "img_close": img[1],
@@ -115,15 +137,36 @@ def embed(texts: list[str]) -> np.ndarray | None:
         return None
 
 
-def image_hashes(image_rows: list[dict]) -> dict[str, list]:
+GENERIC_IMAGE_HAM = 6          # copies of one photo sit within this many bits of each other
+
+
+def image_hashes(image_rows: list[dict], P: list[dict]) -> dict[str, list]:
+    """Perceptual hashes per listing, minus generic images.
+
+    Like a chain's phone number, an image that shows up (near-identically) at several separate sites (spans_sites)
+    is a stock / placeholder picture: it says nothing about which building a listing is, so it is dropped here.
+    """
     import imagehash
     from PIL import Image
-    out: dict[str, list] = {}
-    for im in image_rows:
-        if im["owner_kind"] != "listing":
-            continue
+    pos = {p["listing_id"]: (p["lat"], p["lng"]) for p in P}
+    rows = [im for im in image_rows if im["owner_kind"] == "listing" and im["owner_id"] in pos]    # hotel listings only
+    hs = []
+    for im in rows:
         with Image.open(config.BUILD / "images" / im["path"]) as f:
-            out.setdefault(im["owner_id"], []).append(imagehash.phash(f))
+            hs.append(imagehash.phash(f))
+    bits = np.array([int(str(h), 16) for h in hs], dtype=np.uint64)
+    lat = np.array([pos[im["owner_id"]][0] for im in rows]); lng = np.array([pos[im["owner_id"]][1] for im in rows])
+    popcount = np.array([bin(i).count("1") for i in range(256)], dtype=np.uint8)
+    generic = np.zeros(len(rows), dtype=bool)
+    for i in range(len(rows)):
+        x = (bits ^ bits[i]).view(np.uint8).reshape(-1, 8)
+        near = popcount[x].sum(1) <= GENERIC_IMAGE_HAM
+        if near.sum() > 2 and spans_sites(list(zip(lat[near], lng[near]))):
+            generic[i] = True
+    out: dict[str, list] = {}
+    for im, h, g in zip(rows, hs, generic):
+        if not g:
+            out.setdefault(im["owner_id"], []).append(h)
     return out
 
 

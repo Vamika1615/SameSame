@@ -39,7 +39,32 @@ CANCEL_RANK = lambda d: 0 if d is None else 100 - d  # noqa: E731  more days of 
 
 
 def _img(path: str, source: str | None = None) -> ImageRef:
-    return ImageRef(url=f"/api/images/{path}", illustrative=True, source=source or "generated")
+    m = store.get().image_meta.get(path, {})
+    kind = m.get("photo_kind") or "generated"
+    return ImageRef(url=f"/api/images/{path}", illustrative=kind != "photo", source=source or kind, kind=kind,
+                    credit=m.get("credit"), credit_url=m.get("credit_url"))
+
+
+@lru_cache
+def osm_link(hid: str) -> dict | None:
+    """Look the matched hotel up in the real OpenStreetMap reference data, the way an agent would: nearby + same name."""
+    g = golden(hid)
+    best = None
+    for r in store.get().osm_reference:
+        d = rk.haversine_m(g["lat"], g["lng"], r["lat"], r["lng"])
+        if d > 150:
+            continue
+        sim = fuzz.token_set_ratio(norm(g["name"]), norm(r["name"]))
+        if sim >= 85 and (best is None or (sim, -d) > (best[1], -best[2])):
+            best = (r, sim, d)
+    if not best:
+        return None
+    r, sim, d = best
+    desc = store.get().descriptions.get(r["osm_id"])
+    return {"source": "OpenStreetMap", "osm_id": r["osm_id"], "url": f"https://www.openstreetmap.org/{r['osm_id']}",
+            "name": r["name"], "address": r["address"], "phone": r["phone"], "website": r["website"], "stars": r["stars"],
+            "match": f"name {sim:.0f}% similar, {d:,.0f} m from our merged location",
+            "license": "ODbL 1.0 · © OpenStreetMap contributors", "description": desc}
 
 
 # ------------------------------------------------------------------ estimates from the booking log
@@ -415,7 +440,7 @@ def hotel_detail(hid: str) -> HotelDetail:
     return HotelDetail(cluster_id=hid, name=g["name"], facts=facts, hero=_img(gi[0]["path"]) if gi else None,
                        images=[_img(im["path"]) for im in gi[:8]], rooms=rooms,
                        offers=sorted(priced_offers(hid), key=lambda o: o.sticker_rank), params=PARAMS,
-                       enrichment=enrich, lookalike=looks.get(hid))
+                       enrichment=enrich, lookalike=looks.get(hid), reference=osm_link(hid))
 
 
 # ------------------------------------------------------------------ booking (the sandbox stands in for the real supplier)
@@ -549,7 +574,8 @@ def activity_search(q: str) -> ActivitySearch:
                          today_count=sum(fk in li.dna_tags for li in today)) for fk, label, _ in ACT_FILTERS]
     today.sort(key=lambda x: (x.price, x.listing_id))
     return ActivitySearch(query=att["name"], raw_count=len(today), today=today,
-                          groups=[ActivityGroup(group_id=aid, base_product=att["name"], variants=out)], filters=filters)
+                          groups=[ActivityGroup(group_id=aid, base_product=att["name"], variants=out, description=s.descriptions.get(aid))],
+                          filters=filters)
 
 
 # ------------------------------------------------------------------ supplier report

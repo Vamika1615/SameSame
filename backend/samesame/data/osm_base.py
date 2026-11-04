@@ -26,7 +26,7 @@ OSM_DUP_M = 250
 FAMILIES = [
     "holiday inn express", "holiday inn", "crowne plaza", "hotel indigo", "intercontinental", "ibis styles", "ibis budget", "ibis",
     "grand mercure", "mercure", "novotel", "pullman", "sofitel", "swissotel", "movenpick", "citadines", "somerset",
-    "ascott", "oakwood", "jw marriott", "courtyard", "marriott", "renaissance", "sheraton", "westin", "le meridien",
+    "ascott", "oakwood", "jw marriott", "courtyard", "marriott executive apartments", "marriott", "renaissance", "sheraton", "westin", "le meridien",
     "four points", "aloft", "st. regis", "w bangkok", "doubletree", "hilton garden inn", "hilton", "conrad",
     "hyatt regency", "grand hyatt", "park hyatt", "hyatt place", "centara grand", "centara", "centre point",
     "grande centre point", "amari", "avani", "anantara", "radisson", "park plaza", "best western", "ramada",
@@ -54,7 +54,7 @@ def norm(s: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9@. ]+", " ", s)).strip()
 
 
-_GENERIC = {"the", "hotel", "hotels", "boutique", "bangkok", "by", "and", "resort", "residence", "suites", "inn", "a"}
+_GENERIC = {"the", "hotel", "hotels", "boutique", "bangkok", "thailand", "by", "and", "resort", "residence", "suites", "inn", "a"}
 
 
 def _core(n: str) -> frozenset:
@@ -255,3 +255,21 @@ def curate(rng: np.random.Generator):
     hard = [{"a": "h-" + a.replace("/", "-"), "b": "h-" + b.replace("/", "-"), "distance_m": round(d), "name_sim": s}
             for a, b, d, s in pairs if a in chosen_ids and b in chosen_ids]
     return hotels, dups, hard
+
+
+def reference() -> list[dict]:
+    """Real OSM fields for every named hotel in the snapshot, unmodified: the public reference data the app may
+    look a matched hotel up in (address in whatever script OSM has it, phone, website, stars)."""
+    raw = json.loads((config.RAW_OSM / "hotels_raw.json").read_text(encoding="utf-8"))["elements"]
+    out = []
+    for el in raw:
+        t = el.get("tags", {})
+        c = el.get("center") or el
+        name = t.get("name:en") or t.get("name")
+        if not name or "lat" not in c:
+            continue
+        addr = ", ".join(t[k] for k in ("addr:housenumber", "addr:street", "addr:subdistrict", "addr:district", "addr:postcode") if t.get(k))
+        out.append({"osm_id": f"{el['type']}/{el['id']}", "name": name, "lat": c["lat"], "lng": c["lon"], "address": addr or None,
+                    "phone": t.get("phone") or t.get("contact:phone"), "website": t.get("website") or t.get("contact:website"),
+                    "stars": t.get("stars")})
+    return out

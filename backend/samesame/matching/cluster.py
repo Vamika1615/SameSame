@@ -7,8 +7,15 @@ cannot-link. Everything uncertain is routed to review, never merged.
 """
 import json
 
+import statistics
+
+from rapidfuzz import fuzz
+
 from samesame import config
 from samesame.matching.hotels import conflict
+from samesame.ranking.score import haversine_m
+
+SEPARATE_SITES_M = 300
 
 
 def human_links() -> dict[frozenset, bool]:
@@ -36,6 +43,19 @@ def cluster(P: list[dict], pairs: list[tuple[int, int]], p, auto: float, gray: f
         return i
 
     def cross_conflict(ra, rb):
+        # two established hotels (2+ listings each) never merge unless some names agree: one odd listing (a former
+        # name, a shared address) must not bridge two differently named properties into one
+        if len(members[ra]) >= 2 and len(members[rb]) >= 2:
+            best = max(fuzz.token_set_ratio(" ".join(sorted(P[i]["_core"])), " ".join(sorted(P[j]["_core"])))
+                       for i in members[ra] for j in members[rb])
+            if best < 70:
+                return f"names of two established clusters don't agree (best {best:.0f}%)"
+            # ...and never if each one's listings agree on a location the other doesn't (two branches, not one hotel
+            # with a misplaced pin: a single geocoding error is still free to join)
+            loc = [(statistics.median(P[i]["lat"] for i in members[r]), statistics.median(P[i]["lng"] for i in members[r])) for r in (ra, rb)]
+            d = haversine_m(*loc[0], *loc[1])
+            if d > SEPARATE_SITES_M:
+                return f"two established clusters {d:,.0f} m apart"
         for i in members[ra]:
             for j in members[rb]:
                 r = conflict(P[i], P[j])

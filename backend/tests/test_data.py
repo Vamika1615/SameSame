@@ -89,3 +89,21 @@ def test_listing_ids_unique():
         ids = pl.read_parquet(config.BUILD / f"{t}.parquet")["listing_id"]
         assert ids.n_unique() == len(ids)
     _ = store
+
+
+def test_photos_are_credited_free_and_never_shared_by_neighbours():
+    import re as _re
+    from samesame.data.images_gen import STOCK_REUSE_MIN_M
+    from samesame.ranking.score import haversine_m
+    imgs = [i for i in _t("images") if i["derived_from"] is None] if (config.BUILD / "images.parquet").exists() else []
+    hotels = {h["hotel_id"]: h for h in _t("base_hotels")}
+    users: dict = {}
+    for i in imgs:
+        if i["photo_kind"] != "generated":
+            assert i["credit_url"] and _re.search(r"CC0|CC BY|Public domain|PD", i["credit"], _re.I), i
+        if i["photo_kind"] == "stock" and i["owner_kind"] == "hotel":
+            users.setdefault(i["credit_url"], []).append(hotels[i["owner_id"]])
+    for hs in users.values():
+        for a in range(len(hs)):
+            for b in range(a + 1, len(hs)):
+                assert haversine_m(hs[a]["lat"], hs[a]["lng"], hs[b]["lat"], hs[b]["lng"]) > STOCK_REUSE_MIN_M
