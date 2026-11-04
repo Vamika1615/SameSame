@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getJSON } from "@/lib/api";
 import { Empty, ErrorState, Loading } from "@/components/States";
 import { SupplierBadge, cn } from "@/components/ui";
+import { PageHeader } from "@/components/PageHeader";
 
 type Side = { id: string; supplier: string; title: string; fields: Record<string, string> };
 type Pair = { pair_id: string; entity_type: string; left: Side; right: Side; definitions: Record<"S" | "V" | "D", string> };
@@ -43,19 +44,19 @@ export default function LabelPage() {
   const p = n.pair;
   return (
     <div className="mx-auto max-w-[1300px] px-8 pb-20 pt-6">
-      <h1 className="text-3xl font-bold tracking-tight">Blind-set labelling</h1>
-      <p className="mt-1 text-ink-mute">For the team's independent check. You won't see the model's answer or the generator's label. Labels go to <code>data/blind/labels.jsonl</code>.</p>
+      <PageHeader eyebrow="Held-out labelling" title={<>Your eyes, <span className="italic">not the model's.</span></>}
+        subtitle={<>For the team's independent check. You won't see the model's answer or the generator's label. Labels go to <code>data/blind/labels.jsonl</code>.</>} />
       <div className="mt-4 h-2 overflow-hidden rounded-full bg-paper-warm"><div className="h-full bg-accent-500" style={{ width: `${(100 * n.done) / n.total}%` }} /></div>
       <div className="mt-1 text-sm text-ink-mute">{n.done} of {n.total} labelled</div>
       {!p ? <Empty title="All pairs labelled">Thanks. Metrics against your labels appear after the next build (METRICS.md).</Empty> : (
         <div className="mt-5">
-          <span className="rounded-md bg-ink px-2 py-0.5 text-sm font-semibold uppercase text-white">{p.entity_type}</span>
+          <span className="rounded-full bg-accent-700 px-3 py-0.5 text-sm font-semibold uppercase tracking-wide text-white">{p.entity_type}</span>
           <span className="ml-3 font-mono text-sm text-ink-mute">{p.pair_id}</span>
           <div className="mt-3 grid grid-cols-2 gap-4">
             {[p.left, p.right].map((s) => (
-              <div key={s.id} className="rounded-xl border border-paper-line bg-paper p-4">
+              <div key={s.id} className="rounded-2xl border border-paper-line bg-paper shadow-card p-4">
                 <SupplierBadge name={s.supplier} small />
-                <div className="mt-1 text-xl font-bold">{s.title}</div>
+                <div className="mt-1 font-display text-[22px] font-semibold text-accent-700">{s.title}</div>
                 <dl className="mt-3 grid grid-cols-[120px_1fr] gap-y-1.5">
                   {Object.entries(s.fields).map(([k, v]) => <div key={k} className="contents"><dt className="text-ink-mute">{k}</dt><dd>{v}</dd></div>)}
                 </dl>

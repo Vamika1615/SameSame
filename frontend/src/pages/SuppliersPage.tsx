@@ -2,6 +2,7 @@ import type { SupplierRow } from "@/contracts";
 import { useApi } from "@/lib/api";
 import { Empty, ErrorState, Loading } from "@/components/States";
 import { PromiseMeter, SupplierBadge } from "@/components/ui";
+import { PageHeader } from "@/components/PageHeader";
 
 export default function SuppliersPage() {
   const res = useApi<SupplierRow[]>("/api/suppliers");
@@ -10,9 +11,9 @@ export default function SuppliersPage() {
   if (!res.data.length) return <Empty title="No suppliers yet" />;
   return (
     <div className="mx-auto max-w-[1200px] px-8 pb-20 pt-6">
-      <h1 className="text-3xl font-bold tracking-tight">Supplier report card</h1>
-      <p className="mt-1 text-ink-mute">Honour rate at 15-45 days lead, from booking attempts. Fictional suppliers, synthetic logs.</p>
-      <table className="mt-6 w-full overflow-hidden rounded-2xl border border-paper-line bg-paper">
+      <PageHeader eyebrow="Suppliers" title={<>Who keeps <span className="italic">their promise.</span></>}
+        subtitle="Honour rate at 15–45 days lead, measured on our own booking attempts. Fictional suppliers, synthetic logs." />
+      <table className="mt-6 w-full overflow-hidden rounded-3xl border border-paper-line bg-paper shadow-card">
         <thead className="text-left text-sm uppercase tracking-wide text-ink-mute">
           <tr className="border-b border-paper-line">
             <th className="px-4 py-3">Supplier</th><th className="px-4 py-3 text-center">Hotels</th><th className="px-4 py-3 text-center">Activities</th>

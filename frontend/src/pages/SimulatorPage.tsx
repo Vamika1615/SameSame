@@ -5,6 +5,7 @@ import { usePresenterAction } from "@/lib/presenter";
 import { ErrorState, Loading } from "@/components/States";
 import { cn } from "@/components/ui";
 import { MatcherQuality } from "@/components/MatcherQuality";
+import { PageHeader } from "@/components/PageHeader";
 
 const DEFAULTS: SimParams = { sessions: 50000, price_sensitivity: 0.6, dup_abandon: 0.08, failure_scale: 1.0, seed: 7 };
 // Pessimistic: agents ignore duplicates, chase sticker hard, suppliers fail half as often as profiled
@@ -36,11 +37,11 @@ export default function SimulatorPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-8 pb-20 pt-6">
-      <h1 className="text-3xl font-bold tracking-tight">Session simulator</h1>
-      <p className="mt-1 text-ink-mute">{p.sessions.toLocaleString("en-IN")} simulated agent sessions: Today vs SameSame. The assumptions are yours to attack. Move them.</p>
+      <PageHeader eyebrow="Metrics · simulator" title={<>Does it <span className="italic">hold up?</span></>}
+        subtitle={<>Matcher quality on held-out data, then {p.sessions.toLocaleString("en-IN")} simulated agent sessions. The assumptions are yours to attack.</>} />
       <div className="mt-5"><MatcherQuality /></div>
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[420px_1fr]">
-        <div className="rounded-2xl border border-paper-line bg-paper p-5">
+        <div className="rounded-3xl border border-paper-line bg-paper shadow-card p-5">
           {SLIDERS.map((s) => (
             <label key={s.key} className="mb-5 block">
               <div className="flex justify-between font-semibold"><span>{s.label}</span><span className="tabular-nums text-accent-700">{s.fmt(p[s.key] as number)}</span></div>
@@ -54,7 +55,7 @@ export default function SimulatorPage() {
             <button onClick={() => setP(DEFAULTS)} className="rounded-xl border border-paper-line px-4 py-2.5 font-semibold text-ink-soft hover:bg-paper-warm">Reset</button>
           </div>
         </div>
-        <div className="rounded-2xl border border-paper-line bg-paper p-6">
+        <div className="rounded-3xl border border-paper-line bg-paper shadow-card p-6">
           {err && <ErrorState error={err} />}
           {!res && !err && <Loading what="Simulating sessions" />}
           {res && (
@@ -75,8 +76,8 @@ export default function SimulatorPage() {
                       {res.arms.map((a) => (
                         <div key={a.arm} className="mb-1 flex items-center gap-3">
                           <span className="w-24 text-sm text-ink-mute">{a.arm === "today" ? "Today" : "SameSame"}</span>
-                          <div className="h-7 flex-1 rounded bg-paper-warm">
-                            <div className={cn("h-7 rounded transition-all duration-500", a.arm === "today" ? "bg-slate-400" : "bg-accent-600")} style={{ width: `${(100 * a[key]) / max}%` }} />
+                          <div className="h-7 flex-1 rounded-full bg-paper-warm">
+                            <div className={cn("h-7 rounded-full transition-all duration-500", a.arm === "today" ? "bg-sky-300" : "bg-accent-700")} style={{ width: `${(100 * a[key]) / max}%` }} />
                           </div>
                           <span className="w-24 text-right font-mono tabular-nums">{(fmt as (v: number) => string)(a[key])}</span>
                         </div>

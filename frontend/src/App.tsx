@@ -17,49 +17,63 @@ const NAV = [
   { to: "/hotels", label: "Hotels", icon: Building2 },
   { to: "/sightseeing", label: "Sightseeing", icon: Ship },
   { to: "/ops", label: "Ops Queue", icon: ClipboardCheck },
-  { to: "/suppliers", label: "Supplier Report", icon: BarChart3 },
+  { to: "/suppliers", label: "Suppliers", icon: BarChart3 },
   { to: "/simulator", label: "Simulator", icon: SlidersHorizontal },
 ];
+
+/** A small sun: the brand mark. */
+export function SunMark({ className = "h-7 w-7" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className} aria-hidden>
+      <circle cx="16" cy="16" r="6" fill="#e07b2e" />
+      {Array.from({ length: 12 }).map((_, i) => {
+        const a = (i * Math.PI) / 6, r1 = 9.5, r2 = i % 2 ? 12.5 : 14.5;
+        return <line key={i} x1={16 + r1 * Math.cos(a)} y1={16 + r1 * Math.sin(a)} x2={16 + r2 * Math.cos(a)} y2={16 + r2 * Math.sin(a)}
+          stroke="#e07b2e" strokeWidth="1.6" strokeLinecap="round" />;
+      })}
+    </svg>
+  );
+}
 
 function ModeBadge() {
   const meta = useApi<Meta>("/api/meta");
   if (meta.status !== "ready") return null;
   const { llm, llm_model, data } = meta.data.mode;
   return (
-    <div className="space-y-1.5 text-xs">
-      <Tip content={<ul className="space-y-1">{Object.entries(meta.data.sources ?? {}).map(([k, v]) => <li key={k}><b>{k.replace("_", " ")}:</b> {v}</li>)}</ul>}>
-        <div className="cursor-help rounded-md bg-warn-50 px-2 py-1 font-semibold uppercase tracking-wide text-warn-500">{data} data</div>
+    <div className="flex items-center gap-2 text-xs font-semibold">
+      <span className="rounded-full border border-paper-line bg-paper px-3 py-1.5 text-ink-soft">{meta.data.city} · {meta.data.currency}</span>
+      <Tip side="bottom" content={<ul className="space-y-1">{Object.entries(meta.data.sources ?? {}).map(([k, v]) => <li key={k}><b>{k.replace("_", " ")}:</b> {v}</li>)}</ul>}>
+        <span className="cursor-help rounded-full bg-sand-200 px-3 py-1.5 uppercase tracking-wide text-ink-soft">{data} data</span>
       </Tip>
-      <div className={`rounded-md px-2 py-1 ${llm ? "bg-accent-50 text-accent-700" : "bg-paper-warm text-ink-mute"}`}>
+      <span className={`rounded-full px-3 py-1.5 ${llm ? "bg-accent-50 text-accent-700" : "bg-sky-100 text-ink-soft"}`}>
         {llm ? `LLM on · ${llm_model}` : "LLM off · rules + human queue"}
-      </div>
+      </span>
     </div>
   );
 }
 
 export default function App() {
   return (
-    <div className="flex h-full">
-      <aside className="flex w-56 shrink-0 flex-col border-r border-paper-line bg-paper px-4 py-6">
-        <div className="px-2">
-          <div className="text-2xl font-extrabold tracking-tight">Same<span className="text-accent-600">Same</span></div>
-          <div className="mt-1 text-sm leading-snug text-ink-mute">Same same, but different.</div>
+    <div className="flex h-full flex-col">
+      <header className="sticky top-0 z-40 border-b border-paper-line/80 bg-paper/85 backdrop-blur-md">
+        <div className="mx-auto flex h-[68px] max-w-[1760px] items-center gap-10 px-8">
+          <NavLink to="/hotels" className="flex items-center gap-2.5">
+            <SunMark />
+            <span className="font-display text-[26px] font-semibold leading-none tracking-tight text-accent-700">
+              Same<span className="italic text-sun-500">Same</span>
+            </span>
+          </NavLink>
+          <nav className="flex h-full items-stretch gap-1">
+            {NAV.map(({ to, label }) => (
+              <NavLink key={to} to={to}
+                className={({ isActive }) => `relative flex items-center px-4 text-[15px] font-semibold transition-colors ${isActive ? "text-accent-700" : "text-ink-mute hover:text-ink"}`}>
+                {({ isActive }) => (<>{label}{isActive && <span className="absolute inset-x-4 bottom-0 h-[3px] rounded-t-full bg-sun-500" />}</>)}
+              </NavLink>
+            ))}
+          </nav>
+          <div className="ml-auto"><ModeBadge /></div>
         </div>
-        <nav className="mt-8 flex flex-col gap-1">
-          {NAV.map(({ to, label, icon: Icon }) => (
-            <NavLink key={to} to={to}
-              className={({ isActive }) => `flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium transition-colors ${isActive ? "bg-accent-50 text-accent-700" : "text-ink-soft hover:bg-paper-warm"}`}>
-              <Icon className="h-5 w-5" /> {label}
-            </NavLink>
-          ))}
-        </nav>
-        <div className="mt-auto space-y-4 px-2">
-          <ModeBadge />
-          <div className="text-xs leading-relaxed text-ink-mute">
-            Built for TBO · Track 2<br />Suppliers are fictional, data synthetic, images illustrative.<br />Map data © OpenStreetMap contributors, ODbL
-          </div>
-        </div>
-      </aside>
+      </header>
       <main className="min-w-0 flex-1 overflow-auto">
         <Routes>
           <Route path="/" element={<Navigate to="/hotels" replace />} />
@@ -72,6 +86,10 @@ export default function App() {
           <Route path="/label" element={<LabelPage />} />
           <Route path="*" element={<Empty title="Page not found" />} />
         </Routes>
+        <footer className="mx-auto max-w-[1760px] px-8 pb-8 pt-4 text-xs leading-relaxed text-ink-mute">
+          <span className="font-semibold text-ink-soft">Built for TBO · Track 2.</span> Suppliers are fictional and their data synthetic.
+          Photos from Wikimedia Commons (credited on hover); stock photos are labelled. Map data © OpenStreetMap contributors, ODbL.
+        </footer>
       </main>
       <Presenter />
     </div>

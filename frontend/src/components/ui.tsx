@@ -6,7 +6,7 @@ import type { ImageRef } from "@/contracts";
 export const cn = (...xs: (string | false | null | undefined)[]) => xs.filter(Boolean).join(" ");
 
 export const SUPPLIER_COLOR: Record<string, string> = {
-  Kestrel: "#ea580c", Mynah: "#2563eb", Heron: "#7c3aed", Bulbul: "#ca8a04", Hornbill: "#0891b2", Sunbird: "#db2777",
+  Kestrel: "#d9732a", Mynah: "#2a5590", Heron: "#7a5aa6", Bulbul: "#c49a2c", Hornbill: "#3b8a8c", Sunbird: "#c2577a",
 };
 
 export function SupplierBadge({ name, small }: { name: string; small?: boolean }) {
@@ -21,7 +21,7 @@ export function SupplierBadge({ name, small }: { name: string; small?: boolean }
 export function Stars({ n }: { n: number | null }) {
   if (!n) return null;
   return (
-    <span className="inline-flex items-center gap-0.5 text-amber-500" aria-label={`${n} stars`}>
+    <span className="inline-flex items-center gap-0.5 text-sun-500" aria-label={`${n} stars`}>
       {Array.from({ length: Math.floor(n) }).map((_, i) => <Star key={i} className="h-3.5 w-3.5 fill-current" />)}
       {n % 1 ? <span className="text-xs text-ink-mute">½</span> : null}
     </span>
@@ -31,13 +31,13 @@ export function Stars({ n }: { n: number | null }) {
 export function Segmented<T extends string>({ value, options, onChange, size = "lg" }:
   { value: T; options: { value: T; label: ReactNode }[]; onChange: (v: T) => void; size?: "md" | "lg" }) {
   return (
-    <div className="relative inline-flex rounded-xl bg-paper-line/70 p-1">
+    <div className="relative inline-flex rounded-full border border-sky-200 bg-sky-100/80 p-1">
       {options.map((o) => (
         <button key={o.value} onClick={() => onChange(o.value)}
-          className={cn("relative z-10 rounded-lg font-semibold transition-colors", size === "lg" ? "px-6 py-2.5 text-lg" : "px-4 py-1.5",
+          className={cn("relative z-10 rounded-full font-semibold transition-colors", size === "lg" ? "px-6 py-2.5 text-[17px]" : "px-4 py-1.5",
             value === o.value ? "text-white" : "text-ink-soft hover:text-ink")}>
           {value === o.value && (
-            <motion.span layoutId={`seg-${options.map((x) => x.value).join("-")}`} className="absolute inset-0 -z-10 rounded-lg bg-accent-600"
+            <motion.span layoutId={`seg-${options.map((x) => x.value).join("-")}`} className="absolute inset-0 -z-10 rounded-full bg-accent-700 shadow-card"
               transition={{ type: "spring", stiffness: 500, damping: 40 }} />
           )}
           {o.label}
@@ -52,7 +52,7 @@ export function Tip({ children, content, side = "top", className }: { children: 
   return (
     <span className={cn("group/tip relative inline-flex", className)}>
       {children}
-      <span className={cn("pointer-events-none absolute left-1/2 z-50 w-max max-w-sm -translate-x-1/2 rounded-lg bg-ink px-3 py-2 text-left text-sm font-normal leading-snug text-white opacity-0 shadow-xl transition-opacity duration-150 group-hover/tip:opacity-100",
+      <span className={cn("pointer-events-none absolute left-1/2 z-50 w-max max-w-sm -translate-x-1/2 rounded-xl bg-accent-900 px-3 py-2 text-left text-sm font-normal leading-snug text-white opacity-0 shadow-xl transition-opacity duration-150 group-hover/tip:opacity-100",
         side === "top" ? "bottom-full mb-2" : "top-full mt-2")}>
         {content}
       </span>
@@ -115,7 +115,7 @@ export function FlipBoard({ text, className, tone = "dark" }: { text: string; cl
 
 /** Semicircle gauge for a supplier's honour rate at this lead time. */
 export function PromiseMeter({ rate, n, lo, hi, size = 64 }: { rate: number; n: number; lo: number; hi: number; size?: number }) {
-  const color = rate >= 0.9 ? "#16a34a" : rate >= 0.8 ? "#d97706" : "#dc2626";
+  const color = rate >= 0.9 ? "#2f9461" : rate >= 0.8 ? "#e07b2e" : "#d23c2f";
   const r = size / 2 - 5, cx = size / 2, cy = size / 2;
   const arc = (p: number) => {
     const a = Math.PI * (1 - p);
@@ -125,7 +125,7 @@ export function PromiseMeter({ rate, n, lo, hi, size = 64 }: { rate: number; n: 
     <Tip content={<>Honoured {(rate * 100).toFixed(0)}% at this lead time<br />95% interval {(lo * 100).toFixed(0)}-{(hi * 100).toFixed(0)}% · n = {n.toLocaleString("en-IN")} attempts</>}>
       <span className="inline-flex flex-col items-center">
         <svg width={size} height={size / 2 + 4} viewBox={`0 0 ${size} ${size / 2 + 4}`}>
-          <path d={`M ${arc(0)} A ${r} ${r} 0 0 1 ${arc(1)}`} stroke="#e5e5e0" strokeWidth="7" fill="none" strokeLinecap="round" />
+          <path d={`M ${arc(0)} A ${r} ${r} 0 0 1 ${arc(1)}`} stroke="#e7dcc9" strokeWidth="7" fill="none" strokeLinecap="round" />
           <motion.path d={`M ${arc(0)} A ${r} ${r} 0 0 1 ${arc(1)}`} stroke={color} strokeWidth="7" fill="none" strokeLinecap="round"
             initial={{ pathLength: 0 }} animate={{ pathLength: rate }} transition={{ duration: 0.5 }} />
         </svg>
@@ -138,4 +138,28 @@ export function PromiseMeter({ rate, n, lo, hi, size = 64 }: { rate: number; n: 
 export function DataBadge({ kind }: { kind: "mock" | "synthetic" | "real" | string }) {
   if (kind === "real") return null;
   return <span className="rounded-md bg-warn-50 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-warn-500">{kind} data</span>;
+}
+
+/** Overlapping supplier initials: who sells this hotel. */
+export function SupplierAvatars({ names, max = 4 }: { names: string[]; max?: number }) {
+  return (
+    <Tip content={<>{names.join(" · ")}<br />One hotel, one card. Offers compared inside.</>}>
+      <span className="inline-flex items-center">
+        <span className="flex -space-x-1.5">
+          {names.slice(0, max).map((s) => (
+            <span key={s} className="flex h-7 w-7 items-center justify-center rounded-full text-[12px] font-bold ring-2 ring-paper"
+              style={{ background: `${SUPPLIER_COLOR[s] ?? "#76829a"}22`, color: SUPPLIER_COLOR[s] ?? "#76829a" }}>{s[0]}</span>
+          ))}
+        </span>
+        {names.length > max && <span className="ml-1.5 text-xs font-semibold text-ink-mute">+{names.length - max}</span>}
+      </span>
+    </Tip>
+  );
+}
+
+/** Metres between two points (for "320 m from the Metro"). */
+export function metres(a: [number, number], b: [number, number]) {
+  const r = 6371000, p1 = (a[0] * Math.PI) / 180, p2 = (b[0] * Math.PI) / 180;
+  const h = Math.sin((p2 - p1) / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin((((b[1] - a[1]) * Math.PI) / 180) / 2) ** 2;
+  return 2 * r * Math.asin(Math.sqrt(h));
 }

@@ -54,7 +54,7 @@ export function BookingPanel({ offers, active }: { offers: Offer[]; active: bool
     <section ref={panel} className={cn("mt-10 scroll-mt-4 rounded-2xl border-2 bg-paper p-6", active ? "border-accent-600" : "border-paper-line")}>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Supplier sandbox</h2>
+          <h2 className="text-[28px] font-semibold text-accent-700">Supplier sandbox</h2>
           <p className="text-ink-mute">Outcomes are drawn from each supplier's behaviour profile at this lead time. Failover goes to SAME twins only, never a VARIANT.</p>
         </div>
         <div className="flex items-center gap-2">

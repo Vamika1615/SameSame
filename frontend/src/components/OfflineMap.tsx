@@ -6,7 +6,7 @@ import { MAP_CENTER, MAP_ZOOM } from "@/lib/city";
 export interface Pin { id: string; lat: number; lng: number; label: string; tone?: "default" | "accent" | "danger" | "anchor"; permanent?: boolean }
 export interface MapLine { from: [number, number]; to: [number, number]; label?: string }
 
-const TONE = { default: "#475569", accent: "#0b7a70", danger: "#dc2626", anchor: "#0f172a" };
+const TONE = { default: "#76829a", accent: "#1f4677", danger: "#d23c2f", anchor: "#e07b2e" };
 let basemapCache: Promise<GeoJSON.FeatureCollection> | null = null;
 
 /** Leaflet with NO tile server: draws our saved OSM river / roads / districts. */
@@ -31,8 +31,8 @@ export function OfflineMap({ pins, lines = [], highlight, className, fitPins = f
       L.geoJSON(gj, {
         style: (f) => {
           const layer = f?.properties?.layer;
-          if (layer === "river") return { color: "#7cb4d9", weight: 8, opacity: 0.9 };
-          if (layer === "district") return { color: "#94a3b8", weight: 1.2, dashArray: "4 4", opacity: 0.8 };
+          if (layer === "river") return { color: "#a7c0d8", weight: 9, opacity: 0.95 };
+          if (layer === "district") return { color: "#c4b294", weight: 1.1, dashArray: "4 4", opacity: 0.8 };
           return { color: "#ffffff", weight: f?.properties?.class === "motorway" ? 5 : 3, opacity: 1 };
         },
         interactive: false,
@@ -46,7 +46,7 @@ export function OfflineMap({ pins, lines = [], highlight, className, fitPins = f
     if (!layer || !m) return;
     layer.clearLayers();
     for (const ln of lines) {
-      L.polyline([ln.from, ln.to], { pane: "pins", color: "#dc2626", weight: 2.5, dashArray: "6 6" })
+      L.polyline([ln.from, ln.to], { pane: "pins", color: "#d23c2f", weight: 2.5, dashArray: "6 6" })
         .bindTooltip(ln.label ?? "", { permanent: !!ln.label, direction: "center", className: "map-line-label" }).addTo(layer);
     }
     const ordered = [...pins].sort((a, b) => Number(a.id === highlight) - Number(b.id === highlight));

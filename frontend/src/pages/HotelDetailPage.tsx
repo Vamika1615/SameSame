@@ -8,6 +8,7 @@ import { usePresenterAction } from "@/lib/presenter";
 import { ErrorState, Loading } from "@/components/States";
 import { FlipBoard, Illustrative, PromiseMeter, Segmented, SupplierBadge, Tip, cn } from "@/components/ui";
 import { BookingPanel } from "@/components/BookingPanel";
+import { PageHeader } from "@/components/PageHeader";
 
 export default function HotelDetailPage() {
   const { id } = useParams();
@@ -36,19 +37,17 @@ function Detail({ d }: { d: HotelDetail }) {
   return (
     <div className="mx-auto max-w-[1500px] px-8 pb-[50vh] pt-6">
       <Link to="/hotels?view=samesame" className="inline-flex items-center gap-1 text-ink-mute hover:text-ink"><ArrowLeft className="h-4 w-4" />Back to results</Link>
-      <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight">{d.name}</h1>
-          <div className="mt-2 flex flex-wrap items-center gap-3 text-lg text-ink-soft">
+      <div className="mt-3">
+        <PageHeader eyebrow={`Hotel · ${d.params.city}`} title={d.name}
+          subtitle={<span className="flex flex-wrap items-center gap-3">
             {fact("star") && <FactValue f={fact("star")!} />}·{fact("address") && <FactValue f={fact("address")!} />}
-            <span className="rounded-full bg-ink px-3 py-0.5 text-sm font-semibold text-white">{new Set(d.offers.map((o) => o.supplier)).size} suppliers · {d.offers.length} offers</span>
-          </div>
-        </div>
-        {d.lookalike && (
-          <div className="flex items-center gap-2 rounded-lg bg-danger-50 px-3 py-2 text-danger-700">
-            <AlertTriangle className="h-4 w-4" />Not the same as <b>{d.lookalike.other_name}</b> ({Math.round(d.lookalike.distance_m)} m away)
-          </div>
-        )}
+            <span className="rounded-full bg-accent-700 px-3 py-0.5 text-sm font-semibold text-white">{new Set(d.offers.map((o) => o.supplier)).size} suppliers · {d.offers.length} offers</span>
+          </span>}
+          right={d.lookalike && (
+            <div className="flex items-center gap-2 rounded-2xl bg-danger-50 px-4 py-2.5 text-danger-700 shadow-card">
+              <AlertTriangle className="h-4 w-4" />Not the same as <b>{d.lookalike.other_name}</b> ({Math.round(d.lookalike.distance_m)} m away)
+            </div>
+          )} />
       </div>
 
       <EnrichmentSection d={d} mode={enrich} onMode={(m) => set("enrich", m)} />
@@ -56,7 +55,7 @@ function Detail({ d }: { d: HotelDetail }) {
       <section ref={offersRef} className="mt-10 scroll-mt-4">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold">Compare offers</h2>
+            <h2 className="text-[28px] font-semibold text-accent-700">Compare offers</h2>
             <div className="mt-1 text-ink-mute">
               {p.adults} adults · {p.nights} nights · travel {new Date(p.checkin).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · client wants {p.needs.join(", ") || "nothing extra"}
             </div>
@@ -108,7 +107,7 @@ function EnrichmentSection({ d, mode, onMode }: { d: HotelDetail; mode: "before"
   const images = before ? e.before_images : d.images;
   const facts = before ? e.before_facts : d.facts;
   return (
-    <section className="mt-6 rounded-2xl border border-paper-line bg-paper p-5">
+    <section className="mt-6 rounded-3xl border border-paper-line bg-paper shadow-card p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Segmented size="md" value={mode} onChange={onMode}
@@ -122,10 +121,13 @@ function EnrichmentSection({ d, mode, onMode }: { d: HotelDetail; mode: "before"
       </div>
       <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_1fr]">
         <div className="grid grid-cols-4 grid-rows-2 gap-2">
-          <Illustrative img={images[0]} className="col-span-3 row-span-2 h-[300px] rounded-xl" />
-          {[1, 2].map((i) => images[i]
-            ? <Illustrative key={i} img={images[i]} className="h-[146px] rounded-xl" label={false} />
-            : <div key={i} className="flex h-[146px] items-center justify-center rounded-xl border border-dashed border-paper-line text-sm text-ink-mute">no image</div>)}
+          <Illustrative img={images[0]} className={cn("row-span-2 h-[300px] rounded-2xl", images.length > 1 || before ? "col-span-3" : "col-span-4")} />
+          {before
+            ? [1, 2].map((i) => images[i]   // Before: the gaps are the point (this supplier sends fewer photos)
+              ? <Illustrative key={i} img={images[i]} className="h-[146px] rounded-2xl" label={false} />
+              : <div key={i} className="flex h-[146px] items-center justify-center rounded-2xl border border-dashed border-sand-300 bg-sand-100/60 text-sm text-ink-mute">no photo from {d.enrichment.supplier}</div>)
+            : images.slice(1, 3).map((im, i, arr) => (
+              <Illustrative key={i} img={im} className={cn("rounded-2xl", arr.length === 1 ? "row-span-2 h-[300px]" : "h-[146px]")} label={false} />))}
         </div>
         <div>
           <dl className="grid grid-cols-[110px_1fr] gap-x-4 gap-y-2">
@@ -172,7 +174,7 @@ const TERM_SHORT: Record<string, string> = { fill_needs: "needs", cancel_risk: "
 function OffersTable({ offers, tpOn }: { offers: Offer[]; tpOn: boolean }) {
   const rows = [...offers].sort((a, b) => tpOn ? a.true_rank - b.true_rank : a.sticker_rank - b.sticker_rank);
   return (
-    <div className="mt-4 overflow-visible rounded-2xl border border-paper-line bg-paper">
+    <div className="mt-4 overflow-visible rounded-3xl border border-paper-line bg-paper shadow-card">
       <div className="grid grid-cols-[48px_1.25fr_1.2fr_1.5fr_0.9fr_1.2fr_1fr_0.9fr] gap-3 border-b border-paper-line px-4 py-3 text-sm font-semibold uppercase tracking-wide text-ink-mute">
         <div>#</div><div>Supplier</div><div>Room · board</div><div>Price</div><div>Availability</div><div>Cancellation</div><div>Payment</div><div className="text-center">Reliability</div>
       </div>
@@ -225,8 +227,8 @@ function OffersTable({ offers, tpOn }: { offers: Offer[]; tpOn: boolean }) {
 /** Real public data for the matched property: shown beside the supplier vote, never mixed into it. */
 function ReferenceSection({ r }: { r: Reference }) {
   return (
-    <div className="rounded-2xl border border-paper-line bg-paper p-5">
-      <h2 className="text-2xl font-bold">Reference data</h2>
+    <div className="rounded-3xl border border-paper-line bg-paper shadow-card p-5">
+      <h2 className="text-[28px] font-semibold text-accent-700">Reference data</h2>
       <p className="mt-1 text-ink-mute">Matched to <a className="underline" href={r.url} target="_blank" rel="noreferrer">OpenStreetMap {r.osm_id}</a> ({r.match}). Real, public data, not from any supplier.</p>
       <dl className="mt-3 grid grid-cols-[120px_1fr] gap-y-1.5">
         {([["Name", r.name], ["Address", r.address], ["Phone", r.phone], ["Website", r.website], ["Stars", r.stars && `${r.stars}★`]] as const)
@@ -246,11 +248,11 @@ function ReferenceSection({ r }: { r: Reference }) {
 function RoomsSection({ d }: { d: HotelDetail }) {
   return (
     <>
-      <h2 className="text-2xl font-bold">Room types, mapped</h2>
+      <h2 className="text-[28px] font-semibold text-accent-700">Room types, mapped</h2>
       <p className="mt-1 text-ink-mute">Every supplier names rooms differently. SameSame maps them to one canonical room.</p>
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         {d.rooms.map((r) => (
-          <div key={r.room_id} className="rounded-xl border border-paper-line bg-paper p-4">
+          <div key={r.room_id} className="rounded-2xl border border-paper-line bg-paper shadow-card p-4">
             <div className="text-lg font-bold">{r.name}</div>
             <div className="mt-1 flex flex-wrap gap-1.5 text-xs">{Object.entries(r.attrs).map(([k, v]) => <span key={k} className="rounded bg-accent-50 px-1.5 py-0.5 text-accent-700">{k.replace("_", " ")}: {v}</span>)}</div>
             <ul className="mt-3 space-y-1.5">

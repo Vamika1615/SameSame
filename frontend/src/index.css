@@ -4,16 +4,23 @@
 
 html, body, #root { height: 100%; }
 body { @apply bg-paper-warm text-ink antialiased; font-feature-settings: "tnum" 1; }
+h1, h2, .font-display { font-family: theme("fontFamily.display"); letter-spacing: -0.01em; }
+h1 { font-weight: 600; }
+h2 { font-weight: 600; }
+::selection { background: #f9ddc3; }
 
 /* Leaflet with no tile server: the map canvas is our own basemap */
-.leaflet-container { background: #eef1ef; font-family: inherit; }
+.leaflet-container { background: #f3ece0; font-family: inherit; }
 .leaflet-tooltip { font-size: 13px; font-weight: 600; }
-.map-line-label { background: #dc2626; color: #fff; border: none; box-shadow: none; }
+.map-line-label { background: #d23c2f; color: #fff; border: none; box-shadow: none; }
 .map-line-label::before { display: none; }
 
 /* DNA segment that differs from its siblings */
-@keyframes dna-glow { 0%, 100% { box-shadow: 0 0 0 2px rgb(11 122 112 / .55), 0 0 12px rgb(15 148 136 / .35); } 50% { box-shadow: 0 0 0 2px rgb(11 122 112 / .9), 0 0 20px rgb(15 148 136 / .6); } }
+@keyframes dna-glow { 0%, 100% { box-shadow: 0 0 0 2px rgb(224 123 46 / .55), 0 0 12px rgb(224 123 46 / .30); } 50% { box-shadow: 0 0 0 2px rgb(224 123 46 / .95), 0 0 20px rgb(224 123 46 / .55); } }
 .dna-glow { animation: dna-glow 1.8s ease-in-out infinite; }
 
-@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgb(220 38 38 / .5); } 100% { box-shadow: 0 0 0 14px rgb(220 38 38 / 0); } }
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgb(210 60 47 / .5); } 100% { box-shadow: 0 0 0 14px rgb(210 60 47 / 0); } }
 .pulse-danger { animation: pulse-ring 1.2s ease-out 3; }
+
+/* Hero band: dusty sky into warm cream, like the coast at golden hour */
+.hero-sky { background: linear-gradient(180deg, #a7c0d8 0%, #c9d9e9 38%, #efe6d6 82%, #f6efe3 100%); }

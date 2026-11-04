@@ -2,7 +2,19 @@
 
 _Update after every milestone. Newest first._
 
-## Status: city switched to Dubai → M4 next
+## Status: Dubai + coastal redesign → M4 next
+
+### Done: visual redesign (2026-11-05)
+- **Palette** from the "Sunseeker" reference: deep navy, dusty sky blue, warm cream and sand, with burnt orange as the single accent. Red stays reserved for "Looks the same, isn't". Colours are tokens in `tailwind.config.js`.
+- **Type:** headings use Playfair Display (installed locally, still offline); Inter for UI.
+- **Shell:** a top navigation bar with a sun logo mark replaces the sidebar. City and data-mode pills sit top right, and the credits move to a footer.
+- **Hotels page:**
+  - a hero with a serif headline, a search bar holding the real search parameters, and an original Dubai skyline SVG
+  - a three-column layout: DNA filters and "About the data" on the left; Today/SameSame and the cards in the middle; the look-alike alert card and map on the right
+  - cards with a big photo, rank badge, serif name, distance, supplier avatars, From and True Price, and "Why ranked here" chips
+- **Every other page** opens with the same coastal header band. Sightseeing variants get a photo panel, and DNA segments, gauges and bars use the palette.
+- **Unchanged:** behaviour, data, the presenter beats and the Today→SameSame animation. All seven beats were checked on the production build with no console errors.
+
 
 ### Done: switch from Bangkok to Dubai (2026-11-04)
 **Why Dubai:** TBO is headquartered there, and it's one of the top destinations Indian agents sell. The persona (Meera in Surat, INR) and everything else are unchanged.

@@ -14,7 +14,7 @@ export function ErrorState({ error, onRetry }: { error: string; onRetry?: () => 
     <div className="m-6 rounded-xl border border-danger-500/30 bg-danger-50 p-6">
       <div className="flex items-center gap-2 font-semibold text-danger-700"><AlertTriangle className="h-5 w-5" /> Something went wrong</div>
       <p className="mt-2 font-mono text-sm text-ink-soft">{error}</p>
-      {onRetry && <button onClick={onRetry} className="mt-4 rounded-lg bg-ink px-4 py-2 text-white">Retry</button>}
+      {onRetry && <button onClick={onRetry} className="mt-4 rounded-full bg-accent-700 px-5 py-2 text-white">Retry</button>}
     </div>
   );
 }

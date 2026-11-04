@@ -3,12 +3,12 @@ import type { ScoreTerm, WhyChip } from "@/contracts";
 import { Tip, cn } from "./ui";
 
 const KIND: Record<WhyChip["kind"], string> = {
-  price: "bg-accent-50 text-accent-700 border-accent-100",
-  promise: "bg-ok-50 text-ok-700 border-green-100",
-  relevance: "bg-sky-50 text-sky-800 border-sky-100",
-  popularity: "bg-violet-50 text-violet-800 border-violet-100",
+  price: "bg-sun-50 text-sun-700 border-sun-100",
+  promise: "bg-ok-50 text-ok-700 border-ok-50",
+  relevance: "bg-sky-100 text-accent-700 border-sky-200",
+  popularity: "bg-sand-100 text-ink-soft border-sand-200",
   content: "bg-paper-warm text-ink-soft border-paper-line",
-  warning: "bg-danger-50 text-danger-700 border-red-100",
+  warning: "bg-danger-50 text-danger-700 border-danger-50",
 };
 
 export function ScoreBreakdown({ score }: { score: ScoreTerm[] }) {
@@ -37,7 +37,7 @@ export function WhyChips({ why, score, className }: { why: WhyChip[]; score: Sco
   return (
     <div className={cn("flex flex-wrap items-center gap-1.5", className)}>
       {why.map((w) => (
-        <span key={w.label} className={cn("rounded-md border px-2 py-0.5 text-[13px] font-medium", KIND[w.kind])}>{w.label}</span>
+        <span key={w.label} className={cn("rounded-full border px-2.5 py-0.5 text-[13px] font-medium", KIND[w.kind])}>{w.label}</span>
       ))}
       {score.length > 0 && (
         <Tip content={<ScoreBreakdown score={score} />}>

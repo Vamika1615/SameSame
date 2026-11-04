@@ -19,9 +19,9 @@ export function MatcherQuality() {
   if (m.status !== "ready") return null;
   const d = m.data;
   return (
-    <section className="rounded-2xl border border-paper-line bg-paper p-5">
+    <section className="rounded-3xl border border-paper-line bg-paper shadow-card p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-xl font-bold">Twin Finder on the held-out set</h2>
+        <h2 className="text-[26px] font-semibold text-accent-700">Twin Finder on the held-out set</h2>
         <span className="text-sm text-ink-mute">
           {d.blind.pairs} frozen pairs from brand families the model never trained on · {d.blind.human_labelled} hand-labelled so far
         </span>
