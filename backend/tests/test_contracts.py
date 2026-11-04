@@ -42,7 +42,7 @@ def test_book_is_reproducible():
 
 
 def test_activity_groups_and_filters():
-    for q, n_raw in [("floating market", 9), ("grand palace", 6), ("skywalk", 6)]:
+    for q, n_raw in [("desert safari", 9), ("burj khalifa", 6), ("dhow cruise", 6)]:
         r = c.get("/api/activities/search", params={"q": q}).json()
         assert r["raw_count"] == n_raw
         variants = r["groups"][0]["variants"]

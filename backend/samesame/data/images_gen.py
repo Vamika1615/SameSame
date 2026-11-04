@@ -167,9 +167,9 @@ def generate(hotels, listings, truth, attractions, act_listings, act_truth, hard
     for p in photos:
         own.setdefault(p["subject"], []).append(p)
     # hand out stock photos from the demo area outwards, so the hotels on screen are the ones that get them
-    from samesame.data.osm_base import ASOK
+    from samesame.data.osm_base import DEMO
     from samesame.ranking.score import haversine_m
-    d = {h["hotel_id"]: haversine_m(*ASOK, h["lat"], h["lng"]) for h in hotels}
+    d = {h["hotel_id"]: haversine_m(*DEMO, h["lat"], h["lng"]) for h in hotels}
     near_first = sorted(hotels, key=lambda h: (not (d[h["hotel_id"]] <= 600 and h["star"] >= 4), d[h["hotel_id"]]))
     room_users: dict = {}
     stock = {k: _assign_stock(near_first, [p for p in photos if p["kind"] == k], rng, users=room_users if k == "stock_room" else None)

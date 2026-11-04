@@ -2,7 +2,45 @@
 
 _Update after every milestone. Newest first._
 
-## Status: M3 + review fixes done → M4 next
+## Status: city switched to Dubai → M4 next
+
+### Done: switch from Bangkok to Dubai (2026-11-04)
+**Why Dubai:** TBO is headquartered there, and it's one of the top destinations Indian agents sell. The persona (Meera in Surat, INR) and everything else are unchanged.
+
+**How:** every place-specific value now lives in one file per side: `backend/samesame/city.py` and `frontend/src/lib/city.ts`. These are the bounding box, demo area, phone format, name chaos, transliterations, prices, attractions and Wikimedia lookups. No other module names a place, so switching city again is a config change plus a data pull.
+
+**Data:**
+- A new OpenStreetMap snapshot of Dubai (Sharjah excluded) and 25 Dubai attractions.
+- Three hand-written demo products: Desert Safari, Burj Khalifa At the Top, and a Dubai Creek dhow cruise.
+- Photos and Wikipedia text re-pulled with `pull_wiki.py --city-only`. Every attraction photo was reviewed by eye; the stock photos were kept.
+
+**Demo search:** 4★+ within 500 m of **Baniyas Square Metro, Deira**, the densest hotel cluster in OSM. The golden case is at **Hyatt Place Dubai Baniyas Square**.
+
+**General fixes the switch exposed (they would bite any city):**
+- **OSM dedupe** now also catches short/long names of the same building within 80 m, and names with different numbers are never duplicates. Four far-apart OSM duplicates are listed by hand in `city.py`, each found because the matcher kept merging them.
+- **Look-alikes:** same brand within 1.2 km counts even when names differ, since Dubai names branches by district.
+- **Variant DNA:** reads "BBQ dinner" and sandboarding; a meal is no longer misread as a time-slot option.
+- **Ranking:** a listing awaiting review never ranks above confirmed variants.
+- **Brand families:** Embassy Suites is now its own brand, so it can't merge with the Hilton Garden Inn next door.
+
+**Tests: 38 passing.** Unit tests now use Dubai-style names.
+
+### Computed numbers right now (Dubai)
+| Thing | Value |
+|---|---|
+| Demo search | 84 listings → 21 hotels, 63 duplicates collapsed |
+| Look-alike trap | Flora Hotel Apts. ↔ Flora Al Souq Hotel, 198 m |
+| Offer A: Kestrel ₹18,600 | True Price **₹24,178** (sticker #1 → True #4) |
+| Offer B: Mynah ₹20,100 | True Price **₹20,760** (sticker #4 → True #1) |
+| Book both, seed 1 | Kestrel ₹18,600 → ₹20,860 → SAME twin via Sunbird ₹19,230; Mynah first time |
+| Seeds 1–1,000 | Kestrel 55.5% clean / 5.3% paid a rise / 38.7% failover / 0.5% failed; Mynah 95.4 / 2.6 / 2.0 / 0 |
+| Hotels, whole catalogue | precision 0.997, recall 0.963 (1 false merge: two generic "Rove" entries 1.2 km apart) |
+| Look-alikes merged | 1 of 42 |
+| Held-out set (128 pairs) | hotel 1.000 / 0.975, room 1.000 / 0.850, activity 1.000 / 0.933 |
+| Sightseeing | desert safari 9 → 3 variants; hotel pickup: DNA 9 listings, keyword 4 |
+| First ops item | two hotels named "Rove", 1.1 km apart, p 0.9906 vs bar 0.9907 |
+
+## Earlier status: M3 + review fixes done (Bangkok)
 
 ### Done: M3 review fixes + real content (2026-11-04)
 **The seven review findings are fixed.**

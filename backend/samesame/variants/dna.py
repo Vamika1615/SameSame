@@ -24,7 +24,7 @@ def extract(title: str, desc: str) -> dict:
     d: dict = {}
     private = _has(t, r"\bprivate\b", r"\bpvt\b")
     pickup = _has(t, r"pick[- ]?up", r"collection from your h", r"ex-hotel", r"transfer", r"\bsic\b", r"from (your )?h(o)?t(e)?l", r"\bhtl\b")
-    if _has(t, r"meet(ing)? (at|point)", r"\bassemble\b", r"meeting point", r"victory monument"):
+    if _has(t, r"meet(ing)? (at|point)", r"\bassemble\b", r"meeting point"):
         d["pickup"] = "Meeting point"
     elif _has(t, r"\bpier\b"):
         d["pickup"] = "Pier check-in"
@@ -32,7 +32,9 @@ def extract(title: str, desc: str) -> dict:
         d["pickup"] = "Private hotel pickup"
     elif pickup:
         d["pickup"] = "Shared hotel pickup"
-    if _has(t, r"buffet dinner"):
+    if _has(t, r"\bbbq\b|barbecue"):
+        d["meals"] = "BBQ dinner"
+    elif _has(t, r"buffet dinner"):
         d["meals"] = "Buffet dinner"
     elif _has(t, r"set (menu|dinner)"):
         d["meals"] = "Set dinner"
@@ -50,8 +52,9 @@ def extract(title: str, desc: str) -> dict:
                      (r"(eng(lish)?)[- ]?(speaking )?guide|eng guide|guided|with guide", "Guide"),
                      (r"small group", "Small group"), (r"\bprivate\b|\bpvt\b", "Private"),
                      (r"window seat", "Window seat"), (r"vip (deck|seat)", "VIP seat/deck"), (r"standard seat", "Standard seat"),
-                     (r"boat (ride )?included|boat included", "Boat ride included"), (r"daytime slot|day ticket", "Daytime slot"),
-                     (r"evening slot|buffet dinner", "Evening slot")]:
+                     (r"boat (ride )?included|boat included", "Boat ride included"), (r"sandboard", "Sandboarding"),
+                     (r"vip lounge", "VIP lounge"), (r"daytime slot|day ticket", "Daytime slot"),
+                     (r"evening slot", "Evening slot")]:
         if re.search(pat, t):
             d["option"] = val
             break
@@ -61,8 +64,6 @@ def extract(title: str, desc: str) -> dict:
         d["cancel"] = f"Free until {m.group(2)} h"
     elif _has(t, r"free cancellation", r"refundable"):
         d["cancel"] = "Free cancellation"
-    if _has(t, r"railway|train market|maeklong"):
-        d["stops"] = "+ Maeklong Railway"
     if m := re.search(r"(?:duration|approx\.?|about)\s*:?\s*(\d+(?:\.\d)?)\s*(?:h\b|hrs?\b|hours?\b)", t):
         d["duration"] = f"{float(m.group(1)):g} h"
     if _has(t, r"\bmorning\b"):
@@ -78,7 +79,7 @@ STRICT = tuple(DEFAULTS)
 
 def assign_attraction(listing: dict, attractions: list[dict]) -> str:
     """Catalogue attractions within 250 m of the listing's location; the title picks among them (longest name wins ties,
-    so "Thai Massage at the Wat Pho School" beats "Wat Pho")."""
+    so "Burj Khalifa: At the Top" beats a shorter name it contains)."""
     near = [a for a in attractions if haversine_m(listing["lat"], listing["lng"], a["lat"], a["lng"]) <= 250] or attractions
     title = listing["title"].lower()
     short = lambda a: a["name"].lower().split(" (")[0].split(",")[0]  # noqa: E731
@@ -144,7 +145,8 @@ def summarise(members: list[dict]) -> dict:
         tags.append("lunch")
     hours = float(d["duration"].split()[0]) if d.get("duration") else None
     option = None if d.get("option") == "Private" and d["pickup"].startswith("Private") else d.get("option")
-    parts = [option, d.get("slot") and f"{d['slot']} departure", d["access"] if d["access"] != "Standard" else None,
+    access = d["access"] if d["access"] != "Standard" and d["access"] not in (option or "") else None
+    parts = [option, d.get("slot") and f"{d['slot']} departure", access,
              d["meals"] if d["meals"] != "No meals" else None, d["pickup"] if d["pickup"] != "No transfer" else None,
              d["stops"] if d["stops"] != "Main site only" else None]
     name = " · ".join(p for p in parts if p) or "Entry ticket"

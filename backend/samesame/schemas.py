@@ -128,7 +128,7 @@ class BookStats(BaseModel):
 
 
 class WhyChip(BaseModel):
-    label: str                          # "Lowest True Price", "Mynah 97% honoured", "400 m from Asok"
+    label: str                          # "Lowest True Price", "Mynah 97% honoured", "400 m from the Metro"
     kind: Literal["price", "promise", "content", "relevance", "popularity", "warning"]
 
 
@@ -140,11 +140,11 @@ class ScoreTerm(BaseModel):
     value: float                        # normalised 0..1, higher is better
     weight: float
     contribution: float
-    detail: str                         # human-readable raw value, e.g. "420 m from Asok BTS"
+    detail: str                         # human-readable raw value, e.g. "420 m from Mall of the Emirates Metro"
 
 
 class SearchParams(BaseModel):
-    city: str = "Bangkok"
+    city: str = "Dubai"
     area: str                           # client's chosen area or anchor attraction
     area_lat: float
     area_lng: float

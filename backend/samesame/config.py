@@ -16,7 +16,9 @@ DB_PATH = BUILD / "samesame.duckdb"
 LABELS_PATH = BUILD / "review_labels.jsonl"   # human review labels: training feedback for the matcher
 
 SEED = 20261104
-CITY = "Bangkok"
+from samesame import city as _city  # noqa: E402
+
+CITY = _city.NAME
 CURRENCY = "INR"
 
 # LLM is optional. No key -> offline mode (rules + templates + human queue).

@@ -12,13 +12,13 @@ import unicodedata
 import numpy as np
 from rapidfuzz import fuzz
 
-from samesame import config
+from samesame import city, config
 from samesame.ranking.score import haversine_m
 
 TARGET = 300
-CORE = (13.7400, 100.5450)          # roughly Ratchaprasong; hotels further out are less likely to be kept
-ASOK = (13.7370, 100.5603)          # the demo search area: always keep what's within this radius
-ASOK_KEEP_M = 900
+CORE = city.CORE                    # hotels further from the centre are less likely to be kept
+DEMO = city.DEMO_AREA[1:]           # the demo search area: always keep what's within DEMO_KEEP_M
+DEMO_KEEP_M = city.DEMO_KEEP_M
 HARD_NEG_MAX_M = 3000
 OSM_DUP_M = 250
 
@@ -27,13 +27,17 @@ FAMILIES = [
     "holiday inn express", "holiday inn", "crowne plaza", "hotel indigo", "intercontinental", "ibis styles", "ibis budget", "ibis",
     "grand mercure", "mercure", "novotel", "pullman", "sofitel", "swissotel", "movenpick", "citadines", "somerset",
     "ascott", "oakwood", "jw marriott", "courtyard", "marriott executive apartments", "marriott", "renaissance", "sheraton", "westin", "le meridien",
-    "four points", "aloft", "st. regis", "w bangkok", "doubletree", "hilton garden inn", "hilton", "conrad",
+    "four points", "aloft", "st. regis", "doubletree", "hilton garden inn", "hilton", "conrad",
     "hyatt regency", "grand hyatt", "park hyatt", "hyatt place", "centara grand", "centara", "centre point",
-    "grande centre point", "amari", "avani", "anantara", "radisson", "park plaza", "best western", "ramada",
+    "grande centre point", "amari", "avani", "anantara", "park plaza", "best western", "ramada",
     "days inn", "travelodge", "chatrium", "dusit", "shangri-la", "mandarin oriental", "banyan tree", "kempinski",
     "royal orchid", "arnoma", "the berkeley", "eastin", "lub d", "siam@siam", "adelphi", "bandara", "akyra",
     "maitria", "citin", "royal princess", "majestic grande", "s ratchada", "the salil", "hotel j", "glow",
-    "lancaster", "admiral", "galleria", "nantra", "residence inn", "fraser", "jasmine", "aspen",
+    "lancaster", "admiral", "galleria", "nantra",
+    "embassy suites", "canopy by hilton", "rove", "citymax", "premier inn", "arjaan by rotana", "rotana", "jumeirah", "address", "vida", "fairmont", "ritz-carlton",
+    "golden tulip", "grand millennium", "millennium", "copthorne", "habtoor", "taj", "oberoi", "hampton by hilton", "staybridge",
+    "park inn", "radisson blu", "radisson red", "radisson", "atlantis", "sofitel", "media one", "two seasons", "flora", "ghaya grand", "landmark",
+    "zabeel", "armani", "palazzo versace", "bulgari", "one&only", "le royal meridien", "nh", "occidental", "hyatt centric", "andaz", "residence inn", "fraser", "jasmine", "aspen",
 ]
 BRAND_STARS = {"ibis": 3, "ibis styles": 3, "ibis budget": 2, "holiday inn express": 3, "travelodge": 3, "days inn": 3,
                "novotel": 4, "mercure": 4, "grand mercure": 4, "holiday inn": 4, "citadines": 4, "somerset": 4,
@@ -44,9 +48,15 @@ BRAND_STARS = {"ibis": 3, "ibis styles": 3, "ibis budget": 2, "holiday inn expre
                "le meridien": 5, "st. regis": 5, "conrad": 5, "hilton": 5, "hyatt regency": 5, "grand hyatt": 5,
                "park hyatt": 5, "centara grand": 5, "anantara": 5, "dusit": 5, "shangri-la": 5, "mandarin oriental": 5,
                "banyan tree": 5, "kempinski": 5, "intercontinental": 5, "crowne plaza": 4, "ascott": 5, "oakwood": 4,
-               "lub d": 2, "siam@siam": 4, "royal orchid": 5, "fraser": 4, "residence inn": 4}
-GENERIC_FIRST = {"the", "hotel", "bangkok", "grand", "royal", "new", "baan", "ban", "house", "home", "residence", "city",
-                 "silom", "sukhumvit", "siam", "asoke", "boutique", "golden", "white", "green", "blue", "my", "le", "la"}
+               "lub d": 2, "siam@siam": 4, "royal orchid": 5, "fraser": 4, "residence inn": 4,
+               "embassy suites": 4, "canopy by hilton": 5, "rove": 3, "citymax": 3, "premier inn": 3, "arjaan by rotana": 4, "rotana": 4, "jumeirah": 5, "address": 5,
+               "vida": 4, "fairmont": 5, "ritz-carlton": 5, "golden tulip": 4, "grand millennium": 5, "millennium": 4,
+               "copthorne": 4, "habtoor": 5, "taj": 5, "oberoi": 5, "hampton by hilton": 3, "staybridge": 4, "park inn": 3,
+               "radisson blu": 5, "radisson red": 4, "atlantis": 5, "media one": 4, "two seasons": 4, "flora": 4,
+               "ghaya grand": 4, "landmark": 3, "zabeel": 5, "armani": 5, "palazzo versace": 5, "bulgari": 5, "one&only": 5,
+               "le royal meridien": 5, "nh": 4, "occidental": 4, "hyatt centric": 4, "andaz": 5}
+GENERIC_FIRST = {"the", "hotel", "grand", "royal", "new", "house", "home", "residence", "city", "al", "boutique", "golden",
+                 "white", "green", "blue", "my", "le", "la"} | city.GENERIC_WORDS
 
 
 def norm(s: str) -> str:
@@ -54,7 +64,18 @@ def norm(s: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9@. ]+", " ", s)).strip()
 
 
-_GENERIC = {"the", "hotel", "hotels", "boutique", "bangkok", "thailand", "by", "and", "resort", "residence", "suites", "inn", "a"}
+_GENERIC = {"the", "hotel", "hotels", "boutique", "by", "and", "resort", "residence", "suites", "inn", "a"} | city.GENERIC_WORDS
+
+
+KNOWN_DUPS = {frozenset((norm(a), norm(b))) for a, b in city.OSM_KNOWN_DUPLICATES}
+
+
+def _numbers(n: str) -> frozenset:
+    return frozenset(re.findall(r"\b\d{1,3}\b", n))
+
+
+def _apartments(n: str) -> bool:
+    return bool(re.search(r"apartment|residence|apts", n))
 
 
 def _core(n: str) -> frozenset:
@@ -88,19 +109,28 @@ def _district_rings(bm):
     for f in bm["features"]:
         if f["properties"].get("layer") == "district":
             segs = [(a, b) for line in f["geometry"]["coordinates"] for a, b in zip(line, line[1:])]
-            out.append((f["properties"]["name"].replace(" District", ""), segs))
+            xs = [p[0] for line in f["geometry"]["coordinates"] for p in line]
+            ys = [p[1] for line in f["geometry"]["coordinates"] for p in line]
+            out.append((f["properties"]["name"].replace(" District", ""), segs, (min(xs), min(ys), max(xs), max(ys))))
     return out
+
+
+def _district(lat, lng, rings) -> str | None:
+    for name, segs, (x0, y0, x1, y1) in rings:
+        if x0 <= lng <= x1 and y0 <= lat <= y1 and _inside(lat, lng, segs):
+            return name
+    return None
 
 
 _RINGS = None
 
 
 def district_at(lat: float, lng: float) -> str | None:
-    """Bangkok district containing a point (offline OSM boundaries)."""
+    """District containing a point (offline OSM boundaries)."""
     global _RINGS
     if _RINGS is None:
         _RINGS = _district_rings(_basemap())
-    return next((n for n, segs in _RINGS if _inside(lat, lng, segs)), None)
+    return _district(lat, lng, _RINGS)
 
 
 def _inside(lat, lng, segs) -> bool:
@@ -137,20 +167,20 @@ def _river_m(lat, lng, river):
     return min((_seg_dist_m(lat, lng, a, b) for line in river for a, b in zip(line, line[1:])), default=1e9)
 
 
-SOI = re.compile(r"\b(sukhumvit|silom|sathorn|ratchadamri|phetchaburi|charoen krung|ploenchit|rama \w+)\s*(?:soi\s*)?(\d{1,3})\b")
-
-
 def _street(tags, name, lat, lng, roads):
     s = tags.get("addr:street")
     if s and _latin(s) and "," not in s and len(s) < 40:
         return s, "osm"
-    m = SOI.search(norm(name))
-    if m:
-        return f"{m.group(1).title()} Soi {m.group(2)}", "name"
     if s and _latin(s):
         return s.split(",")[0].strip(), "osm"
     r = _nearest_road(lat, lng, roads)
     return (r, "nearest_road") if r else (None, "none")
+
+
+def fmt_phone(digits: str) -> str:
+    """National digits (no country code, no leading 0) in international format: +971 4 123 4567 / +971 50 123 4567."""
+    cc = city.COUNTRY_CODE
+    return f"+{cc} {digits[0]} {digits[1:4]} {digits[4:]}" if len(digits) == 8 else f"+{cc} {digits[:2]} {digits[2:5]} {digits[5:]}"
 
 
 # ------------------------------------------------------------------ curation
@@ -172,17 +202,26 @@ def curate(rng: np.random.Generator):
             continue
         richness = sum(k in t for k in ("phone", "contact:phone", "website", "stars", "brand", "addr:street", "addr:postcode", "rooms"))
         cands.append({"osm_id": f"{el['type']}/{el['id']}", "name": name.strip(), "lat": c["lat"], "lng": c["lon"], "tags": t,
-                      "richness": richness, "n": norm(name)})
+                      "richness": richness, "n": norm(name), "fam": family(name, t.get("brand"))})
+    # neighbouring emirates caught by the bounding box
+    cands = [x for x in cands if not any(s <= x["lat"] <= n and w <= x["lng"] <= e for s, w, n, e, _ in city.EXCLUDE_BOXES)
+             and "sharjah" not in x["n"] and "sharjah" not in str(x["tags"].get("addr:city", "")).lower()]
 
     # 1. collapse OSM's own duplicates (same name within OSM_DUP_M)
     cands.sort(key=lambda x: (-x["richness"], x["osm_id"]))
     kept, dups = [], []
     for x in cands:
-        twin = next((k for k in kept if abs(k["lat"] - x["lat"]) < 0.003 and (
+        known = next((k for k in kept if frozenset((k["n"], x["n"])) in KNOWN_DUPS
+                      and haversine_m(k["lat"], k["lng"], x["lat"], x["lng"]) < 1500), None)
+        twin = known or next((k for k in kept if abs(k["lat"] - x["lat"]) < 0.003 and _numbers(k["n"]) == _numbers(x["n"]) and (
             (fuzz.token_sort_ratio(k["n"], x["n"]) >= 92 and haversine_m(k["lat"], k["lng"], x["lat"], x["lng"]) < OSM_DUP_M)
             # same distinctive words, practically the same spot ("Coach Boutique Hotel" / "The Coach Hotel", 29 m; "Windsor Suites" / "... Hotel", 61 m;
             # found by the M3 matcher, which kept merging them)
-            or (_core(k["n"]) and _core(k["n"]) == _core(x["n"]) and haversine_m(k["lat"], k["lng"], x["lat"], x["lng"]) < 120))), None)
+            or (_core(k["n"]) and _core(k["n"]) == _core(x["n"]) and haversine_m(k["lat"], k["lng"], x["lat"], x["lng"]) < 120)
+            # one short, one long name for the same building ("rove hotel" / "Rove City Walk", 6 m; "Voco Dubai" / "Voco Hotel
+            # and Nassima Towers", 14 m), unless one is the brand's apartments and the other its hotel
+            or (k["fam"] and k["fam"] == x["fam"] and (_core(k["n"]) <= _core(x["n"]) or _core(x["n"]) <= _core(k["n"]))
+                and _apartments(k["n"]) == _apartments(x["n"]) and haversine_m(k["lat"], k["lng"], x["lat"], x["lng"]) < 80))), None)
         if twin:
             dups.append({"kept": twin["osm_id"], "dropped": x["osm_id"], "name_kept": twin["name"], "name_dropped": x["name"],
                          "distance_m": round(haversine_m(twin["lat"], twin["lng"], x["lat"], x["lng"]))})
@@ -204,7 +243,7 @@ def curate(rng: np.random.Generator):
 
     # 3. pick ~TARGET: everything near the demo area, the most confusable hard-negative pairs, then by score
     by_id = {x["osm_id"]: x for x in kept}
-    must = {x["osm_id"] for x in kept if haversine_m(*ASOK, x["lat"], x["lng"]) < ASOK_KEEP_M}
+    must = {x["osm_id"] for x in kept if haversine_m(*DEMO, x["lat"], x["lng"]) < DEMO_KEEP_M}
     for a, b, _, _ in pairs[:40]:
         must |= {a, b}
     rest = sorted((x for x in kept if x["osm_id"] not in must),
@@ -228,21 +267,22 @@ def curate(rng: np.random.Generator):
         phone = t.get("phone") or t.get("contact:phone")
         if phone:
             digits = re.sub(r"\D", "", phone.split(";")[0])
-            digits = (digits[2:] if digits.startswith("66") else digits).lstrip("0")
+            cc = city.COUNTRY_CODE
+            digits = (digits[len(cc):] if digits.startswith(cc) else digits).lstrip("0")
             phone_src = "osm"
         else:
-            digits = "2" + "".join(str(d) for d in rng.integers(0, 10, 7))
+            digits = city.LANDLINE_PREFIX + "".join(str(d) for d in rng.integers(0, 10, 7))
             phone_src = "synthetic"
-        phone = f"+66 {digits[0]} {digits[1:4]} {digits[4:]}" if len(digits) == 8 else f"+66 {digits[:2]} {digits[2:5]} {digits[5:]}"
+        phone = fmt_phone(digits)
         street, street_src = _street(t, x["name"], x["lat"], x["lng"], roads)
-        district = next((n for n, segs in districts if _inside(x["lat"], x["lng"], segs)), None)
+        district = _district(x["lat"], x["lng"], districts)
         river_m = _river_m(x["lat"], x["lng"], river)
         pool = bool(rng.random() < {2: 0.1, 3: 0.45, 4: 0.85, 5: 0.97}[star])
         rooms = int(t["rooms"]) if str(t.get("rooms", "")).isdigit() else int(rng.integers(40, 120) * star / 3)
         family_rooms = bool(rng.random() < (0.55 if pool else 0.25) + (0.1 if star >= 4 else 0))
         # nightly base rate (INR, standard room, 2 adults): star level x centrality x lognormal noise. Synthetic.
         centr = np.exp(-haversine_m(*CORE, x["lat"], x["lng"]) / 9000)
-        rate = {2: 1500, 3: 2900, 4: 5400, 5: 9800}[star] * (0.8 + 0.4 * centr) * float(np.exp(rng.normal(0, 0.18)))
+        rate = city.BASE_RATE[star] * (0.8 + 0.4 * centr) * float(np.exp(rng.normal(0, 0.18)))
         hotels.append({
             "hotel_id": "h-" + x["osm_id"].replace("/", "-"), "osm_id": x["osm_id"], "name": x["name"],
             "lat": round(x["lat"], 6), "lng": round(x["lng"], 6), "family": x["family"], "brand": t.get("brand"),

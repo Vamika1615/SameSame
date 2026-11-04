@@ -46,7 +46,7 @@ class Store:
     variant_of: dict                     # activity listing_id -> variant_id
     images_of: dict                      # owner_id -> [image row]
     image_meta: dict                     # path -> image row (photo kind + credit)
-    osm_reference: list                  # real OSM fields for every named Bangkok hotel (reference data, not truth)
+    osm_reference: list                  # real OSM fields for every named hotel in the city (reference data, not truth)
     descriptions: dict                   # Wikipedia summaries by attraction id / osm id
     pairs: pl.DataFrame                  # every scored hotel candidate pair
     matcher: dict

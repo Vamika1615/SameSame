@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { DEFAULT_QUERY } from "@/lib/city";
 
 /** The seven demo beats. Keys 1-7 jump straight to each with its state in the URL;
  *  ←/→ step; Space fires the beat's primary action; "." toggles the step indicator. */
@@ -9,7 +10,7 @@ export const BEATS = [
   { key: 2, path: "/hotels?view=samesame&focus=lookalike", title: "Stacks + look-alike trap", action: "Space → back to Today", owner: "A" },
   { key: 3, path: "/hotels/demo?tp=0", title: "Offers + True Price flip", action: "Space → flip True Price", owner: "B" },
   { key: 4, path: "/hotels/demo?tp=1&book=1", title: "Book both + failover", action: "Space → Book both", owner: "B" },
-  { key: 5, path: "/sightseeing?q=floating%20market&view=today", title: "Sightseeing Variant DNA", action: "Space → group variants", owner: "A" },
+  { key: 5, path: `/sightseeing?q=${encodeURIComponent(DEFAULT_QUERY)}&view=today`, title: "Sightseeing Variant DNA", action: "Space → group variants", owner: "A" },
   { key: 6, path: "/ops", title: "Ops queue: the catch", action: "S / V / D to label", owner: "A" },
   { key: 7, path: "/simulator", title: "Simulator + metrics", action: "Space → pessimistic preset", owner: "C" },
 ] as const;

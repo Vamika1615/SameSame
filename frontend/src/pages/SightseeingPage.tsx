@@ -8,8 +8,8 @@ import { usePresenterAction } from "@/lib/presenter";
 import { Empty, ErrorState, Loading } from "@/components/States";
 import { AnimatedNumber, Illustrative, Segmented, SupplierBadge, Tip, cn } from "@/components/ui";
 import { WhyChips } from "@/components/WhyChips";
+import { CITY, DEFAULT_QUERY, QUERIES } from "@/lib/city";
 
-const QUERIES = [{ q: "floating market", label: "Floating Market" }, { q: "grand palace", label: "Grand Palace" }, { q: "skywalk", label: "Rooftop SkyWalk" }];
 const SEG_COLOR: Record<DnaKey, string> = {
   pickup: "bg-sky-100 text-sky-900", meals: "bg-amber-100 text-amber-900", duration: "bg-violet-100 text-violet-900",
   stops: "bg-emerald-100 text-emerald-900", access: "bg-rose-100 text-rose-900", option: "bg-indigo-100 text-indigo-900",
@@ -19,7 +19,7 @@ const SPRING = { type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.55 } as co
 
 export default function SightseeingPage() {
   const [params, setParams] = useSearchParams();
-  const q = params.get("q") ?? "floating market";
+  const q = params.get("q") ?? DEFAULT_QUERY;
   const view = params.get("view") === "samesame" ? "samesame" : "today";
   const res = useApi<ActivitySearch>(`/api/activities/search?q=${encodeURIComponent(q)}`);
   const set = useCallback((k: string, v: string) => { const n = new URLSearchParams(params); n.set(k, v); setParams(n, { replace: true }); }, [params, setParams]);
@@ -29,7 +29,7 @@ export default function SightseeingPage() {
     <div className="mx-auto max-w-[1500px] px-8 pb-20 pt-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Sightseeing in Bangkok</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Sightseeing in {CITY}</h1>
           <div className="mt-3 flex gap-2">
             {QUERIES.map((x) => (
               <button key={x.q} onClick={() => set("q", x.q)}

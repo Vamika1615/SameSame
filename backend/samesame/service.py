@@ -17,7 +17,7 @@ from functools import lru_cache
 import polars as pl
 from rapidfuzz import fuzz
 
-from samesame import config, store
+from samesame import city, config, store
 from samesame.booking import sandbox
 from samesame.data import world
 from samesame.data.booking_log import ANCHOR
@@ -32,8 +32,8 @@ SUPPLIERS = world.SUPPLIERS
 NAME_TO_ID = {v: k for k, v in SUPPLIERS.items()}
 LEAD_DAYS = 21
 CHECKIN = date.today() + timedelta(days=LEAD_DAYS)
-RADIUS_M = 500                          # "near Asok BTS": a 6-7 minute walk
-PARAMS = SearchParams(area="Asok BTS · Sukhumvit", area_lat=13.7370, area_lng=100.5603, checkin=CHECKIN,
+RADIUS_M = city.DEMO_RADIUS_M           # a 6-7 minute walk
+PARAMS = SearchParams(city=city.NAME, area=city.DEMO_AREA[0], area_lat=city.DEMO_AREA[1], area_lng=city.DEMO_AREA[2], checkin=CHECKIN,
                       nights=3, adults=2, children=0, star_min=4, needs=["breakfast"], source_market="IN")
 CANCEL_RANK = lambda d: 0 if d is None else 100 - d  # noqa: E731  more days of free cancellation = more flexible
 
@@ -176,14 +176,14 @@ def golden(hid: str) -> dict:
     # display name: the trust-weighted medoid of the supplier names (a typo or a dropped branch number loses the vote)
     clean = [re.sub(r"\s*\(SHA\+\)", "", l["name"]) for l in ls]
     cand = [c for c in clean if not c.isupper()] or [c.title() for c in clean]
-    cand = [c for c in cand if not re.search(r"\b(HTL|BKK|RESI|STES)\b", c)] or cand
+    cand = [c for c in cand if not re.search(rf"\b(HTL|{city.CITY_ABBR}|RESI|STES|APTS)\b", c)] or cand
     name = max(cand, key=lambda c: sum(trust()[l["supplier_id"]] * fuzz.token_sort_ratio(norm(c), norm(o)) for l, o in zip(ls, clean)))
     lat_m, lng_m = statistics.median(l["lat"] for l in ls), statistics.median(l["lng"] for l in ls)
     near = [l for l in ls if rk.haversine_m(lat_m, lng_m, l["lat"], l["lng"]) < 400] or ls
     lat, lng = statistics.median(l["lat"] for l in near), statistics.median(l["lng"] for l in near)
     star = _vote(pairs("star"))
     phone_val = _vote(pairs("phone"), key=_digits)
-    phone = next((l["phone"] for l in ls if l["phone"] and l["phone"].startswith("+66 ") and _digits(l["phone"]) == _digits(phone_val)), phone_val)
+    phone = next((l["phone"] for l in ls if l["phone"] and l["phone"].startswith(f"+{city.COUNTRY_CODE} ") and _digits(l["phone"]) == _digits(phone_val)), phone_val)
     address = next((l["address"] for l in ls if l["postcode"]), ls[0]["address"])
     checkin = _vote(pairs("checkin_time"))
     amen_sources = {}
@@ -280,6 +280,9 @@ def priced_offers(hid: str) -> list[Offer]:
 
 
 # ------------------------------------------------------------------ search
+LOOKALIKE_NEAR_M = 1200
+
+
 def _lookalikes(hids: list[str]) -> dict[str, Lookalike]:
     out = {}
     g = {h: golden(h) for h in hids}
@@ -289,9 +292,11 @@ def _lookalikes(hids: list[str]) -> dict[str, Lookalike]:
             ga, gb = g[a], g[b]
             if a == b or not ga["family_key"] or ga["family_key"] != gb["family_key"]:
                 continue
-            if fuzz.token_set_ratio(norm(ga["name"]), norm(gb["name"])) < 85:
-                continue
             d = rk.haversine_m(ga["lat"], ga["lng"], gb["lat"], gb["lng"])
+            # confusable siblings: same brand, and either near-identical names or close enough to mix up
+            # (Dubai branches are named after their district, so "Hyatt Place Baniyas Square" vs "... Wasl District")
+            if fuzz.token_set_ratio(norm(ga["name"]), norm(gb["name"])) < 85 and d > LOOKALIKE_NEAR_M:
+                continue
             if best is None or d < best[1]:
                 best = (b, d)
         if best:
@@ -444,7 +449,7 @@ def hotel_detail(hid: str) -> HotelDetail:
 
 
 # ------------------------------------------------------------------ booking (the sandbox stands in for the real supplier)
-DEMO_HOTEL_NAME = "Radisson Blu Plaza"     # the brief's golden case lives here (see DATA.md); found by name like an agent would
+DEMO_HOTEL_NAME = city.DEMO_HOTEL_NAME     # the brief's golden case lives here (see DATA.md); found by name like an agent would
 
 
 @lru_cache
@@ -507,7 +512,7 @@ def _refund_days(cancel: str | None):
 def find_attraction(q: str) -> str:
     s = store.get()
     ql = q.lower().strip()
-    return max(s.attractions, key=lambda a: (fuzz.partial_ratio(ql, s.attractions[a]["name"].lower()), a == "floating-market"))
+    return max(s.attractions, key=lambda a: (fuzz.partial_ratio(ql, s.attractions[a]["name"].lower()), a == city.DEFAULT_ATTRACTION))
 
 
 def activity_search(q: str) -> ActivitySearch:
@@ -541,7 +546,7 @@ def activity_search(q: str) -> ActivitySearch:
         shown = {**{k: NS for k in DNA_LABELS}, **{k: x for k, x in v["dna"].items() if k in DNA_LABELS}}
         shown["stops"] = f"{short} {v['dna']['stops']}" if v["dna"]["stops"].startswith("+") else f"{short} only"
         name = v["name"] + (" · option not stated (in review)" if v["ambiguous"] else "")
-        built.append(dict(vid=v["variant_id"], name=name, dna=shown, tags=v["tags"], hours=v["hours"], listings=listings,
+        built.append(dict(vid=v["variant_id"], name=name, dna=shown, tags=v["tags"], hours=v["hours"], listings=listings, ambiguous=v["ambiguous"],
                           tp=tps[bi], best_sup=members[bi]["supplier_id"], rating=rating, pop=pop.get(v["variant_id"], 0)))
     lo, hi = min(b["tp"].total for b in built), max(b["tp"].total for b in built)
     max_pop = max([b["pop"] for b in built] + [1])
@@ -557,7 +562,10 @@ def activity_search(q: str) -> ActivitySearch:
                    "rating": f"Rated {b['rating']}"}
         items.append({**b, "score": rk.score(feats, details, rk.ACTIVITY_WEIGHTS), "honour": honour})
     rk.rank(items)
-    ordered = sorted(items, key=lambda x: x["rank"])
+    # a listing we couldn't place (sent to review) is never recommended above a confirmed variant
+    ordered = sorted(items, key=lambda x: (x["ambiguous"], x["rank"]))
+    for i, x in enumerate(ordered, 1):
+        x["rank"] = i
     out = []
     for b in ordered:
         segs = [DnaSegment(key=k, label=DNA_LABELS[k], value=b["dna"][k], differs=len({x["dna"][k] for x in items}) > 1) for k in DNA_LABELS]

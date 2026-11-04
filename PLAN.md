@@ -1,5 +1,7 @@
 # SameSame — Plan
 
+> **Update 2026-11-04:** the city is now **Dubai**, not Bangkok (see PROGRESS.md). City-specific values live in `backend/samesame/city.py`; Bangkok mentions below are historical.
+
 > "Same same, but different. We know exactly how, and what it really costs."
 
 ## 1. The goal in five lines

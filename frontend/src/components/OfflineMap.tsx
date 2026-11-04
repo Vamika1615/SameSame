@@ -1,6 +1,7 @@
 import L from "leaflet";
 import { useEffect, useRef } from "react";
 import { getJSON } from "@/lib/api";
+import { MAP_CENTER, MAP_ZOOM } from "@/lib/city";
 
 export interface Pin { id: string; lat: number; lng: number; label: string; tone?: "default" | "accent" | "danger" | "anchor"; permanent?: boolean }
 export interface MapLine { from: [number, number]; to: [number, number]; label?: string }
@@ -19,7 +20,7 @@ export function OfflineMap({ pins, lines = [], highlight, className, fitPins = f
 
   useEffect(() => {
     if (!el.current || map.current) return;
-    const m = L.map(el.current, { zoomControl: true, attributionControl: true, preferCanvas: true, zoomSnap: 0.25 }).setView([13.745, 100.535], 12);
+    const m = L.map(el.current, { zoomControl: true, attributionControl: true, preferCanvas: true, zoomSnap: 0.25 }).setView(MAP_CENTER, MAP_ZOOM);
     m.attributionControl.setPrefix(false).addAttribution("© OpenStreetMap contributors, ODbL");
     map.current = m;
     m.createPane("pins").style.zIndex = "650";   // pins always above the async-loaded basemap

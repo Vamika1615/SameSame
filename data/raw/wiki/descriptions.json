@@ -1,281 +1,316 @@
 {
- "grand-palace": {
-  "text": "The Grand Palace is a complex of buildings at the heart of Bangkok, Thailand. The palace has been the official residence of the Kings of Siam since 1782. The king, his court, and his royal government were based on the grounds of the palace until 1925. King Bhumibol Adulyadej, resided at the Chitralada Royal Villa and his successor King Vajiralongkorn resides at the Amphorn Sathan Residential Hall, both in the Dusit Palace, but the Grand Palace is still used for official events. Several royal ceremonies and state functions are held within the walls of the palace every year. The palace is one of the most popular tourist attractions in Thailand, with over eight million people visiting each year.",
-  "title": "Grand Palace",
-  "source": "https://en.wikipedia.org/wiki/Grand_Palace",
+ "burj-khalifa": {
+  "text": "The Burj Khalifa is a megatall skyscraper in Dubai, United Arab Emirates. Designed by Skidmore, Owings & Merrill, it is the world's tallest structure, with a total height of 829.8 m and a roof height of 828 m (2,717 ft). It has been the tallest building in the world since its complete inauguration in 2011, surpassing Taipei 101, which had held the record since 2004.",
+  "title": "Burj Khalifa",
+  "source": "https://en.wikipedia.org/wiki/Burj_Khalifa",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "wat-pho": {
-  "text": "Wat Pho, also spelled Wat Po, is a Buddhist temple complex in the Phra Nakhon District, Bangkok, Thailand. It is on Rattanakosin Island, directly south of the Grand Palace. Known also as the Temple of the Reclining Buddha, its official name is Wat Phra Chetuphon Wimon Mangkhalaram Rajwaramahawihan. The more commonly known name, Wat Pho, is a contraction of its older name, Wat Photaram.",
-  "title": "Wat Pho",
-  "source": "https://en.wikipedia.org/wiki/Wat_Pho",
+ "desert-safari": {
+  "text": "The Dubai Desert Conservation Reserve, DDCR, is a 225-square-kilometre (87 sq mi) natural reserve in the emirate of Dubai in the United Arab Emirates. It was established by Emiri decree on 9 January 2002 and comprises some 5% of the Emirate of Dubai's total landmass.",
+  "title": "Dubai Desert Conservation Reserve",
+  "source": "https://en.wikipedia.org/wiki/Dubai_Desert_Conservation_Reserve",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "wat-arun": {
-  "text": "Wat Arun Ratchawararam Ratchawaramahawihan or Wat Arun is a Buddhist temple (wat) in the Bangkok Yai district of Bangkok, Thailand. It is situated in Thonburi on the west bank of the Chao Phraya River. The temple derives its name from the Hindu god Aruṇa, often personified as the rays of the rising sun. Built with a fusion of Indian influences, incorporating elements of both Hindu and Buddhist symbolism, as well as reflecting Siamese tradition and identity. Wat Arun is among the best known of Thailand's landmarks. Although the temple has existed since at least the 17th century, its distinctive prang (spire) was built in the early 19th century during the reigns of Rama II and Rama III.",
-  "title": "Wat Arun",
-  "source": "https://en.wikipedia.org/wiki/Wat_Arun",
+ "dhow-cruise": {
+  "text": "Dubai Creek is a natural saltwater inlet of the Persian Gulf in Dubai. It extends about 9 miles (14 km) inwards and forms a natural port that has traditionally been used for trade and transport. The creek ranges from 200 to 1,200 metres in width while the average depth is about 6.5 to 7 metres. Previously, it extended to Ras Al Khor Wildlife Sanctuary but as part of the new Business Bay Canal and Dubai Canal, it extends a further 13 km (8.1 mi) to the Persian Gulf.",
+  "title": "Dubai Creek",
+  "source": "https://en.wikipedia.org/wiki/Dubai_Creek",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "floating-market": {
-  "text": "Damnoen Saduak Floating Market is a floating market in Damnoen Saduak district, Ratchaburi province, about 100 kilometres (62 mi) southwest of Bangkok, Thailand. It has become primarily a tourist attraction, attracting domestic and foreign tourists. It is often considered the most famous floating market.",
-  "title": "Damnoen Saduak Floating Market",
-  "source": "https://en.wikipedia.org/wiki/Damnoen_Saduak_Floating_Market",
+ "dubai-aquarium": {
+  "text": "The Dubai Aquarium and Underwater Zoo is a public aquarium located in the Dubai Mall. It is the biggest aquarium in Dubai and one of the largest in the world. It has the largest glass tank viewing panel at 107 feet wide and 27 feet tall.",
+  "title": "Dubai Aquarium and Underwater Zoo",
+  "source": "https://en.wikipedia.org/wiki/Dubai_Aquarium_and_Underwater_Zoo",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "maeklong": {
-  "text": "The Maeklong Railway is a 1,000 mm metre gauge railway that runs for nearly 65 kilometres (40 mi) between Wongwian Yai, Bangkok, and Samut Songkhram in central Thailand.",
-  "title": "Maeklong Railway",
-  "source": "https://en.wikipedia.org/wiki/Maeklong_Railway",
+ "dubai-frame": {
+  "text": "The Dubai Frame is an observatory, museum and monument in Zabeel Park, Dubai. It holds the record for the largest frame in the world. The building has a height of 150.24 meters and a width of 95.53 meters. The building mainly serves as an observatory, providing views of old Dubai in the north and newer parts in the south.",
+  "title": "Dubai Frame",
+  "source": "https://en.wikipedia.org/wiki/Dubai_Frame",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "ayutthaya": {
-  "text": "Ayutthaya Historical Park covers the ruins of the old city of Ayutthaya, Phra Nakhon Si Ayutthaya province, Thailand. The city of Ayutthaya was founded by King Ramathibodi I in 1351,[a] though it is likely to be significantly older, based on evidence showing that the area was already populated during the Mon Dvaravati period. Sources further mention that around 850 AD, the Khmers occupied the area and established a stronghold there, naming it Ayodhya, after one of the holiest Hindu cities in India of the same name. The early history of Ayutthaya is connected to this Khmer settlement. Additionally, Prince Damrong has also attested to the existence of a city named Ayodhya, founded by the Khmers ruling from Lopburi at the point where the three rivers meet. An excavation map shows traces of an ancient baray close to the southwestern tip of Wat Yai Chai Mongkhon, which could have been built on a former important Khmer temple complex.",
-  "title": "Ayutthaya Historical Park",
-  "source": "https://en.wikipedia.org/wiki/Ayutthaya_Historical_Park",
+ "museum-future": {
+  "text": " Museum of the Future is a building located in the Financial District of Dubai, UAE. The museum, with 7 floors, is dedicated to exploring the future of science, technology, and innovation. It is housed in a torus-shaped building with windows in the form of a poem in Arabic about the future, written by Dubai ruler Sheikh Mohammed bin Rashid Al Maktoum. The Government of the United Arab Emirates opened the museum on 22 February 2022.",
+  "title": "Museum of the Future",
+  "source": "https://en.wikipedia.org/wiki/Museum_of_the_Future",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "skywalk": {
-  "text": "King Power Mahanakhon, formerly known as MahaNakhon (มหานคร), is a mixed-use skyscraper in the Silom/Sathon central business district of Bangkok, Thailand. It was opened in December 2016 by MahaNakhon Managing Director Kipsan Beck. It features the unconventional appearance of a glass curtain-walled square tower with a cuboid-surfaced helix cut into the side of the building. Following transfer of the first residential units in April 2016, at 314.2 metres (1,031 ft) with 77 floors, it was recognized as the tallest building in Thailand on 4 May 2016 by the Council on Tall Buildings and Urban Habitat (CTBUH). The building contains a hotel, retail and residences, which are priced between around $US1,100,000 to US$17,000,000, making it one of the most expensive condominiums in Bangkok.",
-  "title": "King Power Mahanakhon",
-  "source": "https://en.wikipedia.org/wiki/King_Power_Mahanakhon",
+ "global-village": {
+  "text": "Global Village is a cultural destination in the city of Dubai. It has different pavilions to showcase the culture and traditions of each country across the Globe. It is also a festive carnival where different restaurants and places are located too. Global Village is a place where people can look at the culture of different countries and regions.",
+  "title": "Global Village (Dubai)",
+  "source": "https://en.wikipedia.org/wiki/Global_Village_(Dubai)",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "baiyoke": {
-  "text": "Baiyoke Tower II is an 88-story, 309 m (1,014 ft) skyscraper hotel at 222 Ratchaprarop Road in the Ratchathewi District of Bangkok, Thailand. It is the third tallest completed building in the city, after MahaNakhon and Magnolias Waterfront Residences at ICONSIAM. The building comprises the Baiyoke Sky Hotel, the tallest hotel in Southeast Asia and the seventh-tallest hotel in the world.",
-  "title": "Baiyoke Tower II",
-  "source": "https://en.wikipedia.org/wiki/Baiyoke_Tower_II",
+ "miracle-garden": {
+  "text": "The Dubai Miracle Garden is a flower garden located in the district of Dubailand, Dubai, United Arab Emirates. The garden was launched on Valentine's Day in 2013. It occupies over 72,000 square metres (780,000 sq ft), making it the world's largest flower garden, featuring over 150M+ Blooms every season",
+  "title": "Dubai Miracle Garden",
+  "source": "https://en.wikipedia.org/wiki/Dubai_Miracle_Garden",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "dinner-cruise": {
-  "text": "The Chao Phraya River is the major river in Thailand, with its low alluvial plain forming the centre of the country. It flows through Bangkok and then into the Gulf of Thailand.",
-  "title": "Chao Phraya River",
-  "source": "https://en.wikipedia.org/wiki/Chao_Phraya_River",
+ "img-worlds": {
+  "text": "IMG Worlds of Adventure is one of the world’s largest indoor theme parks based in Dubai, United Arab Emirates. It is located on Sheikh Mohammad Bin Zayed Road within the City of Arabia.",
+  "title": "IMG Worlds of Adventure",
+  "source": "https://en.wikipedia.org/wiki/IMG_Worlds_of_Adventure",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "sea-life": {
-  "text": "Sea Life Bangkok Ocean World is an aquarium in Bangkok, Thailand and is the largest in South East Asia. It covers approximately 10,000 square meters (110,000 sq ft) with hundreds of different species on display in exhibits totaling about 5,000,000 liters (1,300,000 U.S. gal).",
-  "title": "Sea Life Bangkok Ocean World",
-  "source": "https://en.wikipedia.org/wiki/Sea_Life_Bangkok_Ocean_World",
+ "aquaventure": {
+  "text": "Atlantis Resorts, a subsidiary of Kerzner International, is a resort company that was created to operate the Atlantis resorts in Dubai, and Sanya (China). Kerzner operates three resorts that include Atlantis The Palm, Dubai; Atlantis Sanya, China; and Atlantis The Royal, Dubai. The Atlantis Paradise Island resort in the Bahamas is no longer owned or operated by Kerzner and is now owned by Brookfield Asset Management LLC and operated by Marriott International's Autograph Collection Hotels.",
+  "title": "Atlantis Resorts",
+  "source": "https://en.wikipedia.org/wiki/Atlantis_Resorts",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "safari-world": {
-  "text": "Safari World is a tourist attraction in Bangkok, Thailand that consists of two parks named Marine Park and Safari Park, operated by Safari World Public Limited. The park was opened in 1988 with a total area of 480 acres (190 ha) for its open zoo and 180 acres (73 ha) for its bird park. A major renovation to enhance effectiveness of land use began on 17 April 1989 and its total area developed for the leisure park now consists of an open zoo and a marine park on 500 rai of land.",
-  "title": "Safari World",
-  "source": "https://en.wikipedia.org/wiki/Safari_World",
+ "ski-dubai": {
+  "text": "Ski Dubai is an indoor ski resort with 22,500 square meters of indoor ski area. The park maintains a temperature of −1 to 2 °C throughout the year. It is a part of the Mall of the Emirates, one of the largest shopping malls in the world, located in Dubai, United Arab Emirates. It was developed by Majid Al Futtaim Group, which also operates the Mall of the Emirates.",
+  "title": "Ski Dubai",
+  "source": "https://en.wikipedia.org/wiki/Ski_Dubai",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "dream-world": {
-  "text": "Dream World is an amusement park in Thanyaburi district, Pathum Thani province, Thailand. The park includes three roller coasters and multiple other rides and attractions.",
-  "title": "Dream World (Thailand)",
-  "source": "https://en.wikipedia.org/wiki/Dream_World_(Thailand)",
+ "dubai-fountain": {
+  "text": "The Dubai Fountain contains a choreographed fountain system located on the 12-hectare (30-acre) artificial Burj Khalifa Lake, at the center of the Downtown Dubai development in Dubai, United Arab Emirates. It was designed by WET Design, a California-based company also responsible for the fountains at the Bellagio Hotel Lake in Las Vegas. Illuminated by 6,600 lights and 25 colored projectors, it is 275 m (902 ft) long and shoots water up to 500 ft (152.4 m) into the air accompanied by a range of classical to contemporary Arabic and world music. It was built at a cost of Dhs 800 million (US$218 million). As of 2025, it is the world's largest choreographed fountain.",
+  "title": "Dubai Fountain",
+  "source": "https://en.wikipedia.org/wiki/Dubai_Fountain",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "calypso": {
-  "text": "Asiatique The Riverfront Destination, simply known as Asiatique is a large open-air mall in Bangkok, Thailand. It occupies the former docks of the East Asiatic Company, and faces the Chao Phraya River and Charoen Krung Road. The complex opened in 2012 after extensive renovation of the site.",
-  "title": "Asiatique",
-  "source": "https://en.wikipedia.org/wiki/Asiatique",
+ "abu-dhabi": {
+  "text": "The Sheikh Zayed Grand Mosque is a mosque located in Abu Dhabi, the capital city of the United Arab Emirates. It is the country's largest mosque, and is the key place of worship for daily Islamic prayers. There is a smaller replica of this mosque in Surakarta, a city in Indonesia.",
+  "title": "Sheikh Zayed Grand Mosque",
+  "source": "https://en.wikipedia.org/wiki/Sheikh_Zayed_Grand_Mosque",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "muay-thai": {
-  "text": "Rajadamnern Stadium is a sporting arena in Bangkok, Thailand. Along with Lumpinee Boxing Stadium, Rajadamnern is one of the two main stadiums for modern Muay Thai. It hosts fights every day from Monday to Sunday. The stadium has its own ranking system and championship titles up to middleweight (160 lbs).",
-  "title": "Rajadamnern Stadium",
-  "source": "https://en.wikipedia.org/wiki/Rajadamnern_Stadium",
+ "hatta": {
+  "text": "Hatta is an inland exclave of the emirate of Dubai in the United Arab Emirates.",
+  "title": "Hatta, United Arab Emirates",
+  "source": "https://en.wikipedia.org/wiki/Hatta%2C_United_Arab_Emirates",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "jim-thompson": {
-  "text": "The Jim Thompson House is a museum in central Bangkok, Thailand, housing the art collection of American businessman and architect James Harrison Wilson Thompson or simply Jim Thompson, the museum designer and former owner. Built in 1959, the museum spans one rectangular rai of land.",
-  "title": "Jim Thompson House",
-  "source": "https://en.wikipedia.org/wiki/Jim_Thompson_House",
+ "old-dubai": {
+  "text": "Dubai Gold Souk or Gold Souk, is a traditional market in Dubai, UAE. The souk is located in Dubai's commercial business district in Deira, in the locality of Al Ras. The souk consists of over 380 retailers, most of whom are jewelry traders. As of 2020, some of the shops are four decades old, while others are new. The market mainly deals in the sale of gold, platinum, and silver jewelry as well as bullion; loose diamonds and color stones are also sold.",
+  "title": "Dubai Gold Souk",
+  "source": "https://en.wikipedia.org/wiki/Dubai_Gold_Souk",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "chatuchak": {
-  "text": "The Chatuchak Weekend Market, on Kamphaeng Phet 2 Road, Chatuchak, Bangkok, is the largest market in Thailand. Afectionately known as JJ Market, it has more than 15,000 stalls and 11,505 vendors (2019), divided into 27 sections. Chatuchak Market sells many different kinds of goods, including plants, antiques, consumer electronics, cosmetics, pets, fresh and dry food and drinks, ceramics, furniture and home accessories, clothing, and books. It is the world's largest and most diverse weekend market, with over 200,000 visitors every weekend.",
-  "title": "Chatuchak Weekend Market",
-  "source": "https://en.wikipedia.org/wiki/Chatuchak_Weekend_Market",
+ "al-fahidi": {
+  "text": "Al Fahidi Historical Neighbourhood is a historic district in Dubai, United Arab Emirates.",
+  "title": "Al Bastakiya",
+  "source": "https://en.wikipedia.org/wiki/Al_Bastakiya",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "chinatown-food": {
-  "text": "Yaowarat Road in Samphanthawong District is the main artery of Bangkok's Chinatown. Modern Chinatown now covers a large area around Yaowarat and Charoen Krung Road. It has been the main centre for trading by the Chinese community since they moved from their old site some 200 years ago to make way for the construction of Wat Phra Kaew, the Grand Palace. Nearby is the Phahurat or Little India. The area is bordered by the Chao Phraya River from the west to the south. Yaowarat Road is well known for its variety of foodstuffs, and at night turns into a large \"food street\" that draws tourists and locals from all over the city.",
-  "title": "Yaowarat Road",
-  "source": "https://en.wikipedia.org/wiki/Yaowarat_Road",
+ "jumeirah-mosque": {
+  "text": "Jumeirah Mosque is a mosque in Dubai, Emirate of Dubai, United Arab Emirates. Construction began in 1975 and the mosque opened in 1979; the mosque is built in a combination of historical Islamic architectural styles, including Fatimid and Mamluk. It was a gift from the late Sheikh Rashid bin Saeed Al Maktoum, the former Ruler of Dubai to his son and heir, Sheikh Mohammed bin Rashid Al Maktoum.",
+  "title": "Jumeirah Mosque",
+  "source": "https://en.wikipedia.org/wiki/Jumeirah_Mosque",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "tuktuk-night": {
-  "text": "An auto rickshaw is a motorized version of the pulled rickshaw or cycle rickshaw. Often called a tuk tuk, it is usually a three-wheeled vehicle, powered by an engine. They use a variety of fuels, with the most common being petrol, compressed natural gas, liquefied petroleum gas, and electricity. They are known by many names in many countries.",
-  "title": "Auto rickshaw",
-  "source": "https://en.wikipedia.org/wiki/Auto_rickshaw",
+ "view-palm": {
+  "text": "The Palm Jumeirah, also known as the Palm Islands,\n(Arabic: نخلة جميرا) is an archipelago of artificial islands on the Persian Gulf in Jumeirah, Dubai, United Arab Emirates. It is part of a larger series of developments called the Palm Islands, including Palm Jebel Ali and the Dubai Islands, which, when completed, will together increase Dubai's shoreline by a total of 520 kilometres (320 mi). It has a population of over 25,000 as of 2022.",
+  "title": "Palm Jumeirah",
+  "source": "https://en.wikipedia.org/wiki/Palm_Jumeirah",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "khlong-boat": {
-  "text": "The long-tail boat is a type of watercraft native to Southeast Asia that uses a common automotive engine as a readily available and maintainable powerplant. A craft designed to carry passengers on a river may include a lightweight, long canoe hull, up to 30 metres long, and a canopy. There is much variation among these boats, some having evolved from traditional craft types, while others have a more improvised look — the sole defining characteristic is a second-hand car or truck engine.",
-  "title": "Long-tail boat",
-  "source": "https://en.wikipedia.org/wiki/Long-tail_boat",
+ "sky-views": {
+  "text": "Downtown Dubai or The Dubai Downtown is a large-scale, mixed-use complex in Dubai, United Arab Emirates. It was developed by the Emaar real estate development company. Before 2000, this area was called Umm Al Tarif. It is home to some of the city's most notable landmarks, including Burj Khalifa, the world's tallest building; the Dubai Mall, the second-largest mall in the world and The Dubai Fountain, the world's largest choreographed fountain. It covers an area of 2 square kilometres (0.77 sq mi), at an estimated cost of US$20 billion upon completion and, as of 2017, has a population of 13,201.",
+  "title": "Downtown Dubai",
+  "source": "https://en.wikipedia.org/wiki/Downtown_Dubai",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "cooking-class": {
-  "text": "Thai cuisine, the national cuisine of Thailand and of Thai people, places emphasis on lightly prepared dishes with aromatics and spicy heat. Traditional Thai cuisine loosely falls into four categories: tom, yam, tam, and kaeng. Deep-frying, stir-frying and steaming are methods introduced from Chinese cuisine.",
-  "title": "Thai cuisine",
-  "source": "https://en.wikipedia.org/wiki/Thai_cuisine",
+ "helicopter": {
+  "text": "The Palm Jumeirah, also known as the Palm Islands,\n(Arabic: نخلة جميرا) is an archipelago of artificial islands on the Persian Gulf in Jumeirah, Dubai, United Arab Emirates. It is part of a larger series of developments called the Palm Islands, including Palm Jebel Ali and the Dubai Islands, which, when completed, will together increase Dubai's shoreline by a total of 520 kilometres (320 mi). It has a population of over 25,000 as of 2022.",
+  "title": "Palm Jumeirah",
+  "source": "https://en.wikipedia.org/wiki/Palm_Jumeirah",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "bang-krachao": {
-  "text": "Bang Kachao, is an artificial island formed by a bend in the Chao Phraya River and a canal at its western end. The entire area is also known as the Green Lung. It lies south of the Thai capital Bangkok in Phra Pradaeng District of Samut Prakan Province. The island, covering 16 square kilometres (6.2 sq mi) or 12,000 rai has been traditionally agricultural with only a relatively small population. It is sometimes referred to as the \"green lung\" of Bangkok\". In 2006, Bang Kachao was named \"best urban oasis\" by Time in its \"Best of Asia\" series and is frequented by nature lovers and cyclists.",
-  "title": "Bang Kachao",
-  "source": "https://en.wikipedia.org/wiki/Bang_Kachao",
+ "balloon": {
+  "text": "A hot air balloon is a lighter-than-air aircraft consisting of a bag, called an envelope, which contains heated air. Suspended beneath is a gondola or wicker basket, which carries passengers and a source of heat, in most cases an open flame caused by burning liquid propane. The heated air inside the envelope makes it buoyant, since it has a lower density than the colder air outside the envelope. As with all aircraft, hot air balloons cannot fly beyond the atmosphere. The envelope does not have to be sealed at the bottom, since the air inside the envelope is at about the same pressure as the surrounding air. In modern sport balloons the envelope is generally made from nylon fabric, and the inlet of the balloon is made from a fire-resistant material such as Nomex. Modern balloons have been made in many shapes, such as rocket ships and the shapes of various commercial products, though the traditional shape is used for most non-commercial and many commercial applications.",
+  "title": "Hot air balloon",
+  "source": "https://en.wikipedia.org/wiki/Hot_air_balloon",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "coral-island": {
-  "text": "Ko Lan is one of the eastern seaboard islands of Thailand. Ko Lan lies 7.5 km from the nearest shore, Pattaya. \"Ko Lan\" is the name of the island in the Royal Thai General System of Transcription. It is also known as \"Koh Larn\" and \"Ko Laan\".",
-  "title": "Ko Lan",
-  "source": "https://en.wikipedia.org/wiki/Ko_Lan",
+ "la-perle": {
+  "text": "Dragone is a Las Vegas and Luxembourg based creative company specializing in the creation of large scale theater shows. It was founded in 2000 by Franco Dragone. Formerly known as Franco Dragone Entertainment Group (FDEG), the company became Dragone in 2014. The company, previously based in La Louvière, Belgium, has created in excess of forty \"permanent shows\", in addition to events in more than 12 countries across Europe, the Middle East, in the United States, South America and Asia.",
+  "title": "Dragone (company)",
+  "source": "https://en.wikipedia.org/wiki/Dragone_(company)",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "river-kwai": {
-  "text": "The Burma Railway, also known as the Siam–Burma Railway, Thai–Burma Railway and similar names, or locally as the Death Railway, is a 415 km (258 mi) railway between Ban Pong, Thailand, and Thanbyuzayat, Burma. It was built from 1940 to 1943 by abducted Southeast Asian civilians and captured Allied soldiers forced to work by the Japanese, to supply troops and weapons in the Burma campaign of World War II. It completed the rail link between Bangkok, Thailand, and Rangoon, Burma. The name used by the Imperial Japanese Government was Tai–Men Rensetsu Tetsudō (泰緬連接鉄道), which means Thailand-Burma-Link-Railway.",
-  "title": "Burma Railway",
-  "source": "https://en.wikipedia.org/wiki/Burma_Railway",
+ "dubai-opera": {
+  "text": "Dubai Opera is a 2,000-seat, multi-format, performing arts centre located within The Opera District in Downtown Dubai. It was developed by Emaar Properties to host a variety of performances and events including theatre, opera, ballet, concerts, conferences and exhibitions. Its plans were announced by Sheikh Mohammed bin Rashid Al Maktoum in March 2012 and it was completed in 2016. It opened on 31 August 2016 with a performance by Plácido Domingo. The first season featured Bizet's The Pearl Fishers opera and tenor José Carreras. Dubai Opera has flat floor capacity of 1,800 m2 (19,000 sq ft). This floor can be hired for weddings, gala dinners, fashion shows and exhibitions. The building is created by Atkins and principal architect Janus Rostock, allows it to transform into three modes: a theatre, a music hall, and a banquet or event hall in a 'flat floor' mode.",
+  "title": "Dubai Opera",
+  "source": "https://en.wikipedia.org/wiki/Dubai_Opera",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "asiatique-wheel": {
-  "text": "Asiatique The Riverfront Destination, simply known as Asiatique is a large open-air mall in Bangkok, Thailand. It occupies the former docks of the East Asiatic Company, and faces the Chao Phraya River and Charoen Krung Road. The complex opened in 2012 after extensive renovation of the site.",
-  "title": "Asiatique",
-  "source": "https://en.wikipedia.org/wiki/Asiatique",
+ "food-tour": {
+  "text": "Emirati cuisine is the local traditional Arabic cuisine of the United Arab Emirates. The origins of Emirati cuisine come from the Bedouins who roamed the country. It is part of Eastern Arabian cuisine and shares similarities with cuisines from neighbouring countries, such as Omani cuisine and Saudi Arabian cuisine, as well as influences from different Middle Eastern and Asian cuisines. As a major international hub, the United Arab Emirates today has a multicultural variety of cuisines from different parts of the world.",
+  "title": "Emirati cuisine",
+  "source": "https://en.wikipedia.org/wiki/Emirati_cuisine",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "wat-pho-massage": {
-  "text": "Traditional Thai massage or Thai yoga massage is a traditional therapy combining acupressure, Indian Ayurvedic principles, and assisted yoga postures. In the Thai language, it is usually called nuat phaen thai or nuat phaen boran, though its formal name is nuat thai according to the Traditional Thai Medical Professions Act, BE 2556 (2013).",
-  "title": "Traditional Thai massage",
-  "source": "https://en.wikipedia.org/wiki/Traditional_Thai_massage",
+ "dolphinarium": {
+  "text": "Dubai Dolphinarium is an indoor dolphinarium in the Middle East, providing habitat to dolphins and seals, allowing the public to watch and interact with them through live shows and photo sessions. It is located at Creek Park near the Children's City within the vicinity of Oud Metha and Bur Dubai. Dubai Dolphinarium was opened on May 21, 2008 in partnership with Dubai Municipality, and is sponsored and supported by Dubai government to provide the general public with entertainment and also educate them regarding dolphins, seals and other marine organisms. It was also reflected that interacting with such friendly mammals like dolphins will motivate young generation to protect marine life and the environment.",
+  "title": "Dubai Dolphinarium",
+  "source": "https://en.wikipedia.org/wiki/Dubai_Dolphinarium",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "way/342554731": {
-  "text": "The Peninsula Bangkok is a 5-star hotel in Bangkok, Thailand. The hotel opened in 1998, counting 37 floors and 367 rooms. The hotel was 50% owned by the Hongkong and Shanghai Hotels (HSH) and 50% by the Phataraprasit family until 2020, when HSH purchased the Phataraprasit family's stake in the property.",
-  "title": "The Peninsula Bangkok",
-  "source": "https://en.wikipedia.org/wiki/The_Peninsula_Bangkok",
+ "way/238284905": {
+  "text": "The JW Marriott Marquis Dubai Hotel is the world's 3rd tallest hotel: a 72-storey, 355 m (1,165 ft) twin-tower skyscraper complex in Dubai, United Arab Emirates. The AED1.8 billion complex features a 1,608-room hotel run by Marriott International.",
+  "title": "JW Marriott Marquis Dubai",
+  "source": "https://en.wikipedia.org/wiki/JW_Marriott_Marquis_Dubai",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "way/341383514": {
-  "text": "The Grand Hyatt Erawan Bangkok is a luxury hotel in Bangkok, Thailand. It opened in 1991, replacing the ailing government-owned Erawan Hotel, on a corner of Ratchaprasong Intersection in the modern city centre. It is jointly owned by Thai hospitality company the Erawan Group and the government-owned company The Syndicate of Thai Hotels and Tourists Enterprises, which previously operated the Erawan, and is managed by Hyatt Hotels and Resorts. The hotel building was designed by Rangsan Torsuwan in a postmodern style employing traditional Thai elements, and features a shopping mall inside the building, known as Erawan Bangkok. The property is adjacent to the popular Erawan Shrine, which was built to alleviate bad luck during the construction of the original hotel.",
-  "title": "Grand Hyatt Erawan Bangkok",
-  "source": "https://en.wikipedia.org/wiki/Grand_Hyatt_Erawan_Bangkok",
+ "way/591560667": {
+  "text": "Waldorf Astoria Dubai Palm Jumeirah is a five-star luxury hotel in Dubai, part of Hilton Worldwide. The hotel was opened March 12, 2014. It is the second hotel of the Waldorf Astoria Hotels & Resorts in the United Arab Emirates. In 2018, Corah Caples was appointed as Director of Operations.",
+  "title": "Waldorf Astoria Dubai Palm Jumeirah",
+  "source": "https://en.wikipedia.org/wiki/Waldorf_Astoria_Dubai_Palm_Jumeirah",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "way/25829599": {
-  "text": "Conrad Bangkok is a hotel in Bangkok, Thailand, that is part of the Conrad Hotels brand owned by Hilton Worldwide. It opened in 2003. The hotel has 392 rooms and suites. There are six restaurants and lounges at the hotel including KiSara restaurant which serves Japanese cuisine and Liu restaurant which offers traditional Chinese food. The hotel also has a gym, a spa, a swimming pool, tennis courts, and a rooftop jogging track.",
-  "title": "Conrad Bangkok",
-  "source": "https://en.wikipedia.org/wiki/Conrad_Bangkok",
+ "way/367180330": {
+  "text": "InterContinental Dubai Festival City is a luxury five-star hotel in Dubai Festival City, United Arab Emirates, operated by IHG Hotels & Resorts. It is located on the Dubai Creek, adjoining the Dubai Festival City Mall, opposite the Mohammed Bin Rashid Library, with the Burj Khalifa behind in the distance. It is also close to Dubai International Airport.",
+  "title": "InterContinental Dubai Festival City",
+  "source": "https://en.wikipedia.org/wiki/InterContinental_Dubai_Festival_City",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "node/257066461": {
-  "text": "lebua Bangkok is a luxury hotel located in at State Tower adjacent to the Chao Phraya River on Silom Road in the Bang Rak District of Bangkok, Thailand. The hotel is managed by lebua Hotels & Resorts, a Thai hospitality company that operates hotels, restaurants, and bars in Thailand, India, and New Zealand. The hotel is known for its high-rise location, large suites, and its collection of restaurants and bars under The Dome by lebua, several of which have received international recognition and Michelin stars.",
-  "title": "Lebua at State Tower",
-  "source": "https://en.wikipedia.org/wiki/Lebua_at_State_Tower",
+ "way/327379135": {
+  "text": "Conrad Dubai is a 51-storey luxury hotel in the United Arab Emirates. Located in Dubai's commercial center on Sheikh Zayed Road, the property is close to the Dubai International Financial Centre and the Dubai Mall. The hotel was officially opened on 18 September 2013.",
+  "title": "Conrad Dubai",
+  "source": "https://en.wikipedia.org/wiki/Conrad_Dubai",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "way/1288203572": {
-  "text": "The Atlanta hotel is a hotel located on Sukhumvit Road, Soi 2 in Bangkok, Thailand. Opened in 1952 by Dr. Max Henn, the hotel is known for its art deco interior design.",
-  "title": "The Atlanta Hotel (Bangkok)",
-  "source": "https://en.wikipedia.org/wiki/The_Atlanta_Hotel_(Bangkok)",
+ "way/10316322": {
+  "text": "Jumeirah Beach Hotel is a luxury hotel in Dubai, United Arab Emirates. The hotel, which opened in 1997, is operated by the Dubai-based hotelier Jumeirah. The hotel contains 598 rooms and suites, 19 beachfront villas, and 20 restaurants and bars. This wave-shaped hotel complements the sail-shaped Burj Al Arab, which is adjacent to the Jumeirah Beach Hotel.",
+  "title": "Jumeirah Beach Hotel",
+  "source": "https://en.wikipedia.org/wiki/Jumeirah_Beach_Hotel",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "node/4603021589": {
-  "text": "Centara Grand & Bangkok Convention Centre at CentralWorld is a hotel located in Pathum Wan District, Bangkok, Thailand. It is the flagship of Central Group's Centara Hotels and Resorts.",
-  "title": "Centara Grand and Bangkok Convention Centre",
-  "source": "https://en.wikipedia.org/wiki/Centara_Grand_and_Bangkok_Convention_Centre",
+ "way/12700546": {
+  "text": "The Jumeirah Burj Al Arab, commonly known as Burj Al Arab, is a luxury hotel in Dubai, United Arab Emirates. Developed and managed by Jumeirah, it is one of the tallest hotels in the world, although 39% of its total height is made up of non-occupiable space. Burj Al Arab stands on an artificial island that is 280 m (920 ft) from Jumeirah Beach and is connected to the mainland by a private curving bridge. The shape of the structure is designed to resemble the sail of a dhow. It has a helipad near the roof, at a height of 210 m (689 ft) above ground. The Burj Al Arab is now temporarily closed for renovations until 31 October 2027, Forbes Travel Guide and Hotels Digest kept the highest Global Ratings for the hotel, despite acknowledging the temporary closure on both websites.",
+  "title": "Burj Al Arab",
+  "source": "https://en.wikipedia.org/wiki/Burj_Al_Arab",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "node/12114197401": {
-  "text": "Hilton Garden Inn is an American chain of full-service hotels targeting business and leisure travelers. The brand is owned by Hilton Worldwide. As of December 2019, it has 862 properties with 126,086 rooms in 49 countries and territories, including 81 that are managed with 15,678 rooms and 781 that are franchised with 110,408 rooms.",
-  "title": "Hilton Garden Inn",
-  "source": "https://en.wikipedia.org/wiki/Hilton_Garden_Inn",
+ "node/659838912": {
+  "text": "Grosvenor House is a twin tower complex in Dubai Marina in Dubai, United Arab Emirates.",
+  "title": "Grosvenor House (Dubai)",
+  "source": "https://en.wikipedia.org/wiki/Grosvenor_House_(Dubai)",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "way/30135060": {
-  "text": "The Sukhothai Bangkok is a hotel in Bangkok, located in the city's Sathorn neighbourhood. The hotel opened in 1991, and is managed by Sukhothai Hotels and Resorts.",
-  "title": "The Sukhothai Bangkok",
-  "source": "https://en.wikipedia.org/wiki/The_Sukhothai_Bangkok",
+ "node/12484512893": {
+  "text": "Jumeirah Marsa Al Arab is a luxury resort hotel in Dubai, United Arab Emirates, operated by the Jumeirah Group. Located on a peninsula adjacent to Burj Al Arab and Jumeirah Beach Hotel, the property opened on 14 March 2025 and forms part of Jumeirah's trio of maritime-themed landmark developments on Dubai's coastline.",
+  "title": "Marsa Al Arab",
+  "source": "https://en.wikipedia.org/wiki/Marsa_Al_Arab",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "way/183158650": {
-  "text": "The Anantara Siam Bangkok Hotel is a luxury hotel located in the Ratchadamri area in the Pathum Wan District of central Bangkok. Formerly known as the Four Seasons Bangkok, it is situated opposite the Royal Bangkok Sports Club. The hotel is part of the Anantara Hotels & Resorts brand under Minor Hotels.",
-  "title": "Anantara Siam Bangkok Hotel",
-  "source": "https://en.wikipedia.org/wiki/Anantara_Siam_Bangkok_Hotel",
+ "way/64890199": {
+  "text": "Rose Rayhaan by Rotana, also known as the Rose Tower, is a 72-storey, 333 m (1,093 ft) hotel on Sheikh Zayed Road in Dubai, United Arab Emirates. It is no. 5 on the list of world's tallest hotels. The tower was originally designed to be 380 m (1,250 ft), but modification reduced it to 333m or 1093 ft.",
+  "title": "Rose Rayhaan by Rotana",
+  "source": "https://en.wikipedia.org/wiki/Rose_Rayhaan_by_Rotana",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "way/261527060": {
-  "text": "W Bangkok is a five-star luxury hotel in Bangkok, marketed under the brand W Hotels.",
-  "title": "W Bangkok",
-  "source": "https://en.wikipedia.org/wiki/W_Bangkok",
+ "way/89790675": {
+  "text": "Atlantis, The Palm is a luxury hotel resort located at the apex of the Palm Jumeirah in the United Arab Emirates. It was the first resort to be built on the island and is themed on the myth of Atlantis but includes distinct Arabian elements. The resort opened on September 24, 2008 as a joint venture between Kerzner International Holdings Limited and Istithmar World.",
+  "title": "Atlantis, The Palm",
+  "source": "https://en.wikipedia.org/wiki/Atlantis%2C_The_Palm",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "way/342200086": {
-  "text": "Shangri-La Bangkok is a 5-star resort hotel owned by Shangri-La Hotels and Resorts, located on the banks of the Chao Phraya River in Bangkok, Thailand. With a quarter of a mile of river frontage, the two towers of the property face the Saphan Taksin BTS Station.",
-  "title": "Shangri-La Hotel, Bangkok",
-  "source": "https://en.wikipedia.org/wiki/Shangri-La_Hotel%2C_Bangkok",
+ "way/98642884": {
+  "text": "The Hyatt Regency Dubai is a luxury, five-star hotel located on Deira Corniche in Dubai, United Arab Emirates. It is the first Hyatt Hotel in UAE. It has 421 rooms and an additional complex of 388 apartments called The Galleria Residence.",
+  "title": "Hyatt Regency Dubai",
+  "source": "https://en.wikipedia.org/wiki/Hyatt_Regency_Dubai",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "way/579376348": {
-  "text": "Rosewood Bangkok is a luxury hotel within Bangkok's central business district along Ploenchit Road, managed by Rosewood Hotels & Resorts. The hotel features 159 guestrooms, three restaurants, a roof bar and conference rooms. It was designed by Kohn Pedersen Fox with Tandem Architects as executive architect and Celia Chu Design Associates as interior designer. The building provides direct access to the adjacent Phloen Chit BTS station.",
-  "title": "Rosewood Bangkok",
-  "source": "https://en.wikipedia.org/wiki/Rosewood_Bangkok",
+ "way/118263839": {
+  "text": "The Four Points by Sheraton Sheikh Zayed Road, Dubai, previously the Golden Sands Tower, is a 43-floor hotel in Dubai, United Arab Emirates. The building, constructed of steel and glass, has a total structural height of 166 m (545 ft), and currently stands as the 40th-tallest structure in the Dubai. Construction of the tower began in 2005 and was completed in early 2007. The hotel is operated by Marriott International, and stands as one of the tallest all-hotel structures in the city.",
+  "title": "Four Points by Sheraton Sheikh Zayed Road, Dubai",
+  "source": "https://en.wikipedia.org/wiki/Four_Points_by_Sheraton_Sheikh_Zayed_Road%2C_Dubai",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "way/856384724": {
-  "text": "The Mövenpick BDMS Wellness Resort Bangkok is a luxury wellness hotel on Witthayu Road, Bangkok, Thailand.",
-  "title": "Mövenpick BDMS Wellness Resort Bangkok",
-  "source": "https://en.wikipedia.org/wiki/M%C3%B6venpick_BDMS_Wellness_Resort_Bangkok",
+ "way/125848289": {
+  "text": "Gevora Hotel is a 1,168 ft (356 m) tall hotel along Sheikh Zayed Road in Dubai, UAE. That height has given the skyscraper the title of tallest hotel building according to Guinness World Records. The four-star hotel opened in February 2018 after a construction period of twelve years. It has 528 rooms spread over 75 floors and a number of facilities including restaurants and a pool on top of its parking garage building.",
+  "title": "Gevora Hotel",
+  "source": "https://en.wikipedia.org/wiki/Gevora_Hotel",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "relation/18728184": {
-  "text": "Baiyoke Tower II is an 88-story, 309 m (1,014 ft) skyscraper hotel at 222 Ratchaprarop Road in the Ratchathewi District of Bangkok, Thailand. It is the third tallest completed building in the city, after MahaNakhon and Magnolias Waterfront Residences at ICONSIAM. The building comprises the Baiyoke Sky Hotel, the tallest hotel in Southeast Asia and the seventh-tallest hotel in the world.",
-  "title": "Baiyoke Tower II",
-  "source": "https://en.wikipedia.org/wiki/Baiyoke_Tower_II",
+ "way/125848292": {
+  "text": "The Shangri-La Hotel is a 43-floor hotel tower in Dubai, United Arab Emirates. The tower has a total structural height of 200 m. Construction of the Shangri-La Hotel was completed in July 2003. It was built by South African construction firm Murray and Roberts, now renamed Concor.",
+  "title": "Shangri-La Hotel (Dubai)",
+  "source": "https://en.wikipedia.org/wiki/Shangri-La_Hotel_(Dubai)",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  },
- "relation/18728185": {
-  "text": "Baiyoke Tower II is an 88-story, 309 m (1,014 ft) skyscraper hotel at 222 Ratchaprarop Road in the Ratchathewi District of Bangkok, Thailand. It is the third tallest completed building in the city, after MahaNakhon and Magnolias Waterfront Residences at ICONSIAM. The building comprises the Baiyoke Sky Hotel, the tallest hotel in Southeast Asia and the seventh-tallest hotel in the world.",
-  "title": "Baiyoke Tower II",
-  "source": "https://en.wikipedia.org/wiki/Baiyoke_Tower_II",
+ "way/195527260": {
+  "text": "Tamani Hotel Marina is a 55-story hotel in Dubai, United Arab Emirates.",
+  "title": "Tamani Hotel Marina",
+  "source": "https://en.wikipedia.org/wiki/Tamani_Hotel_Marina",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+ },
+ "way/256973516": {
+  "text": "Khalid Al Attar Tower 2, aka Millennium Hotel, is a 66-floor tower on Sheikh Zayed Road in Dubai, United Arab Emirates. The tower has a total structural height of 294 m (853 ft). Construction of the Khalid Al Attar Tower 2 was completed in 2011.",
+  "title": "Khalid Al Attar Tower 2",
+  "source": "https://en.wikipedia.org/wiki/Khalid_Al_Attar_Tower_2",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+ },
+ "way/386161424": {
+  "text": "Palazzo Versace Dubai is a hotel and resort completed in Culture Village on the foreshore of Dubai Creek in Dubai, United Arab Emirates.",
+  "title": "Palazzo Versace Dubai",
+  "source": "https://en.wikipedia.org/wiki/Palazzo_Versace_Dubai",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+ },
+ "way/386266181": {
+  "text": "Grand Hyatt Dubai is a luxury five-star hotel located in the Bur Dubai district of Dubai, United Arab Emirates. Situated in the Dubai Healthcare City area near Dubai Creek, the hotel is renowned for its extensive resort-style facilities, lush landscaped gardens, and panoramic views of the city skyline and historic creek. Managed by Hyatt, Grand Hyatt Dubai is one of the flagship properties in the Middle East region.",
+  "title": "Grand Hyatt Dubai",
+  "source": "https://en.wikipedia.org/wiki/Grand_Hyatt_Dubai",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+ },
+ "way/393391115": {
+  "text": "Jumeirah Emirates Hotel Tower, also known as Emirates Tower Two, is a 67-floor hotel in the city of Dubai, United Arab Emirates. The hotel includes 41 luxury suites and is operated by Jumeirah Group. Connected with the Emirates Office Tower by a retail boulevard, the two towers form the Emirates Towers complex. At a structural height of 309 m (1,014 ft), Emirates Towers Hotel is the smaller of the two sister towers. It ranks as the 48th-tallest building in the world. It is the world's third-tallest all-hotel building. Construction, by BESIX subsidiary Six Construct, was completed on 15 April 2000.",
+  "title": "Jumeirah Emirates Towers Hotel",
+  "source": "https://en.wikipedia.org/wiki/Jumeirah_Emirates_Towers_Hotel",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+ },
+ "way/532836516": {
+  "text": "Kempinski The Boulevard Dubai, previously known as The Address Boulevard, is a 73-storey 370 m (1,214 ft) hotel in Downtown Dubai in Dubai, United Arab Emirates. It has 198 five-star hotel rooms and suites. It is on the list of tallest buildings in Dubai and the list of tallest buildings in the world. It has a restaurant, 3 pools, and views of the Burj Khalifa.",
+  "title": "Kempinski The Boulevard Dubai",
+  "source": "https://en.wikipedia.org/wiki/Kempinski_The_Boulevard_Dubai",
   "license": "CC BY-SA 4.0",
   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
  }

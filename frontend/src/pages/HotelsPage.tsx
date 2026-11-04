@@ -9,6 +9,7 @@ import { OfflineMap, type MapLine, type Pin } from "@/components/OfflineMap";
 import { Empty, ErrorState, Loading } from "@/components/States";
 import { AnimatedNumber, Illustrative, Segmented, Stars, SupplierBadge, SUPPLIER_COLOR, Tip, cn } from "@/components/ui";
 import { WhyChips } from "@/components/WhyChips";
+import { CITY } from "@/lib/city";
 
 type View = "today" | "samesame";
 const SPRING = { type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.55 } as const;
@@ -84,7 +85,7 @@ function Listing({ data }: { data: HotelSearch }) {
       <div className="min-w-0 flex-1 overflow-y-auto px-8 pb-16 pt-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Hotels in Bangkok</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Hotels in {CITY}</h1>
             <div className="mt-2"><SearchSummary data={data} /></div>
           </div>
           <Segmented value={view} onChange={setView}

@@ -1,415 +1,5 @@
 [
  {
-  "title": "File:The Twin Towers Hotel, Bangkok.JPG",
-  "author": "Hans Olav Lien",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
-  "source": "https://commons.wikimedia.org/wiki/File:The_Twin_Towers_Hotel,_Bangkok.JPG",
-  "file": "The_Twin_Towers_Hotel_Bangkok_JPG.jpg",
-  "kind": "hotel",
-  "subject": "node/1725736667"
- },
- {
-  "title": "File:\"The Leading Hotels of the World\" at the Okura Prestige Bangkok (2021).jpg",
-  "author": "Chainwit.",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:%22The_Leading_Hotels_of_the_World%22_at_the_Okura_Prestige_Bangkok_(2021).jpg",
-  "file": "The_Leading_Hotels_of_the_World_at_the_Okura_Prestige_Bangkok_2021_jpg.jpg",
-  "kind": "hotel",
-  "subject": "node/3705421625"
- },
- {
-  "title": "File:View from the Okura Prestige Bangkok (2021) 01.jpg",
-  "author": "Chainwit.",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:View_from_the_Okura_Prestige_Bangkok_(2021)_01.jpg",
-  "file": "View_from_the_Okura_Prestige_Bangkok_2021_01_jpg.jpg",
-  "kind": "hotel",
-  "subject": "node/3705421625"
- },
- {
-  "title": "File:YAMAZATO at the Okura Prestige Bangkok (2021).jpg",
-  "author": "Chainwit.",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:YAMAZATO_at_the_Okura_Prestige_Bangkok_(2021).jpg",
-  "file": "YAMAZATO_at_the_Okura_Prestige_Bangkok_2021_jpg.jpg",
-  "kind": "hotel",
-  "subject": "node/3705421625"
- },
- {
-  "title": "File:Chakrabongse Villas from Chao Phraya River วังจักรพงษ์ หรือ บ้านจักรพงษ์ 01.jpg",
-  "author": "Chainwit.",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Chakrabongse_Villas_from_Chao_Phraya_River_%E0%B8%A7%E0%B8%B1%E0%B8%87%E0%B8%88%E0%B8%B1%E0%B8%81%E0%B8%A3%E0%B8%9E%E0%B8%87%E0%B8%A9%E0%B9%8C_%E0%B8%AB%E0%B8%A3%E0%B8%B7%E0%B8%AD_%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B8%88%E0%B8%B1%E0%B8%81%E0%B8%A3%E0%B8%9E%E0%B8%87%E0%B8%A9%E0%B9%8C_01.jpg",
-  "file": "Chakrabongse_Villas_from_Chao_Phraya_River_01_jpg.jpg",
-  "kind": "hotel",
-  "subject": "relation/20583465"
- },
- {
-  "title": "File:Chakrabongse Villas from Chao Phraya River วังจักรพงษ์ หรือ บ้านจักรพงษ์ 02.jpg",
-  "author": "Chainwit.",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Chakrabongse_Villas_from_Chao_Phraya_River_%E0%B8%A7%E0%B8%B1%E0%B8%87%E0%B8%88%E0%B8%B1%E0%B8%81%E0%B8%A3%E0%B8%9E%E0%B8%87%E0%B8%A9%E0%B9%8C_%E0%B8%AB%E0%B8%A3%E0%B8%B7%E0%B8%AD_%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B8%88%E0%B8%B1%E0%B8%81%E0%B8%A3%E0%B8%9E%E0%B8%87%E0%B8%A9%E0%B9%8C_02.jpg",
-  "file": "Chakrabongse_Villas_from_Chao_Phraya_River_02_jpg.jpg",
-  "kind": "hotel",
-  "subject": "relation/20583465"
- },
- {
-  "title": "File:Chakrabongse Villas from Chao Phraya River วังจักรพงษ์ หรือ บ้านจักรพงษ์ 03.jpg",
-  "author": "Chainwit.",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Chakrabongse_Villas_from_Chao_Phraya_River_%E0%B8%A7%E0%B8%B1%E0%B8%87%E0%B8%88%E0%B8%B1%E0%B8%81%E0%B8%A3%E0%B8%9E%E0%B8%87%E0%B8%A9%E0%B9%8C_%E0%B8%AB%E0%B8%A3%E0%B8%B7%E0%B8%AD_%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B8%88%E0%B8%B1%E0%B8%81%E0%B8%A3%E0%B8%9E%E0%B8%87%E0%B8%A9%E0%B9%8C_03.jpg",
-  "file": "Chakrabongse_Villas_from_Chao_Phraya_River_03_jpg.jpg",
-  "kind": "hotel",
-  "subject": "relation/20583465"
- },
- {
-  "title": "File:ทางเข้าวังจักรพงษ์ (บ้านจักรพงษ์) Chakrabongse Villas entrance & River Books Shop.jpg",
-  "author": "Chainwit.",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%A7%E0%B8%B1%E0%B8%87%E0%B8%88%E0%B8%B1%E0%B8%81%E0%B8%A3%E0%B8%9E%E0%B8%87%E0%B8%A9%E0%B9%8C_(%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B8%88%E0%B8%B1%E0%B8%81%E0%B8%A3%E0%B8%9E%E0%B8%87%E0%B8%A9%E0%B9%8C)_Chakrabongse_Villas_entrance_%26_River_Books_Shop.jpg",
-  "file": "Chakrabongse_Villas_entrance_River_Books_Shop_jpg.jpg",
-  "kind": "hotel",
-  "subject": "relation/20583465"
- },
- {
-  "title": "File:Rules at the Atlanta Hotel Bangkok (15126069551).jpg",
-  "author": "Clay Gilliland",
-  "license": "CC BY-SA 2.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Rules_at_the_Atlanta_Hotel_Bangkok_(15126069551).jpg",
-  "file": "Rules_at_the_Atlanta_Hotel_Bangkok_15126069551_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/1288203572"
- },
- {
-  "title": "File:The Atlanta Hotel Bangkok (12445218255).jpg",
-  "author": "Clay Gilliland",
-  "license": "CC BY-SA 2.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:The_Atlanta_Hotel_Bangkok_(12445218255).jpg",
-  "file": "The_Atlanta_Hotel_Bangkok_12445218255_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/1288203572"
- },
- {
-  "title": "File:The Atlanta Hotel Bangkok (12445220105).jpg",
-  "author": "Clay Gilliland",
-  "license": "CC BY-SA 2.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:The_Atlanta_Hotel_Bangkok_(12445220105).jpg",
-  "file": "The_Atlanta_Hotel_Bangkok_12445220105_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/1288203572"
- },
- {
-  "title": "File:The Atlanta Hotel Bangkok (12445689904).jpg",
-  "author": "Clay Gilliland",
-  "license": "CC BY-SA 2.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:The_Atlanta_Hotel_Bangkok_(12445689904).jpg",
-  "file": "The_Atlanta_Hotel_Bangkok_12445689904_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/1288203572"
- },
- {
-  "title": "File:Nana Hotel, Bangkok (23977578728).jpg",
-  "author": "Blemished Paradise",
-  "license": "CC BY-SA 2.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Nana_Hotel,_Bangkok_(23977578728).jpg",
-  "file": "Nana_Hotel_Bangkok_23977578728_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/1292444753"
- },
- {
-  "title": "File:Nana Hotel, Bangkok (23977667248).jpg",
-  "author": "Blemished Paradise",
-  "license": "CC BY-SA 2.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Nana_Hotel,_Bangkok_(23977667248).jpg",
-  "file": "Nana_Hotel_Bangkok_23977667248_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/1292444753"
- },
- {
-  "title": "File:Nana Hotel, Bangkok (23977883188).jpg",
-  "author": "Blemished Paradise",
-  "license": "CC BY-SA 2.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Nana_Hotel,_Bangkok_(23977883188).jpg",
-  "file": "Nana_Hotel_Bangkok_23977883188_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/1292444753"
- },
- {
-  "title": "File:Nana Hotel, Bangkok (23977902828).jpg",
-  "author": "Blemished Paradise",
-  "license": "CC BY-SA 2.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Nana_Hotel,_Bangkok_(23977902828).jpg",
-  "file": "Nana_Hotel_Bangkok_23977902828_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/1292444753"
- },
- {
-  "title": "File:Lobby, Royal Orchid Sheraton Hotel, Bangkok (8284681275).jpg",
-  "author": "Ian Gratton from Sutton-n-Craven, North Yorkshire, England",
-  "license": "CC BY 2.0",
-  "license_url": "https://creativecommons.org/licenses/by/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Lobby,_Royal_Orchid_Sheraton_Hotel,_Bangkok_(8284681275).jpg",
-  "file": "Lobby_Royal_Orchid_Sheraton_Hotel_Bangkok_8284681275_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/1537453215"
- },
- {
-  "title": "File:Anantara Siam Bangkok Hotel bell.jpg",
-  "author": "Chainwit.",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Anantara_Siam_Bangkok_Hotel_bell.jpg",
-  "file": "Anantara_Siam_Bangkok_Hotel_bell_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/183158650"
- },
- {
-  "title": "File:Intercontinental Hotel,Bangkok (12).jpg",
-  "author": "กสิณธร ราชโอรส",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Intercontinental_Hotel,Bangkok_(12).jpg",
-  "file": "Intercontinental_Hotel_Bangkok_12_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/25787534"
- },
- {
-  "title": "File:Intercontinental Hotel,Bangkok (15).jpg",
-  "author": "กสิณธร ราชโอรส",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Intercontinental_Hotel,Bangkok_(15).jpg",
-  "file": "Intercontinental_Hotel_Bangkok_15_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/25787534"
- },
- {
-  "title": "File:Intercontinental Hotel,Bangkok (19).jpg",
-  "author": "กสิณธร ราชโอรส",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Intercontinental_Hotel,Bangkok_(19).jpg",
-  "file": "Intercontinental_Hotel_Bangkok_19_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/25787534"
- },
- {
-  "title": "File:Intercontinental Hotel,Bangkok (9).jpg",
-  "author": "กสิณธร ราชโอรส",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Intercontinental_Hotel,Bangkok_(9).jpg",
-  "file": "Intercontinental_Hotel_Bangkok_9_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/25787534"
- },
- {
-  "title": "File:All Seasons Place & Conrad Bangkok (2021).jpg",
-  "author": "Chainwit.",
-  "license": "CC BY 4.0",
-  "license_url": "https://creativecommons.org/licenses/by/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:All_Seasons_Place_%26_Conrad_Bangkok_(2021).jpg",
-  "file": "All_Seasons_Place_Conrad_Bangkok_2021_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/25829599"
- },
- {
-  "title": "File:Conrad Bangkok hotel room in 2014.jpg",
-  "author": "Marcus Andersson",
-  "license": "CC BY 2.0",
-  "license_url": "https://creativecommons.org/licenses/by/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Conrad_Bangkok_hotel_room_in_2014.jpg",
-  "file": "Conrad_Bangkok_hotel_room_in_2014_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/25829599"
- },
- {
-  "title": "File:Conrad Bangkok swimming pool in 2006.jpg",
-  "author": "Reeve Baily",
-  "license": "CC BY 2.0",
-  "license_url": "https://creativecommons.org/licenses/by/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Conrad_Bangkok_swimming_pool_in_2006.jpg",
-  "file": "Conrad_Bangkok_swimming_pool_in_2006_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/25829599"
- },
- {
-  "title": "File:Galleria 12 Hotel Bangkok 2016 (30889758451).jpg",
-  "author": "fullfen666",
-  "license": "CC BY-SA 2.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Galleria_12_Hotel_Bangkok_2016_(30889758451).jpg",
-  "file": "Galleria_12_Hotel_Bangkok_2016_30889758451_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/330253708"
- },
- {
-  "title": "File:Bangkok - Praya Palazzo - พระยาพาลาซโซ (บ้านบางยี่ขัน) (2022) - img 01.jpg",
-  "author": "Chainwit.",
-  "license": "CC BY 4.0",
-  "license_url": "https://creativecommons.org/licenses/by/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Bangkok_-_Praya_Palazzo_-_%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B2%E0%B8%9E%E0%B8%B2%E0%B8%A5%E0%B8%B2%E0%B8%8B%E0%B9%82%E0%B8%8B_(%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B8%9A%E0%B8%B2%E0%B8%87%E0%B8%A2%E0%B8%B5%E0%B9%88%E0%B8%82%E0%B8%B1%E0%B8%99)_(2022)_-_img_01.jpg",
-  "file": "Bangkok_Praya_Palazzo_2022_img_01_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/333233965"
- },
- {
-  "title": "File:Bangkok - Praya Palazzo - พระยาพาลาซโซ (บ้านบางยี่ขัน) (2022) - img 02.jpg",
-  "author": "Chainwit.",
-  "license": "CC BY 4.0",
-  "license_url": "https://creativecommons.org/licenses/by/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Bangkok_-_Praya_Palazzo_-_%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B2%E0%B8%9E%E0%B8%B2%E0%B8%A5%E0%B8%B2%E0%B8%8B%E0%B9%82%E0%B8%8B_(%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B8%9A%E0%B8%B2%E0%B8%87%E0%B8%A2%E0%B8%B5%E0%B9%88%E0%B8%82%E0%B8%B1%E0%B8%99)_(2022)_-_img_02.jpg",
-  "file": "Bangkok_Praya_Palazzo_2022_img_02_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/333233965"
- },
- {
-  "title": "File:Bangkok - Praya Palazzo - พระยาพาลาซโซ (บ้านบางยี่ขัน) (2022) - img 06.jpg",
-  "author": "Chainwit.",
-  "license": "CC BY 4.0",
-  "license_url": "https://creativecommons.org/licenses/by/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Bangkok_-_Praya_Palazzo_-_%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B2%E0%B8%9E%E0%B8%B2%E0%B8%A5%E0%B8%B2%E0%B8%8B%E0%B9%82%E0%B8%8B_(%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B8%9A%E0%B8%B2%E0%B8%87%E0%B8%A2%E0%B8%B5%E0%B9%88%E0%B8%82%E0%B8%B1%E0%B8%99)_(2022)_-_img_06.jpg",
-  "file": "Bangkok_Praya_Palazzo_2022_img_06_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/333233965"
- },
- {
-  "title": "File:Bangkok - Praya Palazzo - พระยาพาลาซโซ (บ้านบางยี่ขัน) (2022) - img 07.jpg",
-  "author": "Chainwit.",
-  "license": "CC BY 4.0",
-  "license_url": "https://creativecommons.org/licenses/by/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Bangkok_-_Praya_Palazzo_-_%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B2%E0%B8%9E%E0%B8%B2%E0%B8%A5%E0%B8%B2%E0%B8%8B%E0%B9%82%E0%B8%8B_(%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B8%9A%E0%B8%B2%E0%B8%87%E0%B8%A2%E0%B8%B5%E0%B9%88%E0%B8%82%E0%B8%B1%E0%B8%99)_(2022)_-_img_07.jpg",
-  "file": "Bangkok_Praya_Palazzo_2022_img_07_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/333233965"
- },
- {
-  "title": "File:Beautiful Shangri La Hotel, Bangkok - panoramio.jpg",
-  "author": "Anil Kaushik",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Beautiful_Shangri_La_Hotel,_Bangkok_-_panoramio.jpg",
-  "file": "Beautiful_Shangri_La_Hotel_Bangkok_panoramio_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/342200086"
- },
- {
-  "title": "File:Chao Phra river - Peninsula Hotel - Bangkok Thailand - panoramio.jpg",
-  "author": "David Broad",
-  "license": "CC BY 3.0",
-  "license_url": "https://creativecommons.org/licenses/by/3.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Chao_Phra_river_-_Peninsula_Hotel_-_Bangkok_Thailand_-_panoramio.jpg",
-  "file": "Chao_Phra_river_Peninsula_Hotel_Bangkok_Thailand_panoramio_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/342554731"
- },
- {
-  "title": "File:Millennium Hilton , Bangkok - panoramio.jpg",
-  "author": "Seksan Phonsuwan",
-  "license": "CC BY 3.0",
-  "license_url": "https://creativecommons.org/licenses/by/3.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Millennium_Hilton_,_Bangkok_-_panoramio.jpg",
-  "file": "Millennium_Hilton_Bangkok_panoramio_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/342556929"
- },
- {
-  "title": "File:Kimpton Maa-Lai Bangkok 2025-09 001.jpg",
-  "author": "Martin Michlmayr",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Kimpton_Maa-Lai_Bangkok_2025-09_001.jpg",
-  "file": "Kimpton_Maa_Lai_Bangkok_2025_09_001_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/747343257"
- },
- {
-  "title": "File:Kimpton Maa-Lai Bangkok 2025-09 002.jpg",
-  "author": "Martin Michlmayr",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Kimpton_Maa-Lai_Bangkok_2025-09_002.jpg",
-  "file": "Kimpton_Maa_Lai_Bangkok_2025_09_002_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/747343257"
- },
- {
-  "title": "File:Kimpton Maa-Lai Bangkok 2025-09 003.jpg",
-  "author": "Martin Michlmayr",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Kimpton_Maa-Lai_Bangkok_2025-09_003.jpg",
-  "file": "Kimpton_Maa_Lai_Bangkok_2025_09_003_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/747343257"
- },
- {
-  "title": "File:Kimpton Maa-Lai Bangkok 2025-09 004.jpg",
-  "author": "Martin Michlmayr",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Kimpton_Maa-Lai_Bangkok_2025-09_004.jpg",
-  "file": "Kimpton_Maa_Lai_Bangkok_2025_09_004_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/747343257"
- },
- {
-  "title": "File:Mövenpick BDMS Wellness Resort Bangkok 2011 Evening 01.jpg",
-  "author": "Chainwit.",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:M%C3%B6venpick_BDMS_Wellness_Resort_Bangkok_2011_Evening_01.jpg",
-  "file": "M_venpick_BDMS_Wellness_Resort_Bangkok_2011_Evening_01_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/856384724"
- },
- {
-  "title": "File:Mövenpick BDMS Wellness Resort Bangkok 2011 Evening 02.jpg",
-  "author": "Chainwit.",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:M%C3%B6venpick_BDMS_Wellness_Resort_Bangkok_2011_Evening_02.jpg",
-  "file": "M_venpick_BDMS_Wellness_Resort_Bangkok_2011_Evening_02_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/856384724"
- },
- {
-  "title": "File:Mövenpick BDMS Wellness Resort Bangkok 2011 Evening 03.jpg",
-  "author": "Chainwit.",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:M%C3%B6venpick_BDMS_Wellness_Resort_Bangkok_2011_Evening_03.jpg",
-  "file": "M_venpick_BDMS_Wellness_Resort_Bangkok_2011_Evening_03_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/856384724"
- },
- {
-  "title": "File:Mövenpick BDMS Wellness Resort Bangkok 2011 Evening 04.jpg",
-  "author": "Chainwit.",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:M%C3%B6venpick_BDMS_Wellness_Resort_Bangkok_2011_Evening_04.jpg",
-  "file": "M_venpick_BDMS_Wellness_Resort_Bangkok_2011_Evening_04_jpg.jpg",
-  "kind": "hotel",
-  "subject": "way/856384724"
- },
- {
   "title": "File:Al Madina Suite 3 Bedrooms at Shaza Al Madina.jpg",
   "author": "Shazaalmadina",
   "license": "CC BY-SA 3.0",
@@ -1018,496 +608,6 @@
   "file": "The_Grove_Lobby_jpg.jpg",
   "kind": "stock_lobby",
   "subject": "stock_lobby"
- },
- {
-  "title": "File:0005574 - Wat Phra Kaew 006.jpg",
-  "author": "Preecha.MJ",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:0005574_-_Wat_Phra_Kaew_006.jpg",
-  "file": "0005574_Wat_Phra_Kaew_006_jpg.jpg",
-  "kind": "attraction",
-  "subject": "grand-palace"
- },
- {
-  "title": "File:Amarin Winichai.jpg",
-  "author": "Sodacan",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Amarin_Winichai.jpg",
-  "file": "Amarin_Winichai_jpg.jpg",
-  "kind": "attraction",
-  "subject": "grand-palace"
- },
- {
-  "title": "File:Boromphiman Palace.jpg",
-  "author": "Sodacan",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Boromphiman_Palace.jpg",
-  "file": "Boromphiman_Palace_jpg.jpg",
-  "kind": "attraction",
-  "subject": "grand-palace"
- },
- {
-  "title": "File:Bangkok 2014 PD 078.jpg",
-  "author": "Bin im Garten",
-  "license": "CC BY 3.0",
-  "license_url": "https://creativecommons.org/licenses/by/3.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Bangkok_2014_PD_078.jpg",
-  "file": "Bangkok_2014_PD_078_jpg.jpg",
-  "kind": "attraction",
-  "subject": "wat-pho"
- },
- {
-  "title": "File:Buddha statues At WatPho.jpg",
-  "author": "Elod1234",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Buddha_statues_At_WatPho.jpg",
-  "file": "Buddha_statues_At_WatPho_jpg.jpg",
-  "kind": "attraction",
-  "subject": "wat-pho"
- },
- {
-  "title": "File:0000140 - Wat Arun Ratchawararam 005.jpg",
-  "author": "Preecha.MJ",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:0000140_-_Wat_Arun_Ratchawararam_005.jpg",
-  "file": "0000140_Wat_Arun_Ratchawararam_005_jpg.jpg",
-  "kind": "attraction",
-  "subject": "wat-arun"
- },
- {
-  "title": "File:021 Ceramic Decoration (9173563404).jpg",
-  "author": "Photo Dharma from Sadao, Thailand",
-  "license": "CC BY 2.0",
-  "license_url": "https://creativecommons.org/licenses/by/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:021_Ceramic_Decoration_(9173563404).jpg",
-  "file": "021_Ceramic_Decoration_9173563404_jpg.jpg",
-  "kind": "attraction",
-  "subject": "wat-arun"
- },
- {
-  "title": "File:024 Yakkhas supporting the Prang (9173548532).jpg",
-  "author": "Photo Dharma from Sadao, Thailand",
-  "license": "CC BY 2.0",
-  "license_url": "https://creativecommons.org/licenses/by/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:024_Yakkhas_supporting_the_Prang_(9173548532).jpg",
-  "file": "024_Yakkhas_supporting_the_Prang_9173548532_jpg.jpg",
-  "kind": "attraction",
-  "subject": "wat-arun"
- },
- {
-  "title": "File:Understanding the \"floating market\" (15801439261).jpg",
-  "author": "Roberto Faccenda from Canale CN, Italy",
-  "license": "CC BY-SA 2.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Understanding_the_%22floating_market%22_(15801439261).jpg",
-  "file": "Understanding_the_floating_market_15801439261_jpg.jpg",
-  "kind": "attraction",
-  "subject": "floating-market"
- },
- {
-  "title": "File:Maeklong railway station 20220717-6.jpg",
-  "author": "Suikotei",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Maeklong_railway_station_20220717-6.jpg",
-  "file": "Maeklong_railway_station_20220717_6_jpg.jpg",
-  "kind": "attraction",
-  "subject": "maeklong"
- },
- {
-  "title": "File:Talad Rom Hoop (II).jpg",
-  "author": "This Photo was taken by Supanut Arunoprayote. Feel free to use any of my images, but please mention me as the author and",
-  "license": "CC BY 4.0",
-  "license_url": "https://creativecommons.org/licenses/by/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Talad_Rom_Hoop_(II).jpg",
-  "file": "Talad_Rom_Hoop_II_jpg.jpg",
-  "kind": "attraction",
-  "subject": "maeklong"
- },
- {
-  "title": "File:Ayutthaya World Heritage sign.jpg",
-  "author": "Christophe95",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Ayutthaya_World_Heritage_sign.jpg",
-  "file": "Ayutthaya_World_Heritage_sign_jpg.jpg",
-  "kind": "attraction",
-  "subject": "ayutthaya"
- },
- {
-  "title": "File:Historic City of Ayutthaya-111237.jpg",
-  "author": "Vesna Vujicic-Lugassy",
-  "license": "CC BY-SA 3.0 igo",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0/igo/deed.en",
-  "source": "https://commons.wikimedia.org/wiki/File:Historic_City_of_Ayutthaya-111237.jpg",
-  "file": "Historic_City_of_Ayutthaya_111237_jpg.jpg",
-  "kind": "attraction",
-  "subject": "ayutthaya"
- },
- {
-  "title": "File:Sunset at Wat Chaiwatthanaram, Ayutthaya, Thailand.jpg",
-  "author": "Justin Vidamo",
-  "license": "CC BY 2.0",
-  "license_url": "https://creativecommons.org/licenses/by/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Sunset_at_Wat_Chaiwatthanaram,_Ayutthaya,_Thailand.jpg",
-  "file": "Sunset_at_Wat_Chaiwatthanaram_Ayutthaya_Thailand_jpg.jpg",
-  "kind": "attraction",
-  "subject": "ayutthaya"
- },
- {
-  "title": "File:Baiyoke01.JPG",
-  "author": "Davidelit",
-  "license": "Public domain",
-  "license_url": "",
-  "source": "https://commons.wikimedia.org/wiki/File:Baiyoke01.JPG",
-  "file": "Baiyoke01_JPG.jpg",
-  "kind": "attraction",
-  "subject": "baiyoke"
- },
- {
-  "title": "File:Baiyoke roof.jpg",
-  "author": "OmioAsad",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Baiyoke_roof.jpg",
-  "file": "Baiyoke_roof_jpg.jpg",
-  "kind": "attraction",
-  "subject": "baiyoke"
- },
- {
-  "title": "File:Bangkok, Thailand, High angle aerial view.jpg",
-  "author": "Vyacheslav Argenberg",
-  "license": "CC BY 4.0",
-  "license_url": "https://creativecommons.org/licenses/by/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Bangkok,_Thailand,_High_angle_aerial_view.jpg",
-  "file": "Bangkok_Thailand_High_angle_aerial_view_jpg.jpg",
-  "kind": "attraction",
-  "subject": "baiyoke"
- },
- {
-  "title": "File:Ang Thong - Chaiyo (2024) - Wat Chaiyo Worawihan วัดไชโยวรวิหาร - img 14.jpg",
-  "author": "Chainwit.",
-  "license": "CC BY 4.0",
-  "license_url": "https://creativecommons.org/licenses/by/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Ang_Thong_-_Chaiyo_(2024)_-_Wat_Chaiyo_Worawihan_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%84%E0%B8%8A%E0%B9%82%E0%B8%A2%E0%B8%A7%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B8%AB%E0%B8%B2%E0%B8%A3_-_img_14.jpg",
-  "file": "Ang_Thong_Chaiyo_2024_Wat_Chaiyo_Worawihan_img_14_jpg.jpg",
-  "kind": "stock_activity",
-  "subject": "dinner-cruise"
- },
- {
-  "title": "File:Siam Ocean World 2011.JPG",
-  "author": "Wpcpey",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Siam_Ocean_World_2011.JPG",
-  "file": "Siam_Ocean_World_2011_JPG.jpg",
-  "kind": "attraction",
-  "subject": "sea-life"
- },
- {
-  "title": "File:Siam Ocean World Enterance 2011.jpg",
-  "author": "Wpcpey",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Siam_Ocean_World_Enterance_2011.jpg",
-  "file": "Siam_Ocean_World_Enterance_2011_jpg.jpg",
-  "kind": "attraction",
-  "subject": "sea-life"
- },
- {
-  "title": "File:Before the Show - panoramio.jpg",
-  "author": "Anil Kaushik",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Before_the_Show_-_panoramio.jpg",
-  "file": "Before_the_Show_panoramio_jpg.jpg",
-  "kind": "attraction",
-  "subject": "safari-world"
- },
- {
-  "title": "File:Elephant Show.jpg",
-  "author": "Jyotishkardey",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Elephant_Show.jpg",
-  "file": "Elephant_Show_jpg.jpg",
-  "kind": "attraction",
-  "subject": "safari-world"
- },
- {
-  "title": "File:Giraffes- safari- bangkok.JPG",
-  "author": "XerxesII",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Giraffes-_safari-_bangkok.JPG",
-  "file": "Giraffes_safari_bangkok_JPG.jpg",
-  "kind": "attraction",
-  "subject": "safari-world"
- },
- {
-  "title": "File:Bang Yitho, Thanyaburi District, Pathum Thani, Thailand - panoramio (1).jpg",
-  "author": "Serj Kras",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Bang_Yitho,_Thanyaburi_District,_Pathum_Thani,_Thailand_-_panoramio_(1).jpg",
-  "file": "Bang_Yitho_Thanyaburi_District_Pathum_Thani_Thailand_panoramio_1_jpg.jpg",
-  "kind": "attraction",
-  "subject": "dream-world"
- },
- {
-  "title": "File:Bang Yitho, Thanyaburi District, Pathum Thani, Thailand - panoramio (2).jpg",
-  "author": "Serj Kras",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Bang_Yitho,_Thanyaburi_District,_Pathum_Thani,_Thailand_-_panoramio_(2).jpg",
-  "file": "Bang_Yitho_Thanyaburi_District_Pathum_Thani_Thailand_panoramio_2_jpg.jpg",
-  "kind": "attraction",
-  "subject": "dream-world"
- },
- {
-  "title": "File:Dream World, Thailand.jpg",
-  "author": "No machine-readable author provided. Manop assumed (based on copyright claims).",
-  "license": "CC BY-SA 3.0",
-  "license_url": "http://creativecommons.org/licenses/by-sa/3.0/",
-  "source": "https://commons.wikimedia.org/wiki/File:Dream_World,_Thailand.jpg",
-  "file": "Dream_World_Thailand_jpg.jpg",
-  "kind": "attraction",
-  "subject": "dream-world"
- },
- {
-  "title": "File:Asiatique (II).jpg",
-  "author": "This Photo was taken by Supanut Arunoprayote. Feel free to use any of my images, but please mention me as the author and",
-  "license": "CC BY 4.0",
-  "license_url": "https://creativecommons.org/licenses/by/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Asiatique_(II).jpg",
-  "file": "Asiatique_II_jpg.jpg",
-  "kind": "attraction",
-  "subject": "calypso"
- },
- {
-  "title": "File:Asiatique 1.jpg",
-  "author": "Rangan Datta Wiki",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Asiatique_1.jpg",
-  "file": "Asiatique_1_jpg.jpg",
-  "kind": "attraction",
-  "subject": "calypso"
- },
- {
-  "title": "File:Asiatique 2a.jpg",
-  "author": "Rangan Datta Wiki",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Asiatique_2a.jpg",
-  "file": "Asiatique_2a_jpg.jpg",
-  "kind": "attraction",
-  "subject": "calypso"
- },
- {
-  "title": "File:RajInfront.jpg",
-  "author": "Mynameisfootlong",
-  "license": "CC BY 4.0",
-  "license_url": "https://creativecommons.org/licenses/by/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:RajInfront.jpg",
-  "file": "RajInfront_jpg.jpg",
-  "kind": "attraction",
-  "subject": "muay-thai"
- },
- {
-  "title": "File:Rajadamnern stadium.jpg",
-  "author": "Kojach",
-  "license": "CC BY 2.0",
-  "license_url": "https://creativecommons.org/licenses/by/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Rajadamnern_stadium.jpg",
-  "file": "Rajadamnern_stadium_jpg.jpg",
-  "kind": "attraction",
-  "subject": "muay-thai"
- },
- {
-  "title": "File:Bangkokwangna0205.jpg",
-  "author": "Heinrich Damm (User:Hdamm, Hdamm at de.wikipedia.org)",
-  "license": "CC BY 2.0",
-  "license_url": "https://creativecommons.org/licenses/by/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Bangkokwangna0205.jpg",
-  "file": "Bangkokwangna0205_jpg.jpg",
-  "kind": "attraction",
-  "subject": "jim-thompson"
- },
- {
-  "title": "File:Jim Thomson M3.jpg",
-  "author": "Rangan Datta Wiki",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Jim_Thomson_M3.jpg",
-  "file": "Jim_Thomson_M3_jpg.jpg",
-  "kind": "attraction",
-  "subject": "jim-thompson"
- },
- {
-  "title": "File:Main House of Jim Thompson photo Don Ramey Logan.jpg",
-  "author": "Don Ramey Logan",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Main_House_of_Jim_Thompson_photo_Don_Ramey_Logan.jpg",
-  "file": "Main_House_of_Jim_Thompson_photo_Don_Ramey_Logan_jpg.jpg",
-  "kind": "attraction",
-  "subject": "jim-thompson"
- },
- {
-  "title": "File:Bangkok - Jatujak Market 02.JPG",
-  "author": "Azreey",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Bangkok_-_Jatujak_Market_02.JPG",
-  "file": "Bangkok_Jatujak_Market_02_JPG.jpg",
-  "kind": "attraction",
-  "subject": "chatuchak"
- },
- {
-  "title": "File:Chatuchak Weekend Market Soi.jpg",
-  "author": "JJ Harrison (https://www.jjharrison.com.au/)",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Chatuchak_Weekend_Market_Soi.jpg",
-  "file": "Chatuchak_Weekend_Market_Soi_jpg.jpg",
-  "kind": "attraction",
-  "subject": "chatuchak"
- },
- {
-  "title": "File:Chatuchak weekend market.jpg",
-  "author": "Jarcje at en.wikipedia",
-  "license": "CC BY 2.5",
-  "license_url": "https://creativecommons.org/licenses/by/2.5",
-  "source": "https://commons.wikimedia.org/wiki/File:Chatuchak_weekend_market.jpg",
-  "file": "Chatuchak_weekend_market_jpg.jpg",
-  "kind": "attraction",
-  "subject": "chatuchak"
- },
- {
-  "title": "File:(2022) ตึกแถวริมถนนเยาวราช เขตสัมพันธวงศ์ กรุงเทพมหานคร (4).jpg",
-  "author": "กสิณธร ราชโอรส",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:(2022)_%E0%B8%95%E0%B8%B6%E0%B8%81%E0%B9%81%E0%B8%96%E0%B8%A7%E0%B8%A3%E0%B8%B4%E0%B8%A1%E0%B8%96%E0%B8%99%E0%B8%99%E0%B9%80%E0%B8%A2%E0%B8%B2%E0%B8%A7%E0%B8%A3%E0%B8%B2%E0%B8%8A_%E0%B9%80%E0%B8%82%E0%B8%95%E0%B8%AA%E0%B8%B1%E0%B8%A1%E0%B8%9E%E0%B8%B1%E0%B8%99%E0%B8%98%E0%B8%A7%E0%B8%87%E0%B8%A8%E0%B9%8C_%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%A3_(4).jpg",
-  "file": "2022_4_jpg.jpg",
-  "kind": "attraction",
-  "subject": "chinatown-food"
- },
- {
-  "title": "File:Yaowarat Bangkok during COVID-19.jpg",
-  "author": "Chainwit.",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Yaowarat_Bangkok_during_COVID-19.jpg",
-  "file": "Yaowarat_Bangkok_during_COVID_19_jpg.jpg",
-  "kind": "attraction",
-  "subject": "chinatown-food"
- },
- {
-  "title": "File:Yaowarat at night (32455695783).jpg",
-  "author": "Ninara from Helsinki, Finland",
-  "license": "CC BY 2.0",
-  "license_url": "https://creativecommons.org/licenses/by/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Yaowarat_at_night_(32455695783).jpg",
-  "file": "Yaowarat_at_night_32455695783_jpg.jpg",
-  "kind": "attraction",
-  "subject": "chinatown-food"
- },
- {
-  "title": "File:A traditional family breakfast in the Isan, Thailand.JPG",
-  "author": "User:Mattes",
-  "license": "Public domain",
-  "license_url": "",
-  "source": "https://commons.wikimedia.org/wiki/File:A_traditional_family_breakfast_in_the_Isan,_Thailand.JPG",
-  "file": "A_traditional_family_breakfast_in_the_Isan_Thailand_JPG.jpg",
-  "kind": "stock_activity",
-  "subject": "cooking-class"
- },
- {
-  "title": "File:Bangkok’s green lung (40468870113) (cropped).jpg",
-  "author": "European Space Agency",
-  "license": "CC BY-SA 2.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Bangkok%E2%80%99s_green_lung_(40468870113)_(cropped).jpg",
-  "file": "Bangkok_s_green_lung_40468870113_cropped_jpg.jpg",
-  "kind": "attraction",
-  "subject": "bang-krachao"
- },
- {
-  "title": "File:OCT2010VN 246.JPG",
-  "author": "Terry.lives.in.tokyo",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
-  "source": "https://commons.wikimedia.org/wiki/File:OCT2010VN_246.JPG",
-  "file": "OCT2010VN_246_JPG.jpg",
-  "kind": "attraction",
-  "subject": "coral-island"
- },
- {
-  "title": "File:Sea view and Ko Lan island from the 20-flor of Adriatic Palace hotel.jpg",
-  "author": "KAlexey",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Sea_view_and_Ko_Lan_island_from_the_20-flor_of_Adriatic_Palace_hotel.jpg",
-  "file": "Sea_view_and_Ko_Lan_island_from_the_20_flor_of_Adriatic_Palace_hotel_jpg.jpg",
-  "kind": "attraction",
-  "subject": "coral-island"
- },
- {
-  "title": "File:Bridge on the River Kwai - tourist plaza.JPG",
-  "author": "PumpkinSky",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Bridge_on_the_River_Kwai_-_tourist_plaza.JPG",
-  "file": "Bridge_on_the_River_Kwai_tourist_plaza_JPG.jpg",
-  "kind": "attraction",
-  "subject": "river-kwai"
- },
- {
-  "title": "File:Death Railway Line Mawlamyine.jpg",
-  "author": "Khun Win Naung",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Death_Railway_Line_Mawlamyine.jpg",
-  "file": "Death_Railway_Line_Mawlamyine_jpg.jpg",
-  "kind": "attraction",
-  "subject": "river-kwai"
- },
- {
-  "title": "File:SkyFlyers near the Chaophraya River.jpg",
-  "author": "Skaterlight2013",
-  "license": "CC BY 4.0",
-  "license_url": "https://creativecommons.org/licenses/by/4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:SkyFlyers_near_the_Chaophraya_River.jpg",
-  "file": "SkyFlyers_near_the_Chaophraya_River_jpg.jpg",
-  "kind": "attraction",
-  "subject": "asiatique-wheel"
- },
- {
-  "title": "File:Bangkok National Museum 2024-06-01 (037).jpg",
-  "author": "Librovore",
-  "license": "CC0",
-  "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-  "source": "https://commons.wikimedia.org/wiki/File:Bangkok_National_Museum_2024-06-01_(037).jpg",
-  "file": "Bangkok_National_Museum_2024_06_01_037_jpg.jpg",
-  "kind": "stock_activity",
-  "subject": "wat-pho-massage"
- },
- {
-  "title": "File:Classical Thai Massage at Tara Angkor Hotel (5918685202).jpg",
-  "author": "Tara Angkor Hotel",
-  "license": "CC BY 2.0",
-  "license_url": "https://creativecommons.org/licenses/by/2.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Classical_Thai_Massage_at_Tara_Angkor_Hotel_(5918685202).jpg",
-  "file": "Classical_Thai_Massage_at_Tara_Angkor_Hotel_5918685202_jpg.jpg",
-  "kind": "stock_activity",
-  "subject": "wat-pho-massage"
  },
  {
   "title": "File:Bed at Tianhe Hotel in Shenzhen.jpg",
@@ -3148,5 +2248,555 @@
   "file": "DFC_2046_Rooftop_infinity_pool_overlooking_a_cityscape_with_high_rise_towers_and.jpg",
   "kind": "stock_pool",
   "subject": "stock_pool"
+ },
+ {
+  "title": "File:Raffles Dubai 01.jpg",
+  "author": "Frank Schulenburg",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Raffles_Dubai_01.jpg",
+  "file": "Raffles_Dubai_01_jpg.jpg",
+  "kind": "hotel",
+  "subject": "node/3896699589"
+ },
+ {
+  "title": "File:Raffles Dubai 02.jpg",
+  "author": "Frank Schulenburg",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Raffles_Dubai_02.jpg",
+  "file": "Raffles_Dubai_02_jpg.jpg",
+  "kind": "hotel",
+  "subject": "node/3896699589"
+ },
+ {
+  "title": "File:Raffles Dubai 03.jpg",
+  "author": "Frank Schulenburg",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Raffles_Dubai_03.jpg",
+  "file": "Raffles_Dubai_03_jpg.jpg",
+  "kind": "hotel",
+  "subject": "node/3896699589"
+ },
+ {
+  "title": "File:Atlantis, The Palm from Le Royal Méridien Beach Resort and Spa in Dubai 2.jpg",
+  "author": "CT Cooper",
+  "license": "Public domain",
+  "license_url": "",
+  "source": "https://commons.wikimedia.org/wiki/File:Atlantis,_The_Palm_from_Le_Royal_M%C3%A9ridien_Beach_Resort_and_Spa_in_Dubai_2.jpg",
+  "file": "Atlantis_The_Palm_from_Le_Royal_M_ridien_Beach_Resort_and_Spa_in_Dubai_2_jpg.jpg",
+  "kind": "hotel",
+  "subject": "way/89790675"
+ },
+ {
+  "title": "File:Atlantis, The Palm from Le Royal Méridien Beach Resort and Spa in Dubai 3.jpg",
+  "author": "CT Cooper",
+  "license": "Public domain",
+  "license_url": "",
+  "source": "https://commons.wikimedia.org/wiki/File:Atlantis,_The_Palm_from_Le_Royal_M%C3%A9ridien_Beach_Resort_and_Spa_in_Dubai_3.jpg",
+  "file": "Atlantis_The_Palm_from_Le_Royal_M_ridien_Beach_Resort_and_Spa_in_Dubai_3_jpg.jpg",
+  "kind": "hotel",
+  "subject": "way/89790675"
+ },
+ {
+  "title": "File:Carlton Tower Hotel Dubai.jpg",
+  "author": "Noor Ali Rashid",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Carlton_Tower_Hotel_Dubai.jpg",
+  "file": "Carlton_Tower_Hotel_Dubai_jpg.jpg",
+  "kind": "hotel",
+  "subject": "way/98551756"
+ },
+ {
+  "title": "File:Burj Dubai 001.jpg",
+  "author": "Nepenthes",
+  "license": "CC BY-SA 2.5",
+  "license_url": "https://creativecommons.org/licenses/by-sa/2.5",
+  "source": "https://commons.wikimedia.org/wiki/File:Burj_Dubai_001.jpg",
+  "file": "Burj_Dubai_001_jpg.jpg",
+  "kind": "attraction",
+  "subject": "burj-khalifa"
+ },
+ {
+  "title": "File:Burj Khalifa (worlds tallest building) and the Dubai skyline (25781049892).jpg",
+  "author": "imran shahabuddin",
+  "license": "CC BY 2.0",
+  "license_url": "https://creativecommons.org/licenses/by/2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Burj_Khalifa_(worlds_tallest_building)_and_the_Dubai_skyline_(25781049892).jpg",
+  "file": "Burj_Khalifa_worlds_tallest_building_and_the_Dubai_skyline_25781049892_jpg.jpg",
+  "kind": "attraction",
+  "subject": "burj-khalifa"
+ },
+ {
+  "title": "File:Dubai Fountain 7.JPG",
+  "author": "Nealt",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Dubai_Fountain_7.JPG",
+  "file": "Dubai_Fountain_7_JPG.jpg",
+  "kind": "attraction",
+  "subject": "burj-khalifa"
+ },
+ {
+  "title": "File:2005-07-16 Dubai Creek.jpg",
+  "author": "Hansueli Krapf",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:2005-07-16_Dubai_Creek.jpg",
+  "file": "2005_07_16_Dubai_Creek_jpg.jpg",
+  "kind": "stock_activity",
+  "subject": "dhow-cruise"
+ },
+ {
+  "title": "File:Akula.JPG",
+  "author": "Николай Мазепа",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Akula.JPG",
+  "file": "Akula_JPG.jpg",
+  "kind": "attraction",
+  "subject": "dubai-aquarium"
+ },
+ {
+  "title": "File:Dubai Aquarium.JPG",
+  "author": "T3n60",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Dubai_Aquarium.JPG",
+  "file": "Dubai_Aquarium_JPG.jpg",
+  "kind": "attraction",
+  "subject": "dubai-aquarium"
+ },
+ {
+  "title": "File:DONIS Dubai Frame Nighttime.jpg",
+  "author": "Sachimo",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:DONIS_Dubai_Frame_Nighttime.jpg",
+  "file": "DONIS_Dubai_Frame_Nighttime_jpg.jpg",
+  "kind": "attraction",
+  "subject": "dubai-frame"
+ },
+ {
+  "title": "File:Dubai Frame View-Dubai UAE-Andres Larin.jpg",
+  "author": "Saaremees",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Dubai_Frame_View-Dubai_UAE-Andres_Larin.jpg",
+  "file": "Dubai_Frame_View_Dubai_UAE_Andres_Larin_jpg.jpg",
+  "kind": "attraction",
+  "subject": "dubai-frame"
+ },
+ {
+  "title": "File:The Dubai Frame Observation Deck in Dubai, United Arab Emirates.jpg",
+  "author": "Richard N Horne",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:The_Dubai_Frame_Observation_Deck_in_Dubai,_United_Arab_Emirates.jpg",
+  "file": "The_Dubai_Frame_Observation_Deck_in_Dubai_United_Arab_Emirates_jpg.jpg",
+  "kind": "attraction",
+  "subject": "dubai-frame"
+ },
+ {
+  "title": "File:Museum of the Future DNA Library-Dubai UAE-Andres Larin.jpg",
+  "author": "Saaremees",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Museum_of_the_Future_DNA_Library-Dubai_UAE-Andres_Larin.jpg",
+  "file": "Museum_of_the_Future_DNA_Library_Dubai_UAE_Andres_Larin_jpg.jpg",
+  "kind": "attraction",
+  "subject": "museum-future"
+ },
+ {
+  "title": "File:Global village Dubai6.jpg",
+  "author": "Philosographer",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Global_village_Dubai6.jpg",
+  "file": "Global_village_Dubai6_jpg.jpg",
+  "kind": "attraction",
+  "subject": "global-village"
+ },
+ {
+  "title": "File:The Central Park at Cityland Mall.jpg",
+  "author": "Citylandgroup",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:The_Central_Park_at_Cityland_Mall.jpg",
+  "file": "The_Central_Park_at_Cityland_Mall_jpg.jpg",
+  "kind": "attraction",
+  "subject": "global-village"
+ },
+ {
+  "title": "File:Dubai Miracle Garden-Dubai UAE-Andres Larin.jpg",
+  "author": "Saaremees",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Dubai_Miracle_Garden-Dubai_UAE-Andres_Larin.jpg",
+  "file": "Dubai_Miracle_Garden_Dubai_UAE_Andres_Larin_jpg.jpg",
+  "kind": "attraction",
+  "subject": "miracle-garden"
+ },
+ {
+  "title": "File:Miracle Garden 1.jpg",
+  "author": "Dayneferrera",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Miracle_Garden_1.jpg",
+  "file": "Miracle_Garden_1_jpg.jpg",
+  "kind": "attraction",
+  "subject": "miracle-garden"
+ },
+ {
+  "title": "File:VAE-dubai-miracle-03.jpg",
+  "author": "Balou46",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:VAE-dubai-miracle-03.jpg",
+  "file": "VAE_dubai_miracle_03_jpg.jpg",
+  "kind": "attraction",
+  "subject": "miracle-garden"
+ },
+ {
+  "title": "File:Dubai-Ski-Dubai-11.JPG",
+  "author": "Ian and Wendy Sewell",
+  "license": "CC BY 2.5",
+  "license_url": "https://creativecommons.org/licenses/by/2.5",
+  "source": "https://commons.wikimedia.org/wiki/File:Dubai-Ski-Dubai-11.JPG",
+  "file": "Dubai_Ski_Dubai_11_JPG.jpg",
+  "kind": "attraction",
+  "subject": "ski-dubai"
+ },
+ {
+  "title": "File:Ski-Dubai1.JPG",
+  "author": "Mofsound at English Wikipedia",
+  "license": "Public domain",
+  "license_url": "",
+  "source": "https://commons.wikimedia.org/wiki/File:Ski-Dubai1.JPG",
+  "file": "Ski_Dubai1_JPG.jpg",
+  "kind": "attraction",
+  "subject": "ski-dubai"
+ },
+ {
+  "title": "File:SkiDubai7176.JPG",
+  "author": "Frank Seiplax",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:SkiDubai7176.JPG",
+  "file": "SkiDubai7176_JPG.jpg",
+  "kind": "attraction",
+  "subject": "ski-dubai"
+ },
+ {
+  "title": "File:Dubai Fountain.jpg",
+  "author": "GinaD",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Dubai_Fountain.jpg",
+  "file": "Dubai_Fountain_jpg.jpg",
+  "kind": "attraction",
+  "subject": "dubai-fountain"
+ },
+ {
+  "title": "File:Dubai Fountain from At The Top of Burj Khalifa.JPG",
+  "author": "Nealt",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Dubai_Fountain_from_At_The_Top_of_Burj_Khalifa.JPG",
+  "file": "Dubai_Fountain_from_At_The_Top_of_Burj_Khalifa_JPG.jpg",
+  "kind": "attraction",
+  "subject": "dubai-fountain"
+ },
+ {
+  "title": "File:Dubai Fountain performing \"Bassbor Al Fourgakom\".jpg",
+  "author": "CT Cooper",
+  "license": "Public domain",
+  "license_url": "",
+  "source": "https://commons.wikimedia.org/wiki/File:Dubai_Fountain_performing_%22Bassbor_Al_Fourgakom%22.jpg",
+  "file": "Dubai_Fountain_performing_Bassbor_Al_Fourgakom_jpg.jpg",
+  "kind": "attraction",
+  "subject": "dubai-fountain"
+ },
+ {
+  "title": "File:HATTA.JPG",
+  "author": "Hattawe",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:HATTA.JPG",
+  "file": "HATTA_JPG.jpg",
+  "kind": "attraction",
+  "subject": "hatta"
+ },
+ {
+  "title": "File:Hatta, Dubai, United Arab Emirates.jpg",
+  "author": "Alexandermcnabb",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Hatta,_Dubai,_United_Arab_Emirates.jpg",
+  "file": "Hatta_Dubai_United_Arab_Emirates_jpg.jpg",
+  "kind": "attraction",
+  "subject": "hatta"
+ },
+ {
+  "title": "File:Hatta Dam, Dubai, UAE.jpg",
+  "author": "Titoni Thomas",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Hatta_Dam,_Dubai,_UAE.jpg",
+  "file": "Hatta_Dam_Dubai_UAE_jpg.jpg",
+  "kind": "attraction",
+  "subject": "hatta"
+ },
+ {
+  "title": "File:Dubai Gold Souk on 31 May 2007 Pict 1.jpg",
+  "author": "Imre Solt",
+  "license": "CC BY-SA 3.0",
+  "license_url": "http://creativecommons.org/licenses/by-sa/3.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Dubai_Gold_Souk_on_31_May_2007_Pict_1.jpg",
+  "file": "Dubai_Gold_Souk_on_31_May_2007_Pict_1_jpg.jpg",
+  "kind": "attraction",
+  "subject": "old-dubai"
+ },
+ {
+  "title": "File:Dubai gold district.jpg",
+  "author": "AbhijithPC1",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Dubai_gold_district.jpg",
+  "file": "Dubai_gold_district_jpg.jpg",
+  "kind": "attraction",
+  "subject": "old-dubai"
+ },
+ {
+  "title": "File:The view of Dubai Creek.jpg",
+  "author": "Phil6007",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:The_view_of_Dubai_Creek.jpg",
+  "file": "The_view_of_Dubai_Creek_jpg.jpg",
+  "kind": "attraction",
+  "subject": "old-dubai"
+ },
+ {
+  "title": "File:Al Fanar Seafood Market-Dubai UAE-Andres Larin.jpg",
+  "author": "Saaremees",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Al_Fanar_Seafood_Market-Dubai_UAE-Andres_Larin.jpg",
+  "file": "Al_Fanar_Seafood_Market_Dubai_UAE_Andres_Larin_jpg.jpg",
+  "kind": "attraction",
+  "subject": "al-fahidi"
+ },
+ {
+  "title": "File:Al Farooq Mosque-Dubai UAE-Andres Larin.jpg",
+  "author": "Saaremees",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Al_Farooq_Mosque-Dubai_UAE-Andres_Larin.jpg",
+  "file": "Al_Farooq_Mosque_Dubai_UAE_Andres_Larin_jpg.jpg",
+  "kind": "attraction",
+  "subject": "al-fahidi"
+ },
+ {
+  "title": "File:Arabian Tea House-Dubai UAE-Andres Larin.jpg",
+  "author": "Saaremees",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Arabian_Tea_House-Dubai_UAE-Andres_Larin.jpg",
+  "file": "Arabian_Tea_House_Dubai_UAE_Andres_Larin_jpg.jpg",
+  "kind": "attraction",
+  "subject": "al-fahidi"
+ },
+ {
+  "title": "File:Interior at Jumeirah Mosque.jpg",
+  "author": "scottgunn",
+  "license": "Public domain",
+  "license_url": "",
+  "source": "https://commons.wikimedia.org/wiki/File:Interior_at_Jumeirah_Mosque.jpg",
+  "file": "Interior_at_Jumeirah_Mosque_jpg.jpg",
+  "kind": "attraction",
+  "subject": "jumeirah-mosque"
+ },
+ {
+  "title": "File:Jumeira Mosque Dubai.jpg",
+  "author": "Vicharam",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Jumeira_Mosque_Dubai.jpg",
+  "file": "Jumeira_Mosque_Dubai_jpg.jpg",
+  "kind": "attraction",
+  "subject": "jumeirah-mosque"
+ },
+ {
+  "title": "File:Artificial Archipelagos, Dubai, United Arab Emirates ISS022-E-024940 lrg (cropped).jpg",
+  "author": "Member of the Expedition 22 crew.",
+  "license": "Public domain",
+  "license_url": "",
+  "source": "https://commons.wikimedia.org/wiki/File:Artificial_Archipelagos,_Dubai,_United_Arab_Emirates_ISS022-E-024940_lrg_(cropped).jpg",
+  "file": "Artificial_Archipelagos_Dubai_United_Arab_Emirates_ISS022_E_024940_lrg_cropped_j.jpg",
+  "kind": "attraction",
+  "subject": "view-palm"
+ },
+ {
+  "title": "File:Dubai Monorail 01.jpg",
+  "author": "Bjoertvedt",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Dubai_Monorail_01.jpg",
+  "file": "Dubai_Monorail_01_jpg.jpg",
+  "kind": "attraction",
+  "subject": "view-palm"
+ },
+ {
+  "title": "File:Dubai Wingsuit Flying Trip (7623566780).jpg",
+  "author": "Richard Schneider from Los Angeles",
+  "license": "CC BY 2.0",
+  "license_url": "https://creativecommons.org/licenses/by/2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Dubai_Wingsuit_Flying_Trip_(7623566780).jpg",
+  "file": "Dubai_Wingsuit_Flying_Trip_7623566780_jpg.jpg",
+  "kind": "attraction",
+  "subject": "view-palm"
+ },
+ {
+  "title": "File:Dubai fountain show.jpg",
+  "author": "Amzexplorersfamily",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Dubai_fountain_show.jpg",
+  "file": "Dubai_fountain_show_jpg.jpg",
+  "kind": "attraction",
+  "subject": "sky-views"
+ },
+ {
+  "title": "File:Dubai skyscrapers at night 2011.jpg",
+  "author": "Michaelbibin from Pixabay",
+  "license": "CC0",
+  "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "source": "https://commons.wikimedia.org/wiki/File:Dubai_skyscrapers_at_night_2011.jpg",
+  "file": "Dubai_skyscrapers_at_night_2011_jpg.jpg",
+  "kind": "attraction",
+  "subject": "sky-views"
+ },
+ {
+  "title": "File:Kuboos being prepared in Abu Dhabi, UAE.JPG",
+  "author": "Aravind Sivaraj",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Kuboos_being_prepared_in_Abu_Dhabi,_UAE.JPG",
+  "file": "Kuboos_being_prepared_in_Abu_Dhabi_UAE_JPG.jpg",
+  "kind": "stock_activity",
+  "subject": "food-tour"
+ },
+ {
+  "title": "File:Traditional UAE Cooking.jpg",
+  "author": "Shahid1024",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Traditional_UAE_Cooking.jpg",
+  "file": "Traditional_UAE_Cooking_jpg.jpg",
+  "kind": "stock_activity",
+  "subject": "food-tour"
+ },
+ {
+  "title": "File:Dolphin show at Dubai dolphinarium, September 2012.jpg",
+  "author": "Georgekurian80823",
+  "license": "CC BY 3.0",
+  "license_url": "https://creativecommons.org/licenses/by/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Dolphin_show_at_Dubai_dolphinarium,_September_2012.jpg",
+  "file": "Dolphin_show_at_Dubai_dolphinarium_September_2012_jpg.jpg",
+  "kind": "attraction",
+  "subject": "dolphinarium"
+ },
+ {
+  "title": "File:Dubai Children's City, Dolphinarium - panoramio.jpg",
+  "author": "Vladimir Yaitskiy",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Dubai_Children%27s_City,_Dolphinarium_-_panoramio.jpg",
+  "file": "Dubai_Children_s_City_Dolphinarium_panoramio_jpg.jpg",
+  "kind": "attraction",
+  "subject": "dolphinarium"
+ },
+ {
+  "title": "File:Black Chevrolet Suburban (Desert Safari Dubai) (8667292413).jpg",
+  "author": "Rob Young from United Kingdom",
+  "license": "CC BY 2.0",
+  "license_url": "https://creativecommons.org/licenses/by/2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Black_Chevrolet_Suburban_(Desert_Safari_Dubai)_(8667292413).jpg",
+  "file": "Black_Chevrolet_Suburban_Desert_Safari_Dubai_8667292413_jpg.jpg",
+  "kind": "stock_activity",
+  "subject": "desert-safari"
+ },
+ {
+  "title": "File:DUBAI DESERT SAFARI.jpg",
+  "author": "SHARON VISHAKHAM",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:DUBAI_DESERT_SAFARI.jpg",
+  "file": "DUBAI_DESERT_SAFARI_jpg.jpg",
+  "kind": "stock_activity",
+  "subject": "desert-safari"
+ },
+ {
+  "title": "File:Aquaventure. The Atlantis, Dubai (8973483064).jpg",
+  "author": "Fabio Achilli from Milano, Italy",
+  "license": "CC BY 2.0",
+  "license_url": "https://creativecommons.org/licenses/by/2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Aquaventure._The_Atlantis,_Dubai_(8973483064).jpg",
+  "file": "Aquaventure_The_Atlantis_Dubai_8973483064_jpg.jpg",
+  "kind": "attraction",
+  "subject": "aquaventure"
+ },
+ {
+  "title": "File:Aquaventure. The Atlantis, Dubai (8973483200).jpg",
+  "author": "Fabio Achilli from Milano, Italy",
+  "license": "CC BY 2.0",
+  "license_url": "https://creativecommons.org/licenses/by/2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Aquaventure._The_Atlantis,_Dubai_(8973483200).jpg",
+  "file": "Aquaventure_The_Atlantis_Dubai_8973483200_jpg.jpg",
+  "kind": "attraction",
+  "subject": "aquaventure"
+ },
+ {
+  "title": "File:Aquaventure 2022-11-6.jpg",
+  "author": "دانية دروبي",
+  "license": "CC0",
+  "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "source": "https://commons.wikimedia.org/wiki/File:Aquaventure_2022-11-6.jpg",
+  "file": "Aquaventure_2022_11_6_jpg.jpg",
+  "kind": "attraction",
+  "subject": "aquaventure"
+ },
+ {
+  "title": "File:Abu Dhabi - The Ritz-Carlton Abu Dhabi, Grand Canal - فندق ريتز كارلتون أبو ظبي، القناة الكبرى - Sheikh Zayed Mosque reflected in the windows - مسجد الشيخ زاي - panoramio.jpg",
+  "author": "Edgar El",
+  "license": "CC BY 3.0",
+  "license_url": "https://creativecommons.org/licenses/by/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Abu_Dhabi_-_The_Ritz-Carlton_Abu_Dhabi,_Grand_Canal_-_%D9%81%D9%86%D8%AF%D9%82_%D8%B1%D9%8A%D8%AA%D8%B2_%D9%83%D8%A7%D8%B1%D9%84%D8%AA%D9%88%D9%86_%D8%A3%D8%A8%D9%88_%D8%B8%D8%A8%D9%8A%D8%8C_%D8%A7%D9%84%D9%82%D9%86%D8%A7%D8%A9_%D8%A7%D9%84%D9%83%D8%A8%D8%B1%D9%89_-_Sheikh_Zayed_Mosque_reflected_in_the_windows_-_%D9%85%D8%B3%D8%AC%D8%AF_%D8%A7%D9%84%D8%B4%D9%8A%D8%AE_%D8%B2%D8%A7%D9%8A_-_panoramio.jpg",
+  "file": "Abu_Dhabi_The_Ritz_Carlton_Abu_Dhabi_Grand_Canal_Sheikh_Zayed_Mosque_reflected_i.jpg",
+  "kind": "attraction",
+  "subject": "abu-dhabi"
+ },
+ {
+  "title": "File:JBR Beach Helicopter-Dubai UAE-Andres Larin.jpg",
+  "author": "Saaremees",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:JBR_Beach_Helicopter-Dubai_UAE-Andres_Larin.jpg",
+  "file": "JBR_Beach_Helicopter_Dubai_UAE_Andres_Larin_jpg.jpg",
+  "kind": "stock_activity",
+  "subject": "helicopter"
+ },
+ {
+  "title": "File:Hot air Balloon at Al Quoz4 Dubai.jpg",
+  "author": "Antony Earnest",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Hot_air_Balloon_at_Al_Quoz4_Dubai.jpg",
+  "file": "Hot_air_Balloon_at_Al_Quoz4_Dubai_jpg.jpg",
+  "kind": "stock_activity",
+  "subject": "balloon"
  }
 ]

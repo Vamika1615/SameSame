@@ -57,7 +57,8 @@ def test_booking_log_size_and_profile():
 def test_golden_case_inputs_present():
     truth = {t["listing_id"]: t["hotel_id"] for t in _t("hotel_truth")}
     room = {t["supplier_room_id"]: t["room_id"] for t in _t("room_truth")}
-    offers = [o for o in _t("offers") if truth[o["listing_id"]] == feeds.GOLDEN_HOTEL and room[o["supplier_room_id"]].endswith(":R1")]
+    golden = next(h["hotel_id"] for h in _t("base_hotels") if h["golden"])
+    offers = [o for o in _t("offers") if truth[o["listing_id"]] == golden and room[o["supplier_room_id"]].endswith(":R1")]
     a = [o for o in offers if o["supplier_id"] == "kestrel" and o["board"] == "RO"]
     b = [o for o in offers if o["supplier_id"] == "mynah" and o["board"] == "BB"]
     assert a[0]["nightly"] * 3 == 18600 and a[0]["refundable_days"] is None

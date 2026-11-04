@@ -13,8 +13,9 @@ TIERS = [("junior suite", "Junior Suite"), ("jr ste", "Junior Suite"), ("suite",
 BEDS = [("2 twin", "Twin"), ("twin", "Twin"), ("twn", "Twin"), ("1 king", "King"), ("king", "King"), ("1kg", "King"),
         ("kg", "King"), ("double", "King"), ("dbl", "King")]
 VIEWS = [("city", "City"), ("cv", "City"), ("pool", "Pool"), ("pv", "Pool"), ("river", "River"), ("rv", "River"),
+         ("creek", "Creek"), ("ck", "Creek"),
          ("garden", "Garden"), ("gv", "Garden")]
-ABBREV = {"jr ste", "ste", "exec", "prem", "dlx", "sup", "std", "fam", "twn", "1kg", "kg", "dbl", "cv", "pv", "rv", "gv"}
+ABBREV = {"jr ste", "ste", "exec", "prem", "dlx", "sup", "std", "fam", "twn", "1kg", "kg", "dbl", "cv", "pv", "rv", "ck", "gv"}
 
 
 def _find(text, table):
@@ -33,7 +34,7 @@ def parse(raw: str) -> dict:
                 "confidence": 0.9 if tk in ABBREV or re.search(r"2a|2c|2 2|sgl", t) else 0.95}
     bk, bed = _find(t, BEDS)
     vk, view = _find(t, VIEWS)
-    if vk in ("cv", "pv", "rv", "gv") and not re.search(r"\b(dlx|sup|exec|prem|std|kg|twn)\b", t):
+    if vk in ("cv", "pv", "rv", "ck", "gv") and not re.search(r"\b(dlx|sup|exec|prem|std|kg|twn)\b", t):
         vk, view = None, None                                 # a bare "pv" outside abbreviation style is too risky
     conf = 1.0
     for k in (tk, bk, vk):

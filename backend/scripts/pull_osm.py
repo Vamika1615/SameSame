@@ -6,7 +6,7 @@ network again. Stdlib only, so it runs before the venv exists.
     python backend/scripts/pull_osm.py
 
 Outputs (data/raw/osm/):
-  hotels_raw.json      every tourism=hotel in Bangkok (nodes/ways/relations, with centers)
+  hotels_raw.json      every tourism=hotel in the city (samesame/city.py) (nodes/ways/relations, with centers)
   basemap.geojson      river, major roads and district outlines, simplified for an offline map
   SNAPSHOT.txt         timestamp + query provenance
 
@@ -22,25 +22,29 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "data" / "raw" / "osm"
-ENDPOINTS = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"]
+ENDPOINTS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter",
+             "https://overpass.kumi.systems/api/interpreter"]
 UA = "SameSame-hackathon/0.1 (offline snapshot, one-off)"
 
-# Central Bangkok bbox for basemap layers (south, west, north, east)
-BBOX = (13.64, 100.42, 13.89, 100.68)
-BANGKOK = 'area["name:en"="Bangkok"]["admin_level"="4"]->.a;'
+sys.path.insert(0, str(ROOT / "backend"))
+from samesame import city  # noqa: E402  (stdlib-only module: no venv needed)
+
+BBOX = city.BBOX                     # (south, west, north, east) for basemap layers
+AREA = city.OSM_AREA
 
 QUERIES = {
-    "hotels": f'[out:json][timeout:120];{BANGKOK}nwr["tourism"="hotel"](area.a);out center tags;',
-    "river": '[out:json][timeout:120];way["waterway"="river"]["name:en"~"Chao Phraya"]({},{},{},{});out geom;'.format(*BBOX),
-    "roads": '[out:json][timeout:180];way["highway"~"^(motorway|trunk|primary)$"]({},{},{},{});out geom;'.format(*BBOX),
-    "districts": f'[out:json][timeout:180];{BANGKOK}rel["boundary"="administrative"]["admin_level"="6"](area.a);out geom;',
+    "hotels": '[out:json][timeout:300];nwr["tourism"="hotel"]({},{},{},{});out center tags;'.format(*BBOX),
+    "river": '[out:json][timeout:180];{}({},{},{},{});out geom;'.format(city.OSM_WATER, *BBOX),
+    "roads": '[out:json][timeout:240];way["highway"~"^(motorway|trunk|primary)$"]({},{},{},{});out geom;'.format(*BBOX),
+    "districts": '[out:json][timeout:300];rel["boundary"="administrative"]["admin_level"="{}"]({},{},{},{});out geom;'.format(
+        city.OSM_DISTRICT_LEVEL, *BBOX),
 }
 
 
 def overpass(query: str) -> dict:
     data = urllib.parse.urlencode({"data": query}).encode()
     last = None
-    for attempt in range(4):
+    for attempt in range(9):
         url = ENDPOINTS[attempt % len(ENDPOINTS)]
         try:
             req = urllib.request.Request(url, data=data, headers={"User-Agent": UA})
@@ -102,7 +106,7 @@ def main():
     river = overpass(QUERIES["river"])
     stamps["river"] = river["osm3s"]["timestamp_osm_base"]
     for el in river["elements"]:
-        features.append({"type": "Feature", "properties": {"layer": "river", "name": "Chao Phraya River"},
+        features.append({"type": "Feature", "properties": {"layer": "river", "name": city.WATER[0]},
                          "geometry": {"type": "LineString", "coordinates": line(el["geometry"], 0.0002)}})
 
     print("roads ...")

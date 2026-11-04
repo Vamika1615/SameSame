@@ -1,10 +1,10 @@
 OpenStreetMap snapshot for SameSame (data (c) OpenStreetMap contributors, ODbL 1.0)
-pulled_at_utc: 2026-11-03T18:56:59Z
-osm_base[hotels]: 2026-11-03T18:53:35Z
-osm_base[river]: 2026-11-03T18:54:36Z
-osm_base[roads]: 2026-11-03T18:54:36Z
-osm_base[districts]: 2026-11-03T18:55:32Z
-query[hotels]: [out:json][timeout:120];area["name:en"="Bangkok"]["admin_level"="4"]->.a;nwr["tourism"="hotel"](area.a);out center tags;
-query[river]: [out:json][timeout:120];way["waterway"="river"]["name:en"~"Chao Phraya"](13.64,100.42,13.89,100.68);out geom;
-query[roads]: [out:json][timeout:180];way["highway"~"^(motorway|trunk|primary)$"](13.64,100.42,13.89,100.68);out geom;
-query[districts]: [out:json][timeout:180];area["name:en"="Bangkok"]["admin_level"="4"]->.a;rel["boundary"="administrative"]["admin_level"="6"](area.a);out geom;
+pulled_at_utc: 2026-11-04T14:00:41Z
+osm_base[hotels]: 2026-11-04T13:54:59Z
+osm_base[river]: 2026-11-04T13:55:58Z
+osm_base[roads]: 2026-05-31T22:37:44Z
+osm_base[districts]: 2026-11-04T13:59:02Z
+query[hotels]: [out:json][timeout:300];nwr["tourism"="hotel"](24.95,55.05,25.36,55.45);out center tags;
+query[river]: [out:json][timeout:180];way["waterway"~"^(canal|river)$"]["name:en"~"Dubai Creek|Dubai Water Canal"](24.95,55.05,25.36,55.45);out geom;
+query[roads]: [out:json][timeout:240];way["highway"~"^(motorway|trunk|primary)$"](24.95,55.05,25.36,55.45);out geom;
+query[districts]: [out:json][timeout:300];rel["boundary"="administrative"]["admin_level"="10"](24.95,55.05,25.36,55.45);out geom;

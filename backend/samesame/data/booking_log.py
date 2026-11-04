@@ -8,6 +8,7 @@ from datetime import date, timedelta
 
 import numpy as np
 
+from samesame import city
 from samesame.data import world
 
 N_ATTEMPTS = 24_000
@@ -34,7 +35,7 @@ def generate(hotels, listings, truth, offers, attractions, act_listings, act_tru
     # latent demand: hotels near the centre, higher stars and family facilities get more attempts;
     # Indian agents additionally favour family rooms, pools and Indian breakfast options
     def appeal(h, market):
-        cen = np.exp(-((h["lat"] - 13.742) ** 2 + (h["lng"] - 100.548) ** 2) ** 0.5 / 0.05)
+        cen = np.exp(-((h["lat"] - city.CORE[0]) ** 2 + (h["lng"] - city.CORE[1]) ** 2) ** 0.5 / 0.05)
         a = (0.4 + cen) * (0.6 + 0.2 * h["star"])
         if market == "IN":
             a *= (1 + 0.8 * h["family_rooms"] + 0.4 * h["pool"] + 0.6 * ("Indian breakfast options" in h.get("amenities", [])))

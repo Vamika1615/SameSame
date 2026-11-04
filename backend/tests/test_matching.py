@@ -11,24 +11,24 @@ from samesame.matching import hotels as hm
 from samesame.matching import train
 
 
-def _l(lid, name, lat=13.74, lng=100.55, phone=None, sup="mynah"):
+def _l(lid, name, lat=25.12, lng=55.20, phone=None, sup="mynah"):
     return {"listing_id": lid, "supplier_id": sup, "name": name, "lat": lat, "lng": lng, "address": "", "phone": phone, "star": 4.0,
             "checkin_time": "14:00", "amenities": [], "postcode": None}
 
 
 def test_conflict_rules():
-    a, b, c, d = hm.prep([_l("a", "Citadines Sukhumvit 16"), _l("b", "Citadines Sukhumvit 8"),
-                          _l("c", "Holiday Inn Express Sukhumvit"), _l("d", "Holiday Inn Sukhumvit", lat=13.76)])
+    a, b, c, d = hm.prep([_l("a", "Citadines Al Barsha 1"), _l("b", "Citadines Al Barsha 2"),
+                          _l("c", "Holiday Inn Express Al Barsha"), _l("d", "Holiday Inn Al Barsha", lat=25.14)])
     assert "branch number" in hm.conflict(a, b)
     assert "brand family" in hm.conflict(c, d)
-    far = hm.prep([_l("e", "Same Name Hotel"), _l("f", "Same Name Hotel", lat=13.76)])
+    far = hm.prep([_l("e", "Same Name Hotel"), _l("f", "Same Name Hotel", lat=25.14)])
     assert "apart" in hm.conflict(*far)
-    assert hm.conflict(*hm.prep([_l("g", "NOVOTEL BKK SUKHUMVIT20"), _l("h", "Novotel Bangkok Sukhumvit Soi 20")])) is None
+    assert hm.conflict(*hm.prep([_l("g", "NOVOTEL DXB AL BARSHA2"), _l("h", "Novotel Dubai Al-Barsha 2")])) is None
 
 
 def test_chain_cannot_smuggle_a_merge():
     """x~y and y~z both look like twins, but x and z are different branches: the cluster must not hold both."""
-    P = hm.prep([_l("x", "Citadines Sukhumvit 16"), _l("y", "Citadines Sukhumvit"), _l("z", "Citadines Sukhumvit 8")])
+    P = hm.prep([_l("x", "Citadines Al Barsha 1"), _l("y", "Citadines Al Barsha"), _l("z", "Citadines Al Barsha 2")])
     cl, dec = clu.cluster(P, [(0, 1), (1, 2), (0, 2)], np.array([0.99, 0.98, 0.97]), auto=0.9, gray=0.3)
     assert cl["x"] != cl["z"]
     assert any(d == "blocked" for _, d, _ in dec)

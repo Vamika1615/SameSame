@@ -1,12 +1,12 @@
-"""25 real Bangkok attractions -> sellable variants (Variant DNA truth) -> six supplier listings each.
+"""25 real Dubai attractions -> sellable variants (Variant DNA truth) -> six supplier listings each.
 
 Attraction names and approximate coordinates are real; variants, prices, ratings and supplier titles
-are synthetic. The three demo products (Floating Market, Grand Palace, SkyWalk) have hand-written
-variants and titles because the brief names them; every other attraction is generated from its
-category template.
+are synthetic. The three demo products (Desert Safari, Burj Khalifa At the Top, Dubai Creek dhow cruise)
+have hand-written variants and titles; every other attraction is generated from its category template.
 """
 import numpy as np
 
+from samesame import city
 from samesame.data.feeds import _new_id
 from samesame.data.world import SUPPLIERS
 
@@ -14,88 +14,88 @@ DNA_KEYS = ["pickup", "meals", "duration", "stops", "access", "option", "cancel"
 
 # id, name, lat, lng, category, base price per person (INR, synthetic), typical hours
 ATTRACTIONS = [
-    ("grand-palace", "Grand Palace & Wat Phra Kaew", 13.7500, 100.4913, "fixed", 1150, 3),
-    ("wat-pho", "Wat Pho (Reclining Buddha)", 13.7465, 100.4930, "temple", 450, 2),
-    ("wat-arun", "Wat Arun (Temple of Dawn)", 13.7437, 100.4889, "temple", 350, 1.5),
-    ("floating-market", "Damnoen Saduak Floating Market", 13.5196, 99.9590, "fixed", 1250, 6),
-    ("maeklong", "Maeklong Railway Market", 13.4072, 100.0006, "daytrip", 1400, 6),
-    ("ayutthaya", "Ayutthaya Historical Park", 14.3556, 100.5676, "daytrip", 1900, 9),
-    ("skywalk", "Mahanakhon SkyWalk (rooftop)", 13.7234, 100.5283, "fixed", 940, 1.5),
-    ("baiyoke", "Baiyoke Sky Observation Deck", 13.7543, 100.5403, "observation", 550, 1.5),
-    ("dinner-cruise", "Chao Phraya Dinner Cruise", 13.7234, 100.5139, "cruise", 1600, 2),
-    ("sea-life", "SEA LIFE Bangkok Ocean World", 13.7462, 100.5347, "park", 1100, 3),
-    ("safari-world", "Safari World Bangkok", 13.8606, 100.7053, "park", 1700, 7),
-    ("dream-world", "Dream World", 13.9876, 100.6766, "park", 1300, 7),
-    ("calypso", "Calypso Cabaret, Asiatique", 13.7044, 100.5030, "show", 1150, 1.5),
-    ("muay-thai", "Muay Thai at Rajadamnern Stadium", 13.7597, 100.5092, "show", 2200, 3),
-    ("jim-thompson", "Jim Thompson House Museum", 13.7492, 100.5283, "museum", 350, 1.5),
-    ("chatuchak", "Chatuchak Weekend Market", 13.7999, 100.5500, "tour", 900, 4),
-    ("chinatown-food", "Chinatown (Yaowarat) Street Food", 13.7398, 100.5100, "tour", 1700, 3.5),
-    ("tuktuk-night", "Bangkok by Tuk-Tuk at Night", 13.7465, 100.4930, "tour", 1900, 4),
-    ("khlong-boat", "Thonburi Canals Long-tail Boat", 13.7437, 100.4889, "tour", 1100, 2),
-    ("cooking-class", "Thai Cooking Class, Silom", 13.7262, 100.5265, "tour", 1600, 4),
-    ("bang-krachao", "Bang Krachao Bicycle Tour", 13.6936, 100.5650, "tour", 1500, 5),
-    ("coral-island", "Pattaya & Coral Island", 12.9236, 100.8825, "daytrip", 2300, 11),
-    ("river-kwai", "Kanchanaburi & the Bridge on the River Kwai", 14.0412, 99.5036, "daytrip", 2100, 11),
-    ("asiatique-wheel", "Asiatique Sky Ferris Wheel", 13.7044, 100.5030, "observation", 450, 0.5),
-    ("wat-pho-massage", "Thai Massage at the Wat Pho School", 13.7465, 100.4930, "museum", 650, 1),
+    ("burj-khalifa", "Burj Khalifa: At the Top", 25.1972, 55.2744, "fixed", 3900, 1.5),
+    ("desert-safari", "Desert Safari, Lahbab Red Dunes", 24.8300, 55.6200, "fixed", 2000, 6),
+    ("dhow-cruise", "Dhow Dinner Cruise, Dubai Creek", 25.2550, 55.3030, "fixed", 2400, 2),
+    ("dubai-aquarium", "Dubai Aquarium & Underwater Zoo", 25.1975, 55.2790, "park", 3100, 2),
+    ("dubai-frame", "Dubai Frame", 25.2353, 55.3003, "observation", 1150, 1.5),
+    ("museum-future", "Museum of the Future", 25.2192, 55.2820, "museum", 3400, 2),
+    ("global-village", "Global Village", 25.0717, 55.3089, "park", 600, 4),
+    ("miracle-garden", "Dubai Miracle Garden", 25.0599, 55.2440, "park", 2100, 2),
+    ("img-worlds", "IMG Worlds of Adventure", 25.0815, 55.3184, "park", 6200, 6),
+    ("aquaventure", "Aquaventure Waterpark, Atlantis", 25.1340, 55.1199, "park", 7200, 6),
+    ("ski-dubai", "Ski Dubai", 25.1179, 55.1975, "park", 5800, 3),
+    ("dubai-fountain", "Dubai Fountain Boat Ride", 25.1959, 55.2758, "tour", 1600, 0.5),
+    ("abu-dhabi", "Abu Dhabi City Tour & Sheikh Zayed Grand Mosque", 24.4128, 54.4749, "daytrip", 3800, 9),
+    ("hatta", "Hatta Mountain Day Trip", 24.8000, 56.1300, "daytrip", 4200, 8),
+    ("old-dubai", "Old Dubai Souks & Abra Walk", 25.2644, 55.2970, "tour", 1900, 3),
+    ("al-fahidi", "Al Fahidi Historical Neighbourhood", 25.2637, 55.2997, "museum", 700, 2),
+    ("jumeirah-mosque", "Jumeirah Mosque Guided Visit", 25.2338, 55.2655, "museum", 600, 1.5),
+    ("view-palm", "The View at The Palm", 25.1124, 55.1388, "observation", 3100, 1.5),
+    ("sky-views", "Sky Views Dubai", 25.1945, 55.2690, "observation", 2200, 1.5),
+    ("helicopter", "Helicopter Tour over Dubai", 25.2425, 55.3265, "tour", 16000, 0.5),
+    ("balloon", "Hot Air Balloon over the Desert", 24.9800, 55.7300, "daytrip", 21000, 4),
+    ("la-perle", "La Perle by Dragone", 25.0812, 55.1433, "show", 7400, 1.5),
+    ("dubai-opera", "Dubai Opera", 25.1924, 55.2716, "show", 5500, 2.5),
+    ("food-tour", "Old Dubai Street Food Tour", 25.2660, 55.3050, "tour", 4300, 3.5),
+    ("dolphinarium", "Dubai Dolphinarium", 25.2296, 55.3260, "show", 2400, 1.5),
 ]
 
-# Hand-written variants for the three products the brief names: (vid, name, dna, tags, hours, [(supplier, title, price, rating, desc)])
+# Hand-written variants for the three demo products: (vid, name, dna, tags, hours, [(supplier, title, price, rating, desc)])
 FIXED = {
-    "floating-market": [
-        ("fm-rail-shared", "Floating + Railway Market · shared transfer",
-         {"pickup": "Shared hotel pickup", "meals": "No meals", "duration": "6 h · half day", "stops": "Floating + Maeklong Railway",
-          "access": "Standard", "option": "Boat ride extra", "cancel": "Free until 24 h"}, ["pickup", "free_cancel"], 6, [
-            ("kestrel", "Damnoen Saduak Floating Market & Maeklong Railway Market Tour", 1850, 4.5, "Join-in tour, approx. 6 hours. Pick-up from central Bangkok hotels."),
-            ("mynah", "Railway Market + Floating Market Half Day (Join-in)", 2050, 4.6, "Shared van with hotel pickup. Duration 6 h. Free cancellation up to 24h."),
-            ("hornbill", "Maeklong Train Market and Damnoen Saduak Floating Market Trip from Bangkok", 1990, 4.4, "Collection from your hotel in a shared minivan.")]),
-        ("fm-morning", "Floating Market only · morning, meet at Siam",
-         {"pickup": "Meeting point (Siam)", "meals": "No meals", "duration": "4.5 h · morning", "stops": "Floating market only",
-          "access": "Standard", "option": "Boat ride included", "cancel": "Non-refundable"}, [], 4.5, [
-            ("sunbird", "Damnoen Saduak Floating Market Morning Tour", 1250, 4.3, "Meet at Siam BTS exit 4. Boat ride included. About 4.5 hours."),
-            ("kestrel", "Floating Market Early Morning (SIC)", 1190, 4.1, "SIC basis from meeting point. NRF."),
-            ("bulbul", "Damnoen Saduak Floating Mkt - Half Day Morning", 1320, 4.2, "Boat included. Assemble at Siam Paragon.")]),
-        ("fm-private-lunch", "Floating + Railway Market · private car, Thai lunch",
-         {"pickup": "Private hotel pickup", "meals": "Thai lunch", "duration": "8 h · full day", "stops": "Floating + Maeklong Railway",
-          "access": "Standard", "option": "Private guide (English)", "cancel": "Free until 48 h"}, ["pickup", "free_cancel", "lunch"], 8, [
-            ("heron", "Private Floating & Railway Market Tour with Thai Lunch", 4600, 4.8, "Private car and driver, hotel pickup, lunch included. Approx. 8 hours."),
-            ("mynah", "Floating Market + Railway Market Private Car incl. Lunch", 4450, 4.7, "Private transfer from hotel. Lunch. Free cancellation 48h."),
-            ("bulbul", "PVT Damnoen Saduak + Maeklong w/ lunch", 4800, 4.6, "PVT car ex-hotel, lunch at local restaurant. Duration 8 h.")]),
+    "desert-safari": [
+        ("ds-evening-shared", "Evening safari · shared 4x4, BBQ dinner",
+         {"pickup": "Shared hotel pickup", "meals": "BBQ dinner", "duration": "6 h · evening", "stops": "Lahbab red dunes + camp",
+          "access": "Standard", "option": "Shared 4x4", "cancel": "Free until 24 h"}, ["pickup", "free_cancel"], 6, [
+            ("kestrel", "DESERT SAFARI WITH BBQ DINNER (SIC)", 2450, 4.5, "SIC basis with pick-up from Dubai hotels. BBQ dinner and live show. Approx. 6 hours."),
+            ("mynah", "Evening Desert Safari with BBQ Dinner (Shared)", 2650, 4.6, "Hotel pickup in a shared 4x4, BBQ dinner at camp. Duration 6 h. Free cancellation up to 24h."),
+            ("hornbill", "Red Dune Desert Safari & Barbecue Dinner from Dubai", 2590, 4.4, "Collection from your hotel in a shared vehicle; barbecue dinner at the camp.")]),
+        ("ds-morning", "Morning dune bashing · sandboarding, no meals",
+         {"pickup": "Shared hotel pickup", "meals": "No meals", "duration": "4 h · morning", "stops": "Lahbab red dunes",
+          "access": "Standard", "option": "Sandboarding", "cancel": "Non-refundable"}, ["pickup"], 4, [
+            ("sunbird", "Morning Desert Safari | Dune Bashing & Sandboarding", 1990, 4.3, "Morning departure, hotel pickup in a shared 4x4. About 4 hours. NRF."),
+            ("kestrel", "MORNING DUNE BASHING (SIC)", 1890, 4.1, "SIC pick-up from hotel, sandboarding included. Morning. NRF."),
+            ("bulbul", "Morning Desert Safari w/ Sandboarding", 2090, 4.2, "Htl pickup, shared 4x4, morning slot. Non-refundable.")]),
+        ("ds-private", "Private 4x4 · hotel pickup, BBQ dinner",
+         {"pickup": "Private hotel pickup", "meals": "BBQ dinner", "duration": "7 h · evening", "stops": "Lahbab red dunes + camp",
+          "access": "Standard", "option": "Private 4x4", "cancel": "Free until 48 h"}, ["pickup", "free_cancel"], 7, [
+            ("heron", "Private Desert Safari with BBQ Dinner", 14200, 4.8, "Private 4x4 and driver, hotel pickup, BBQ dinner. Approx. 7 hours."),
+            ("mynah", "Premium Private Desert Safari incl. BBQ Dinner", 13900, 4.7, "Private transfer from hotel. BBQ dinner. Free cancellation 48h."),
+            ("bulbul", "PVT Desert Safari w/ BBQ dinner", 14600, 4.6, "PVT 4x4 ex-hotel, BBQ dinner at camp. Duration 7 h.")]),
     ],
-    "grand-palace": [
-        ("gp-standard", "Entry ticket · standard queue",
-         {"pickup": "No transfer", "meals": "No meals", "duration": "3 h", "stops": "Grand Palace + Wat Phra Kaew",
-          "access": "Standard", "option": "Self-guided", "cancel": "Free until 24 h"}, ["free_cancel"], 3, [
-            ("kestrel", "Grand Palace Entrance Ticket", 1150, 4.2, "Admission ticket. Queue at the gate."),
-            ("sunbird", "Grand Palace & Emerald Buddha Ticket", 1190, 4.3, "Entry ticket, free cancellation 24h.")]),
-        ("gp-skip", "Skip-the-line entry",
-         {"pickup": "No transfer", "meals": "No meals", "duration": "2.5 h", "stops": "Grand Palace + Wat Phra Kaew",
-          "access": "Skip-the-line", "option": "Self-guided", "cancel": "Free until 24 h"}, ["free_cancel", "skip_line"], 2.5, [
-            ("mynah", "Grand Palace Skip-the-Line Ticket", 1650, 4.6, "Fast-track entrance, avoid the ticket queue."),
-            ("heron", "Grand Palace Priority Entry", 1590, 4.5, "Priority access lane. Cancel free 24h.")]),
-        ("gp-guide", "Standard entry + English guide, hotel pickup",
-         {"pickup": "Shared hotel pickup", "meals": "No meals", "duration": "4 h", "stops": "Grand Palace + Wat Phra Kaew + Wat Pho",
-          "access": "Standard", "option": "English-speaking guide", "cancel": "Free until 24 h"}, ["pickup", "free_cancel"], 4, [
-            ("hornbill", "Grand Palace & Wat Pho Guided Tour (English)", 2350, 4.7, "English guide, hotel transfer included."),
-            ("bulbul", "Grand Palace Half-Day w/ Eng Guide", 2290, 4.5, "Pick up from hotel, licensed English guide.")]),
+    "burj-khalifa": [
+        ("bk-day", "At the Top · levels 124-125, daytime slot",
+         {"pickup": "No transfer", "meals": "No meals", "duration": "1.5 h", "stops": "Levels 124 + 125",
+          "access": "Standard", "option": "Daytime slot", "cancel": "Free until 24 h"}, ["free_cancel"], 1.5, [
+            ("sunbird", "Burj Khalifa At the Top (Levels 124 & 125)", 3950, 4.5, "Entry ticket, choose a daytime slot."),
+            ("kestrel", "BURJ KHALIFA AT THE TOP TICKET", 3790, 4.4, "Levels 124 and 125. NRF after booking.")]),
+        ("bk-sunset", "At the Top · sunset prime time",
+         {"pickup": "No transfer", "meals": "No meals", "duration": "1.5 h", "stops": "Levels 124 + 125",
+          "access": "Standard", "option": "Sunset slot", "cancel": "Free until 24 h"}, ["free_cancel"], 1.5, [
+            ("mynah", "Burj Khalifa At the Top - Prime Time Sunset", 5600, 4.8, "Sunset time-slot, levels 124 & 125."),
+            ("hornbill", "Sunset at Burj Khalifa: At the Top", 5750, 4.7, "Golden-hour slot.")]),
+        ("bk-sky", "At the Top SKY · level 148 VIP lounge",
+         {"pickup": "No transfer", "meals": "Refreshments", "duration": "2 h", "stops": "Levels 148 + 125 + 124",
+          "access": "VIP", "option": "VIP lounge", "cancel": "Free until 24 h"}, ["free_cancel"], 2, [
+            ("heron", "Burj Khalifa At the Top SKY (Level 148)", 9600, 4.6, "VIP lounge on level 148 with refreshments, then levels 125 and 124."),
+            ("bulbul", "Burj Khalifa SKY lvl 148 + VIP lounge", 9350, 4.5, "VIP access, level 148, free cxl 24h.")]),
     ],
-    "skywalk": [
-        ("sw-day", "Day ticket",
-         {"pickup": "No transfer", "meals": "No meals", "duration": "1.5 h", "stops": "Observation deck + glass tray",
-          "access": "Time-slot", "option": "Daytime slot", "cancel": "Free until 24 h"}, ["free_cancel"], 1.5, [
-            ("sunbird", "Mahanakhon SkyWalk Admission", 990, 4.5, "Entry ticket, choose a daytime slot."),
-            ("kestrel", "King Power Mahanakhon Skywalk Ticket", 940, 4.4, "Ticket. NRF after booking.")]),
-        ("sw-sunset", "Sunset slot (17:00-18:30)",
-         {"pickup": "No transfer", "meals": "No meals", "duration": "1.5 h", "stops": "Observation deck + glass tray",
-          "access": "Time-slot", "option": "Sunset slot", "cancel": "Free until 24 h"}, ["free_cancel"], 1.5, [
-            ("mynah", "Mahanakhon SkyWalk Sunset Entry", 1290, 4.8, "Sunset time-slot 17:00-18:30."),
-            ("hornbill", "SkyWalk Bangkok at Sunset", 1340, 4.7, "Golden-hour slot.")]),
-        ("sw-drink", "Day ticket + rooftop drink",
-         {"pickup": "No transfer", "meals": "1 drink", "duration": "2 h", "stops": "Observation deck + glass tray + rooftop bar",
-          "access": "Time-slot", "option": "With drink", "cancel": "Free until 24 h"}, ["free_cancel"], 2, [
-            ("heron", "Mahanakhon SkyWalk with Welcome Drink", 1450, 4.6, "Ticket plus one drink at the rooftop bar."),
-            ("bulbul", "SkyWalk + Rooftop Bar Drink", 1390, 4.5, "Entry + 1 beverage.")]),
+    "dhow-cruise": [
+        ("dc-standard", "Creek dinner cruise · buffet, pier check-in",
+         {"pickup": "Pier check-in", "meals": "Buffet dinner", "duration": "2 h", "stops": "Dubai Creek",
+          "access": "Standard", "option": "Standard seat", "cancel": "Free until 24 h"}, ["free_cancel"], 2, [
+            ("kestrel", "DHOW CRUISE DUBAI CREEK - BUFFET DINNER", 2350, 4.3, "Check in at Al Seef pier. Buffet dinner. Approx. 2 hours."),
+            ("sunbird", "Dubai Creek Dhow Dinner Cruise | Standard Seat", 2450, 4.4, "Buffet dinner on board, standard seat, pier check-in. Free cancellation.")]),
+        ("dc-transfer", "Creek dinner cruise · buffet + hotel transfer",
+         {"pickup": "Shared hotel pickup", "meals": "Buffet dinner", "duration": "3 h", "stops": "Dubai Creek",
+          "access": "Standard", "option": "Standard seat", "cancel": "Free until 24 h"}, ["pickup", "free_cancel"], 3, [
+            ("mynah", "Dhow Dinner Cruise Dubai Creek with Hotel Transfer", 3150, 4.6, "Shared hotel pickup, buffet dinner. Duration 3 h. Free cancellation up to 24h."),
+            ("hornbill", "Dubai Creek Dhow Cruise incl. Transfers", 3090, 4.5, "Collection from your hotel; buffet dinner on board.")]),
+        ("dc-premium", "Upper deck · set menu, VIP",
+         {"pickup": "Pier check-in", "meals": "Set dinner", "duration": "2 h", "stops": "Dubai Creek",
+          "access": "VIP", "option": "VIP deck", "cancel": "Free until 24 h"}, ["free_cancel"], 2, [
+            ("heron", "Premium Dhow Cruise, Upper Deck Set Menu", 4250, 4.7, "VIP upper deck, set dinner menu. Pier check-in."),
+            ("bulbul", "Dhow Cruise VIP deck w/ set dinner", 4100, 4.5, "Set menu, VIP deck, check-in at pier.")]),
     ],
 }
 
@@ -106,9 +106,9 @@ TEMPLATES = {
                ("skip-the-line + audio guide", {"access": "Skip-the-line", "option": "Audio guide"}, ["skip_line", "free_cancel"], 1.6, 0.8),
                ("guided walk with hotel pickup", {"pickup": "Shared hotel pickup", "option": "English-speaking guide"}, ["pickup", "free_cancel"], 2.6, 1.6)],
     "daytrip": [("join-in tour, shared transfer", {"pickup": "Shared hotel pickup", "option": "Group (max 15)"}, ["pickup", "free_cancel"], 1.0, 1.0),
-                ("private car with lunch", {"pickup": "Private hotel pickup", "meals": "Thai lunch", "option": "Private guide (English)", "cancel": "Free until 48 h"},
+                ("private car with lunch", {"pickup": "Private hotel pickup", "meals": "Lunch", "option": "Private guide (English)", "cancel": "Free until 48 h"},
                  ["pickup", "lunch", "free_cancel"], 2.4, 1.1),
-                ("meet at Victory Monument, no refunds", {"pickup": "Meeting point (Victory Monument)", "cancel": "Non-refundable", "option": "Group (max 30)"}, [], 0.7, 1.0)],
+                (f"meet at {city.MEETING_POINT}, no refunds", {"pickup": f"Meeting point ({city.MEETING_POINT})", "cancel": "Non-refundable", "option": "Group (max 30)"}, [], 0.7, 1.0)],
     "observation": [("day ticket", {"access": "Time-slot", "option": "Daytime slot"}, ["free_cancel"], 1.0, 1.0),
                     ("sunset slot", {"access": "Time-slot", "option": "Sunset slot"}, ["free_cancel"], 1.3, 1.0),
                     ("ticket + buffet dinner", {"access": "Time-slot", "option": "Evening slot", "meals": "Buffet dinner"}, ["free_cancel"], 2.8, 1.8)],
@@ -131,7 +131,7 @@ PHRASES = {"pickup": ["hotel pickup", "pick-up from your hotel", "collection fro
                       "SIC from hotel"],
            "skip_line": ["skip-the-line", "fast-track entry", "priority entrance", "no queuing"],
            "free_cancel": ["free cancellation", "cancel free up to 24h", "refundable to 24h", "FC 24H"],
-           "lunch": ["lunch included", "Thai lunch", "incl. buffet lunch", "meal included"]}
+           "lunch": ["lunch included", "local lunch", "incl. buffet lunch", "meal included"]}
 # Which suppliers sell activities, weighted (Sunbird is strongest on activities; Heron sells them but fails often)
 ACT_SHARE = {"kestrel": 1.0, "mynah": 0.9, "heron": 0.8, "bulbul": 0.6, "hornbill": 0.8, "sunbird": 1.3}
 

@@ -8,15 +8,14 @@ import unicodedata
 import numpy as np
 from rapidfuzz import fuzz
 
-from samesame import config
+from samesame import city, config
 from samesame.data.osm_base import family as brand_family
 from samesame.ranking.score import haversine_m
 
 BLOCK_RADIUS_M = 2000
-ABBR = {"bkk": "bangkok", "htl": "hotel", "resi": "residence", "stes": "suites", "suk": "sukhumvit", "krungthep": "bangkok",
-        "sukhumwit": "sukhumvit", "seelom": "silom", "asoke": "asok", "intl": "international", "apt": "apartment",
-        "rd": "road", "st": "street", "&": "and"}
-STOP = {"hotel", "bangkok", "the", "by", "and", "soi", "a", "an", "at", "of", "road", "sha", "plus", "thailand"}
+ABBR = {"htl": "hotel", "resi": "residence", "stes": "suites", "apts": "apartments", "intl": "international", "apt": "apartment",
+        "rd": "road", "st": "street", "&": "and", **city.MATCH_ABBR}
+STOP = {"hotel", "the", "by", "and", "a", "an", "at", "of", "road", "street", "sha", "plus"} | city.GENERIC_WORDS
 
 
 def norm(s: str | None) -> str:
@@ -24,7 +23,7 @@ def norm(s: str | None) -> str:
         return ""
     s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower()
     s = re.sub(r"\(sha\+?\)", " ", s)
-    s = re.sub(r"(?<=[a-z])(?=\d)|(?<=\d)(?=[a-z])", " ", s)          # SUKHUMVIT20 -> sukhumvit 20
+    s = re.sub(r"(?<=[a-z])(?=\d)|(?<=\d)(?=[a-z])", " ", s)          # BARSHA2 -> barsha 2
     toks = re.findall(r"[a-z0-9@&]+", s)
     return " ".join(ABBR.get(t, t) for t in toks)
 

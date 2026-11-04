@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from samesame import config, images, placeholders, review, service, store
+from samesame import city, config, images, placeholders, review, service, store
 from samesame.labelling.api import router as labelling_router
 from samesame.schemas import (ActivitySearch, BookResponse, BookStats, HotelDetail, HotelSearch, Meta, Mode, ReviewAck, ReviewItem,
                               ReviewLabel, SimParams, SimResult, SupplierRow)
@@ -94,7 +94,7 @@ def book_stats(offer_ids: str = "", runs: int = 1000):
 
 
 @app.get("/api/activities/search", response_model=ActivitySearch)
-def activities(q: str = "floating market"):
+def activities(q: str = city.DEMO_QUERIES[0][0]):
     return service.activity_search(q)
 
 

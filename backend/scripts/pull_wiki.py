@@ -27,23 +27,25 @@ PHOTOS = OUT / "photos"
 UA = {"User-Agent": "SameSame-hackathon/0.1 (offline demo; contact aryandahiya1706@gmail.com)"}
 FREE = re.compile(r"^(cc0|cc[- ]by(-sa)?( \d\.\d)?|public domain|pd)", re.I)
 WIDTH = 500                       # a standard Wikimedia thumbnail step (pre-rendered, fast)
-ASOK = (13.7370, 100.5603)
+sys.path.insert(0, str(ROOT / "backend"))
+from samesame import city  # noqa: E402  (stdlib-only module)
+
+DEMO = city.DEMO_AREA[1:]
 
 # attraction id -> English Wikipedia article (descriptions + the article's own photos)
 ARTICLES = {
-    "grand-palace": "Grand Palace", "wat-pho": "Wat Pho", "wat-arun": "Wat Arun",
-    "floating-market": "Damnoen Saduak floating market", "maeklong": "Maeklong Railway Market",
-    "ayutthaya": "Ayutthaya Historical Park", "skywalk": "King Power Mahanakhon", "baiyoke": "Baiyoke Tower II",
-    "dinner-cruise": "Chao Phraya River", "sea-life": "Sea Life Bangkok Ocean World", "safari-world": "Safari World",
-    "dream-world": "Dream World (Thailand)", "calypso": "Asiatique The Riverfront", "muay-thai": "Rajadamnern Stadium",
-    "jim-thompson": "Jim Thompson House", "chatuchak": "Chatuchak Weekend Market", "chinatown-food": "Yaowarat Road",
-    "tuktuk-night": "Auto rickshaw", "khlong-boat": "Long-tail boat", "cooking-class": "Thai cuisine",
-    "bang-krachao": "Bang Krachao", "coral-island": "Ko Lan", "river-kwai": "Death Railway",
-    "asiatique-wheel": "Asiatique The Riverfront", "wat-pho-massage": "Thai massage",
+    "burj-khalifa": "Burj Khalifa", "desert-safari": "Dubai Desert Conservation Reserve", "dhow-cruise": "Dubai Creek",
+    "dubai-aquarium": "Dubai Aquarium and Underwater Zoo", "dubai-frame": "Dubai Frame", "museum-future": "Museum of the Future",
+    "global-village": "Global Village (Dubai)", "miracle-garden": "Dubai Miracle Garden", "img-worlds": "IMG Worlds of Adventure",
+    "aquaventure": "Aquaventure", "ski-dubai": "Ski Dubai", "dubai-fountain": "Dubai Fountain",
+    "abu-dhabi": "Sheikh Zayed Grand Mosque", "hatta": "Hatta, Dubai", "old-dubai": "Gold Souk (Dubai)",
+    "al-fahidi": "Al Fahidi Historical Neighbourhood", "jumeirah-mosque": "Jumeirah Mosque", "view-palm": "The Palm Tower",
+    "sky-views": "Address Sky View", "helicopter": "Palm Jumeirah", "balloon": "Hot air balloon", "la-perle": "La Perle (show)",
+    "dubai-opera": "Dubai Opera", "food-tour": "Emirati cuisine", "dolphinarium": "Dubai Dolphinarium",
 }
 STOCK = {"stock_room": ("Category:Hotel rooms", 90), "stock_pool": ("Category:Hotel swimming pools", 80),
          "stock_lobby": ("Category:Hotel lobbies", 47)}
-GENERIC = {"the", "hotel", "hotels", "bangkok", "by", "and", "a", "resort", "boutique", "residence", "suites", "inn", "thailand", "of"}
+GENERIC = city.GENERIC_WORDS | {"the", "hotel", "hotels", "by", "and", "a", "resort", "boutique", "residence", "suites", "inn", "of"}
 
 
 def get(url, params=None):
@@ -186,17 +188,18 @@ STOCK_BAD = (r"postcard|vintage|card|advert|19[0-8]\d|18\d\d|meeting|conference|
              r"minister|interview")
 # Removed after a visual review of every remaining stock photo (people in shot, an elephant, snow, derelict, too dark)
 STOCK_REJECTED = set(["Breakfast_serving_room_in_hotel_jpg.jpg", "Hotel_Room_37456623550_jpg.jpg", "Hotel_Room_Lamp_46385514474_jpg.jpg", "Hotel_room_2086685536_jpg.jpg", "Inside_a_hotel_room_20100911_120542_jpg.jpg", "Luxurious_rooms_jpg.jpg", "Alpenresort_Schwarz_interior_pool_24723499948_png.jpg", "Bavaro_Iberostar_pool_bar_JPG.jpg", "Current_situation_of_the_Grande_Hotel_high_polluted_swimming_pool_JPG.jpg", "Elephant_Mole_Motel_pool_jpg.jpg", "Four_seasons_pool_in_buenos_aires_jpg.jpg", "Guitar_Pool_geograph_org_uk_1658918_jpg.jpg", "AcropoleHotelKhartoum_Lobby_RomanDeckert02022016_jpg.jpg", "Detalles_Lobby_Hotel_Contempo_panoramio_jpg.jpg", "Grande_Hotel_interior_of_original_lobby_on_the_ground_floor_of_block_A_March_201.jpg", "IMG_20170717_hotel_mirage_lobby_struga_2017_jpg.jpg", "Lobby_Testing_21174745_jpg.jpg", "Bed_Room_Arcadia_hotel_fire_LCCN2014694942_jpg.jpg", "GD_Guangdong_Guangzhou_Huangpu_MUSTEL_Hotel_Knowledge_City_bed_room_double_sigle.jpg", "GD_Guangdong_Guangzhou_Huangpu_MUSTEL_Hotel_Knowledge_City_bed_room_double_sigle.jpg", "GD_Guangdong_Guangzhou_Huangpu_MUSTEL_Hotel_Knowledge_City_bed_room_double_sigle.jpg", "Gladstone_Hotel_Come_up_to_my_room_floating_bed_2D_version_jpg.jpg", "Hotel_Room_Bed_40144499253_jpg.jpg", "Hotel_room_in_Mumbai_238516872_jpg.jpg", "Pensacola_Hotel_Room_Fun_July_2017_Lounging_jpg.jpg", "Poshekhonye_Soga_Hotel_five_bed_room_DSCF5433_JPG.jpg", "Restaurant_room_of_Amantaka_luxury_Resort_Hotel_in_Luang_Prabang_Laos_jpg.jpg", "Room_Hotel_Sofitel_Strasbourg_jpg.jpg", "Gladstone_Hotel_Come_up_to_my_room_floating_bed_jpg.jpg", "MC_Macau_Cotai_Grand_Lisboa_Palace_hotel_two_beds_room_14pm_afternoon_November_2.jpg", "MC_Macau_Cotai_Grand_Lisboa_Palace_hotel_two_beds_room_14pm_afternoon_November_2.jpg", "MC_Macau_Cotai_Grand_Lisboa_Palace_hotel_two_beds_room_14pm_afternoon_November_2.jpg", "Typical_bed_room_new_Hotel_Waldorf_Toledo_Ohio_DPLA_66b7a28c328211b088004dc3a322.jpg", "Typical_bed_room_new_Hotel_Waldorf_Toledo_Ohio_DPLA_66b7a28c328211b088004dc3a322.jpg", "Banquet_Room_interior_Brother_Hotel_20130212_jpg.jpg", "Belmond_Grand_Hotel_Europe_Saint_Petersburg_sitting_room_stairways_jpg.jpg", "Hotel_Room_Interior_2026_10_13_3_jpg.jpg", "Hotel_room_window_Guoman_Tower_Hotel_2014_03_05_jpg.jpg", "Interior_of_a_room_at_City_Lodge_OR_Tambo_Airport_hotel_February_2025_jpg.jpg", "Skyline_dining_room_Terrace_Plaza_Hotel_Cincinnati_Ohio_79213_jpg.jpg", "Trump_Hotel_dinner_room_service_jpg.jpg", "University_Arms_Hotel_room_interior_1999_jpg.jpg", "Belmond_Grand_Hotel_Europe_Saint_Petersburg_sitting_room_2_jpg.jpg", "Burgh_Island_Hotel_Dining_Room_geograph_6005073_jpg.jpg", "Dombay_Room_interior_Soviet_modernism_Karachay_Cherkessia_jpg.jpg", "GD_Zhaoqing_Pearl_Hotel_Starlake_interior_hall_waiting_room_July_2012_JPG.jpg", "Room_Hotel_Florence_San_Diego_Calif_jpg.jpg", "Room_in_Hotel_jpg.jpg", "Wyndham_New_Orleans_at_Canal_Place_hotel_room_2002_02_jpg.jpg", "Boscolo_Hotel_Atlantic_Deluxe_Room_Nice_panoramio_jpg.jpg", "Deluxe_room_jpg.jpg", "Deluxe_room_hotels_in_gili_trawangan_jpg.jpg", "Marquette_Inn_Room_Service_Menu_DPLA_a2d923c1a44a85dd32b6905102c6d83c_page_2_jpg.jpg", "Marquette_Inn_Room_Service_Menu_DPLA_a2d923c1a44a85dd32b6905102c6d83c_page_3_jpg.jpg", "Marquette_Inn_Room_Service_Menu_DPLA_a2d923c1a44a85dd32b6905102c6d83c_page_4_jpg.jpg", "Astoria_Hotel_bedroom_in_the_Royal_Suite_png.jpg", "Canopy_bed_and_wardrobes_in_Khan_Pool_Suite_at_Amantaka_luxury_Resort_Hotel_in_L.jpg", "Canopy_bed_of_Amantaka_Suite_in_Amantaka_luxury_Resort_Hotel_in_Luang_Prabang_La.jpg", "Canopy_bed_of_Khan_Pool_Suite_in_Amantaka_luxury_Resort_Hotel_in_Luang_Prabang_L.jpg", "Suite_bedroom_at_Union_Station_Nashville_jpg.jpg", "Bedrooms_Titanic_Hotel_Guest_Suite_Bathroom_37604041486_jpg.jpg", "Broadmoor_Hotel_suite_jpg.jpg", "Copper_Point_Resort_2_Bedroom_Loft_Suite_9611675574_jpg.jpg", "COVID_19_Swimming_Pool_Measures_Cactus_Hotel_Rhodes_3_September_2024_jpg.jpg", "Hotel_Swimming_Pool_geograph_org_uk_3353507_jpg.jpg", "JW_Marriott_Hotel_New_Orleans_Swimming_Pool_2003_jpg.jpg", "Miami_Swimming_Pool_Hotel_Royal_Palm_jpg.jpg", "Miami_Beach_Swimming_pool_Ocean_Haven_Hotel_01_jpg.jpg", "Miami_Beach_Swimming_pool_Prince_Michael_Hotel_jpg.jpg", "Miami_Beach_Swimming_pool_The_Delmonico_Hotel_01_jpg.jpg", "P_rtschach_Hauptstrasse_161_P_rtschacher_Hof_Swimming_Pool_21012016_0244_jpg.jpg", "Swimming_Pool_in_a_hotel_in_Tamil_Nadu_03_jpg.jpg", "Havana_Pool_Hotel_Nacional_jpg.jpg", "Miami_Beach_Swimming_Pool_The_Sands_Hotel_jpg.jpg", "Miami_Beach_Swimming_pool_Atlantis_Hotel_jpg.jpg", "Miami_Beach_Swimming_pool_Coral_Reef_Hotel_jpg.jpg", "Miami_Beach_Swimming_pool_Strath_Haven_Hotel_jpg.jpg", "Miami_Beach_Swimming_pool_The_Delmonico_Hotel_02_jpg.jpg", "Miami_Beach_Swimming_pool_The_Poinciana_Hotel_jpg.jpg", "Poinsett_Hotel_Rooftop_swimming_pool_jpg.jpg", "Shillingford_Bridge_Hotel_swimming_pool_geograph_org_uk_1295735_jpg.jpg", "Swimming_pool_Traders_Hotel_Singapore_20070123_01_jpg.jpg", "Swimming_pool_Traders_Hotel_Singapore_20070123_05_jpg.jpg", "Swimming_pool_in_a_Hotel_of_Guatemala_jpg.jpg", "Bathroom_of_Khan_Pool_Suite_in_Amantaka_luxury_Resort_Hotel_in_Luang_Prabang_Lao.jpg", "Bathtub_of_Khan_Pool_Suite_in_Amantaka_luxury_Resort_Hotel_in_Luang_Prabang_Laos.jpg", "Indoor_pool_and_shower_of_spa_at_Amantaka_luxury_Resort_Hotel_in_Luang_Prabang_L.jpg", "Indoor_pool_and_showers_of_the_spa_at_Amantaka_luxury_Resort_Hotel_in_Luang_Prab.jpg", "Indoor_pool_of_spa_with_open_door_at_Amantaka_luxury_Resort_Hotel_in_Luang_Praba.jpg", "Olympic_sized_Swimming_Pool_and_Piscine_for_Kids_Eden_Roc_Resort_Hotel_Rhodes_24.jpg", "Swimming_pool_of_Unzen_Resort_Hotel_jpg.jpg", "Tachibana_Bay_and_swimming_pool_of_Unzen_Resort_Hotel_2_jpg.jpg", "The_pool_room_inside_Manor_Resort_jpg.jpg", "Fullerton_Bay_Hotel_rooftop_swimming_pool_20170306_jpg.jpg", "Infinity_Pool_at_Marina_Bay_Sands_SkyPark_Singapore_Ank_Kumar_Infosys_Limited_01.jpg", "Infinity_Pool_at_Marina_Bay_Sands_SkyPark_Singapore_Ank_Kumar_Infosys_Limited_02.jpg", "Infinity_Pool_at_Marina_Bay_Sands_SkyPark_Singapore_Ank_Kumar_Infosys_Limited_03.jpg", "Infinity_Pool_at_Marina_Bay_Sands_SkyPark_Singapore_Ank_Kumar_Infosys_Limited_04.jpg", "Infinity_Pool_at_Marina_Bay_Sands_SkyPark_Singapore_Ank_Kumar_Infosys_Limited_05.jpg", "Infinity_Pool_at_Marina_Bay_Sands_SkyPark_Singapore_Ank_Kumar_Infosys_Limited_06.jpg", "Infinity_Pool_at_Marina_Bay_Sands_SkyPark_Singapore_Ank_Kumar_Infosys_Limited_07.jpg", "Infinity_Pool_at_Marina_Bay_Sands_SkyPark_Singapore_Ank_Kumar_Infosys_Limited_08.jpg", "Le_Pavillon_Hotel_New_Orleans_rooftop_pool_jpg.jpg", "Marina_Bay_Sands_Rooftop_SkyPark_Infinity_Pool_view_from_the_side_jpg.jpg", "New_Orleans_Rooftop_Pool_All_Mine_June_2012_jpg.jpg", "Rio_hotel_upstairs_pool_jpeg.jpg", "Rio_hotel_upstairs_pool_14_14_20_881000_jpeg.jpg", "Rio_hotel_upstairs_pool_14_14_35_177000_jpeg.jpg", "Rio_hotel_upstairs_pool_14_14_49_144000_jpeg.jpg", "Rooftop_Pool_Tulum_Quintana_Roo_Mexico_June_2024_jpg.jpg", "Rooftop_Pool_in_Australian_Drought_465917674_jpg.jpg", "Rooftop_pool_Nairobi_20250808_P1048999_jpg.jpg", "Rooftop_pool_4628729613_jpg.jpg", "Schloss_Elmau_Rooftop_Pool_jpg.jpg", "The_Standard_Down_Town_Los_Angeles_rooftop_pool_2014_04_28_22_19_42_by_Blake_Pat.jpg", "Westin_New_Orleans_Canal_Place_rooftop_pool_jpg.jpg", "DZ3_0919_Night_reflections_over_Pattaya_city_lights_mirrored_in_a_rooftop_infini.jpg", "Pool_mit_Blick_zum_S_ntis_jpg.jpg"])
-ATTRACTION_REJECTED = set(["Arrival_of_the_King_of_Siam_at_the_Temple_of_Sleeping_Idol_Wellcome_L0020127_jpg.jpg", "Caribou_from_Wagon_Trails_jpg.jpg", "Koh_Larn_Island_from_the_Bird_and_Bees_resort_by_Don_Ramey_Logan_jpg.jpg", "Bridge_over_the_River_Kwai_Art_IWMARTLD6035_jpg.jpg"])   # visual review: archive crowd photo, a reindeer, a satellite map, a drawing
-GENERIC_TOPICS = {"tuktuk-night", "khlong-boat", "cooking-class", "wat-pho-massage", "dinner-cruise"}
-THAI = re.compile(r"bangkok|thailand|\bthai\b|krung ?thep|[\u0e00-\u0e7f]", re.I)
+ATTRACTION_REJECTED = set(["Arrival_of_the_King_of_Siam_at_the_Temple_of_Sleeping_Idol_Wellcome_L0020127_jpg.jpg", "Caribou_from_Wagon_Trails_jpg.jpg", "Koh_Larn_Island_from_the_Bird_and_Bees_resort_by_Don_Ramey_Logan_jpg.jpg", "Bridge_over_the_River_Kwai_Art_IWMARTLD6035_jpg.jpg", "Carlton_Tower_Hotel_Dubai_jpg.jpg", "Dubai_Aquarium_jpg.jpg", "Dubai_Future_Forum_2024_interior_01_jpg.jpg", "Museum_of_the_Future_Audi_Etron_Dubai_UAE_Andres_Larin_jpg.jpg", "Visitors_at_Jumeirah_Mosque_jpg.jpg", "Falcon_Handlers_at_Desert_Safari_in_Dubai_jpg.jpg", "IMG_Worlds_of_Adventure_jpg.jpg", "IMG_Worlds_of_Adventure_27352868657_jpg.jpg", "IMG_Worlds_of_Adventure_28351048018_jpg.jpg", "Gradens_Sheikh_Zayed_Grand_Mosque_in_Abu_Dhabi_panoramio_jpg.jpg", "Secretary_Kerry_Removes_His_Shoes_Before_Entering_the_Sheikh_Zayed_Grand_Mosque.jpg", "Fauchon_opera_cake_11389628205_jpg.jpg", "Paolo_Petrocelli_and_HH_Sayyid_Kamil_Fahad_Mahmood_Al_Said_at_the_Royal_Opera_Ho.jpg", "Paolo_Petrocelli_with_Malaysian_billionaireTan_Sri_Francis_Yeoh_and_Superintende.jpg", "The_Helicopter_Company_H160_at_Dubai_Airshow_2025_jpg.jpg", "UAEAF_helicopter_mass_flyover_practice_for_Dubai_Airshow_2025_jpg.jpg"])   # visual review: archive shots, people / events, unrelated objects
+# articles about a wider topic or area than the product: their photos are labelled stock, and must be local
+GENERIC_TOPICS = {"helicopter", "balloon", "food-tour", "desert-safari", "dhow-cruise"}
+LOCAL = re.compile(city.LOCAL_CONTEXT, re.I)          # the title places the photo in this city
 
 
 def vet(photos: list[dict], hotels: list[dict]) -> list[dict]:
     """Precision first: a photo is labelled as showing a place only if its own title says so.
 
-    hotel:      the title contains the hotel's distinctive name as a phrase AND places it in Bangkok / Thailand
+    hotel:      the title contains the hotel's distinctive name as a phrase AND places it in the city
                 (Commons categories and name searches also return the street outside, a namesake in Oslo, a jet)
-    attraction: articles about a whole topic (tuk-tuks, Thai massage) keep only Thai photos, relabelled as stock
+    attraction: articles about a whole topic (hot-air balloons, the cuisine) keep only local photos, relabelled as stock
     """
     names = {h["osm_id"]: h["name"] for h in hotels}
     out = []
@@ -204,34 +207,39 @@ def vet(photos: list[dict], hotels: list[dict]) -> list[dict]:
         t = p["title"]
         if p["kind"] == "hotel":
             phrase = " ".join(w for w in norm(names.get(p["subject"], "")).split() if w not in GENERIC)
-            if not phrase or f" {phrase} " not in f" {norm(t)} " or not THAI.search(t) or re.search(r"demolish|construction|logo", t, re.I):
+            if not phrase or f" {phrase} " not in f" {norm(t)} " or not LOCAL.search(t) or re.search(r"demolish|construction|logo", t, re.I):
                 continue
         elif p["kind"] in STOCK_TITLE:
             if (not re.search(STOCK_TITLE[p["kind"]], t, re.I) or re.search(STOCK_BAD, t, re.I)
                     or p["file"] in STOCK_REJECTED):
                 continue
-        elif p["kind"] == "attraction" and p["file"] in ATTRACTION_REJECTED:
+        elif p["kind"] in ("attraction", "stock_activity", "hotel") and p["file"] in ATTRACTION_REJECTED:
             continue
         elif p["kind"] == "attraction" and p["subject"] in GENERIC_TOPICS:
-            if not THAI.search(t):
+            if not LOCAL.search(t):
                 continue
             p = {**p, "kind": "stock_activity"}
         out.append(p)
     return out
 
 
-def main():
+def main(keep_stock: bool = False):
+    """keep_stock: reuse the already-vetted stock photos (they show no particular city) and fetch only this
+    city's hotel and attraction photos and descriptions (used when switching city)."""
     PHOTOS.mkdir(parents=True, exist_ok=True)
     hotels = osm_hotels()
     seen: set = set()
     photos, desc, links = [], {}, []
+    if keep_stock:
+        photos = [p for p in json.loads((OUT / "photos.json").read_text(encoding="utf-8")) if p["kind"] in STOCK]
+        seen = {p["title"] for p in photos}
 
     # 1. hotels with an explicit Wikidata link (OSM tag) or Wikidata coordinates nearby
     q = """SELECT ?h ?hLabel ?lat ?lng ?img ?cat ?article WHERE { ?h wdt:P31 ?t. VALUES ?t {wd:Q27686 wd:Q1631129 wd:Q5056668 wd:Q63099748}
-      ?h wdt:P131* wd:Q1861; p:P625/psv:P625 [wikibase:geoLatitude ?lat; wikibase:geoLongitude ?lng].
+      ?h wdt:P131* wd:{city.WIKIDATA_CITY}; p:P625/psv:P625 [wikibase:geoLatitude ?lat; wikibase:geoLongitude ?lng].
       OPTIONAL{?h wdt:P18 ?img} OPTIONAL{?h wdt:P373 ?cat}
       OPTIONAL{?article schema:about ?h; schema:isPartOf <https://en.wikipedia.org/>}
-      SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } }"""
+      SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } }""".replace("{city.WIKIDATA_CITY}", city.WIKIDATA_CITY)
     wd = get("https://query.wikidata.org/sparql", {"query": q})["results"]["bindings"]
     by_q: dict = {}
     for x in wd:
@@ -255,14 +263,14 @@ def main():
             hotel_cats.setdefault(h["osm_id"], set()).add(t["wikimedia_commons"])
         if t.get("wikipedia", "").startswith("en:"):
             links.append((h["osm_id"], t["wikipedia"][3:]))
-    # 2. Commons "Hotels in Bangkok" subcategories, matched to OSM by name
-    for cat in members("Category:Hotels in Bangkok", "subcat"):
+    # 2. Commons "Hotels in <city>" subcategories, matched to OSM by name
+    for cat in members(city.COMMONS_HOTELS, "subcat"):
         h = best_osm(re.sub(r"\s*\(.*\)", "", cat.split(":", 1)[1]), hotels)
         if h:
             hotel_cats.setdefault(h["osm_id"], set()).add(cat)
     # 3. demo area: file titles that name the hotel (all distinctive words must appear in the title)
     for h in hotels:
-        if dist_m(*ASOK, h["lat"], h["lng"]) > 1200 or h["osm_id"] in hotel_cats or len(core(h["name"])) < 2:
+        if dist_m(*DEMO, h["lat"], h["lng"]) > 1200 or h["osm_id"] in hotel_cats or len(core(h["name"])) < 2:
             continue
         r = commons({"action": "query", "list": "search", "srsearch": h["name"], "srnamespace": 6, "srlimit": 10})
         hits = [s["title"] for s in r["query"]["search"] if core(h["name"]) <= core(s["title"])]
@@ -276,7 +284,7 @@ def main():
         photos += download(file_info(files), "hotel", osm_id, 4, seen)
 
     # 4. stock photos: real hotel rooms / pools / lobbies, shown as "stock photo, not this hotel"
-    for kind, (cat, n) in STOCK.items():
+    for kind, (cat, n) in ({} if keep_stock else STOCK).items():
         files = members(cat, "file", 400)
         photos += download(file_info(files), kind, kind, n, seen)
         print(kind, sum(p["kind"] == kind for p in photos))
@@ -301,6 +309,7 @@ def main():
 
     photos = vet(photos, hotels)
     (OUT / "photos.json").write_text(json.dumps(photos, indent=1, ensure_ascii=False), encoding="utf-8")
+    desc = vet_descriptions(desc, hotels)
     (OUT / "descriptions.json").write_text(json.dumps(desc, indent=1, ensure_ascii=False), encoding="utf-8")
     kinds = {}
     for p in photos:
@@ -327,9 +336,40 @@ def more_stock(per_query: int = 60):
     print({k: sum(p["kind"] == k for p in photos) for k in ("stock_room", "stock_pool", "stock_lobby")})
 
 
+# Commons file searches for attractions whose article has no usable photo (titles must name the place, and be local)
+ATTRACTION_SEARCH = {"desert-safari": "Dubai desert safari", "img-worlds": "IMG Worlds of Adventure Dubai",
+                     "aquaventure": "Aquaventure Dubai", "abu-dhabi": "Sheikh Zayed Grand Mosque", "la-perle": "La Perle Dubai",
+                     "dubai-opera": "Dubai Opera", "helicopter": "Dubai helicopter", "balloon": "Dubai hot air balloon"}
+
+
+def more_attractions():
+    photos = json.loads((OUT / "photos.json").read_text(encoding="utf-8"))
+    seen = {p["title"] for p in photos}
+    have = {p["subject"] for p in photos if p["kind"] in ("attraction", "stock_activity")}
+    for aid, q in ATTRACTION_SEARCH.items():
+        if aid in have:
+            continue
+        r = commons({"action": "query", "list": "search", "srsearch": f"{q} filetype:bitmap", "srnamespace": 6, "srlimit": 40})
+        want = core(q) - {"dubai"}
+        files = [x["title"] for x in r["query"]["search"] if want <= core(x["title"])]
+        got = download(file_info(files), "attraction", aid, 3, seen)
+        print(aid, len(got))
+        photos += got
+    photos = vet(photos, osm_hotels())
+    (OUT / "photos.json").write_text(json.dumps(photos, indent=1, ensure_ascii=False), encoding="utf-8")
+
+
+def vet_descriptions(desc: dict, hotels: list[dict]) -> dict:
+    """A hotel's description must be an article about that hotel: its title shares a distinctive word with the name."""
+    names = {h["osm_id"]: h["name"] for h in hotels}
+    return {k: v for k, v in desc.items() if k not in names or core(v["title"]) & core(names[k])}
+
+
 def revet():
     """Re-apply vet() to an existing download and delete files no longer used (no network)."""
     photos = vet(json.loads((OUT / "photos.json").read_text(encoding="utf-8")), osm_hotels())
+    desc = vet_descriptions(json.loads((OUT / "descriptions.json").read_text(encoding="utf-8")), osm_hotels())
+    (OUT / "descriptions.json").write_text(json.dumps(desc, indent=1, ensure_ascii=False), encoding="utf-8")
     (OUT / "photos.json").write_text(json.dumps(photos, indent=1, ensure_ascii=False), encoding="utf-8")
     keep = {p["file"] for p in photos}
     for f in PHOTOS.iterdir():
@@ -339,4 +379,12 @@ def revet():
 
 
 if __name__ == "__main__":
-    sys.exit(revet() if "--vet-only" in sys.argv else more_stock() if "--more-stock" in sys.argv else main())
+    if "--vet-only" in sys.argv:
+        sys.exit(revet())
+    if "--more-stock" in sys.argv:
+        sys.exit(more_stock())
+    if "--more-attractions" in sys.argv:
+        more_attractions()
+        sys.exit(revet())
+    main(keep_stock="--city-only" in sys.argv)
+    revet()                                              # drop files no longer referenced

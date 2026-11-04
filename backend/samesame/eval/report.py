@@ -219,7 +219,7 @@ def render(r: dict) -> str:
         "- **Room and sightseeing rules were fixed while looking at errors across the whole catalogue**, held-out attractions included. "
         "Their numbers are not blind; only C's human labels on the held-out pairs are an independent check.",
         "- The hotel model never trained or chose thresholds on held-out families, and held-out listings carry a corruption family "
-        "(Thai-style romanisation) that never appears in training.",
+        "(alternative transliterations, e.g. Jumeira, Dayra, Dubayy) that never appears in training.",
     ]
     return "\n".join(lines) + "\n"
 

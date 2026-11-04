@@ -8,7 +8,7 @@ import re
 
 import numpy as np
 
-from samesame import config
+from samesame import city, config
 from samesame.data.world import RATE_PLANS, RATE_TEXT, STYLE
 
 AMENITIES = ["Outdoor pool", "Fitness centre", "Free Wi-Fi", "Airport shuttle (paid)", "Kids' club", "Spa", "Restaurant",
@@ -22,13 +22,12 @@ TIER_LADDER = {2: ["Standard", "Superior", "Family"], 3: ["Standard", "Superior"
 BREAKFAST_PP = {2: 250, 3: 380, 4: 560, 5: 900}
 ABBR = {"Superior": "SUP", "Deluxe": "DLX", "Standard": "STD", "Premier": "PREM", "Executive": "EXEC", "Junior Suite": "JR STE",
         "Suite": "STE", "Family": "FAM", "King": "KG", "Twin": "TWN", "Double": "DBL", "City": "CV", "Pool": "PV",
-        "River": "RV", "Garden": "GV"}
-NAME_ABBR = [("Bangkok", "BKK"), ("Hotel", "HTL"), ("Sukhumvit", "SUKHUMVIT"), ("Residence", "RESI"), ("Suites", "STES")]
+        "River": "RV", "Creek": "CK", "Garden": "GV"}
+NAME_ABBR = city.NAME_ABBR
 
-# Radisson Blu Plaza (Sukhumvit 27, 450 m from Asok BTS) hosts the brief's golden case. Fixed inputs here:
-# its room list, its nightly base rate (so Kestrel's usual 6% discount lands on the brief's ₹6,200), and the
-# two golden offers. Everything else about the hotel's offers is generated like any other hotel.
-GOLDEN_HOTEL = "h-way-331963030"
+# city.DEMO_HOTEL_NAME hosts the brief's golden case. Fixed inputs here: its room list, its nightly base rate
+# (so Kestrel's usual 6% discount lands on the brief's ₹6,200), and the two golden offers. Everything else about
+# the hotel's offers is generated like any other hotel. The hotel is found by name and flagged h["golden"].
 GOLDEN_BASE_RATE = 6600
 GOLDEN_ROOMS = [("Superior", "King", None, 2), ("Superior", "Twin", None, 2), ("Deluxe", "Twin", "Pool", 2),
                 ("Executive", "King", "City", 2), ("Family", "King + 2 Single", None, 4)]
@@ -44,17 +43,18 @@ def _m_to_deg(m):
 def hotel_name(name: str, sup: str, st: dict, rng, corr: list, holdout: bool = False) -> str:
     n = name
     if holdout and rng.random() < 0.35:
-        # corruption family the matcher never sees in training: Thai-style romanisation of common words
-        for a, b in (("Sukhumvit", "Sukhumwit"), ("Bangkok", "Krungthep"), ("Asoke", "Asok"), ("Silom", "Seelom")):
+        # corruption family the matcher never sees in training: alternative transliterations of common words
+        for a, b in city.HOLDOUT_SPELLINGS:
             if a in n:
                 n = n.replace(a, b)
         corr.append("holdout_romanisation")
-    if not re.search(r"bangkok", n, re.I) and rng.random() < 0.4:
-        n += " Bangkok"
-    if sup == "heron" and re.search(r"Sukhumvit (\d+)", n):
-        n = re.sub(r"Sukhumvit (\d+)", r"Sukhumvit Soi \1", n); corr.append("soi_inserted")
+    if not re.search(city.NAME, n, re.I) and rng.random() < 0.4:
+        n += " " + city.NAME
+    pat, sub, tag = city.SUPPLIER_NAME_RULE
+    if sup == "heron" and re.search(pat, n):
+        n = re.sub(pat, sub, n); corr.append(tag)
     if sup == "hornbill" and rng.random() < 0.5:
-        n = re.sub(r"\s*Bangkok\s*", " ", n).strip(); corr.append("city_dropped")
+        n = re.sub(rf"\s*{city.NAME}\s*", " ", n).strip(); corr.append("city_dropped")
     if sup == "bulbul" and rng.random() < 0.4 and "hotel" not in n.lower():
         n += " Hotel"; corr.append("hotel_suffix")
     if st["drop_number"] and re.search(r"\b\d{1,3}\b", n) and rng.random() < st["drop_number"]:
@@ -82,31 +82,32 @@ def former_name(h: dict, rng, corr: list) -> str:
     corr.append("former_name")
     a, b = rng.choice(FORMER, size=2, replace=False)
     street = h["street"] if h["street"] and len(h["street"].split()) <= 3 else None
-    area = (street or h["district"] or "Bangkok").replace(" Road", "").split(" Soi")[0]
+    area = (street or h["district"] or city.NAME).replace(" Road", "").replace(" Street", "")
     return f"{area} {a} {b} Hotel"
 
 
 def phone(p: str, style: str) -> str:
-    d = re.sub(r"\D", "", p)[2:]          # national digits without leading 0
-    return {"intl": p, "digits": "66" + d, "dashed": f"+66-{d[0]}-{d[1:4]}-{d[4:]}", "local": f"0{d[0]} {d[1:4]} {d[4:]}",
-            "compact": f"+66 {d[:4]} {d[4:]}"}[style]
+    cc = city.COUNTRY_CODE
+    d = re.sub(r"\D", "", p)[len(cc):]   # national digits without leading 0
+    return {"intl": p, "digits": cc + d, "dashed": f"+{cc}-{d[0]}-{d[1:4]}-{d[4:]}", "local": f"0{d[0]} {d[1:4]} {d[4:]}",
+            "compact": f"+{cc} {d[:4]} {d[4:]}"}[style]
 
 
 def address(h: dict, sup: str, rng) -> str:
-    parts = [h["house_number"], h["street"], h["district"], "Bangkok", h["postcode"] if sup in ("mynah", "heron") else None]
+    parts = [h["house_number"], h["street"], h["district"], city.NAME, h["postcode"] if sup in ("mynah", "heron") else None]
     a = ", ".join(p for p in parts if p)
     if sup == "kestrel":
-        a = a.upper().replace("SUKHUMVIT", "SUKHUMVIT RD") if rng.random() < 0.3 else a.upper()
+        a = a.upper().replace(" STREET", " ST").replace(" ROAD", " RD") if rng.random() < 0.3 else a.upper()
     if sup == "sunbird":
-        a = ", ".join(p for p in [h["street"], "Bangkok"] if p)
+        a = ", ".join(p for p in [h["street"], city.NAME] if p)
     return a
 
 
 DESC = {
     "short": ["Hotel in {district} area.", "{star}-star hotel, {district}.", "Located in {district}."],
-    "medium": ["{name} is a {star}-star hotel in {district}, Bangkok. {pool}Rooms have air conditioning and free Wi-Fi.",
-               "Set in {district}, {name} offers {star}-star rooms{pool_short}. Close to shopping and BTS."],
-    "long": ["{name} sits on {street} in {district}, close to BTS and Bangkok's shopping streets. {pool}{family}"
+    "medium": ["{name} is a {star}-star hotel in {district}, {city}. {pool}Rooms have air conditioning and free Wi-Fi.",
+               "Set in {district}, {name} offers {star}-star rooms{pool_short}. Close to shopping and {transit}."],
+    "long": ["{name} sits on {street} in {district}, close to {transit} and {shopping}. {pool}{family}"
              "Rooms are modern with city views; the restaurant serves an international breakfast.",
              "A {star}-star stay in {district}: {name} offers {n_rooms} rooms on {street}. {pool}{family}"
              "Guests have free Wi-Fi, a fitness centre and 24-hour front desk."],
@@ -115,7 +116,8 @@ DESC = {
 
 def description(h, sup, st, rng):
     t = DESC[st["desc"]][int(rng.integers(len(DESC[st["desc"]])))]
-    return t.format(name=h["name"], district=h["district"] or "central Bangkok", star=h["star"], street=h["street"] or "a quiet soi",
+    return t.format(name=h["name"], district=h["district"] or f"central {city.NAME}", star=h["star"], street=h["street"] or "a quiet street",
+                    city=city.NAME, transit=city.TRANSIT, shopping=city.SHOPPING,
                     n_rooms=h["room_count"], pool="An outdoor pool is on site. " if h["pool"] else "",
                     pool_short=" and an outdoor pool" if h["pool"] else "",
                     family="Family rooms and connecting rooms are available. " if h["family_rooms"] else "")
@@ -123,13 +125,13 @@ def description(h, sup, st, rng):
 
 # ------------------------------------------------------------------ rooms
 def canonical_rooms(h, rng):
-    if h["hotel_id"] == GOLDEN_HOTEL:
+    if h["golden"]:
         spec = GOLDEN_ROOMS
     else:
         ladder = TIER_LADDER[h["star"]]
         n = int(rng.integers(3, min(len(ladder), 5) + 1))
         tiers = ladder[:n - 1] + (["Family"] if h["family_rooms"] else [ladder[n - 1]])
-        views = ["City"] + (["Pool"] if h["pool"] else []) + (["River"] if h["river_m"] < 500 else []) + ["Garden"]
+        views = ["City"] + (["Pool"] if h["pool"] else []) + ([city.WATER[1]] if h["river_m"] < 500 else []) + ["Garden"]
         spec = []
         for i, t in enumerate(dict.fromkeys(tiers)):
             if t == "Family":
@@ -190,13 +192,18 @@ def _new_id(prefix: str, key: str) -> str:
 # ------------------------------------------------------------------ the feed
 def generate(hotels: list[dict], rng: np.random.Generator):
     _USED.clear()
+    want = re.sub(r"\W+", " ", city.DEMO_HOTEL_NAME.lower()).strip()
+    for h in hotels:
+        h["golden"] = re.sub(r"\W+", " ", h["name"].lower()).strip() == want
+    assert sum(h["golden"] for h in hotels) == 1, f"golden-case hotel {city.DEMO_HOTEL_NAME!r} must be in the base exactly once"
     listings, truth, rooms_all, sup_rooms, room_truth, offers = [], [], [], [], [], []
     # chain-wide reservations numbers: some suppliers list the brand's central line for every branch
-    chain_line = {f: "+66 2 " + "".join(str(d) for d in rng.integers(0, 10, 3)) + " " + "".join(str(d) for d in rng.integers(0, 10, 4))
+    chain_line = {f: f"+{city.COUNTRY_CODE} {city.LANDLINE_PREFIX} " + "".join(str(d) for d in rng.integers(0, 10, 3)) + " "
+                  + "".join(str(d) for d in rng.integers(0, 10, 4))
                   for f in sorted({h["family"] for h in hotels if h["family"]})}
     uses_chain_line = {(sup, f): rng.random() < 0.5 for sup in ("kestrel", "sunbird", "bulbul") for f in chain_line}
     for h in hotels:
-        if h["hotel_id"] == GOLDEN_HOTEL:
+        if h["golden"]:
             h["base_rate"] = GOLDEN_BASE_RATE
         rooms = canonical_rooms(h, rng)
         rooms_all += rooms
@@ -206,10 +213,10 @@ def generate(hotels: list[dict], rng: np.random.Generator):
         bf_pp = BREAKFAST_PP[h["star"]] * float(np.exp(rng.normal(0, 0.15)))
         h["volatility"] = float(np.exp(rng.normal(0, 0.25)))    # demand pressure: drives sold-out / reprice odds
         apartment = bool(re.search(r"citadines|oakwood|somerset|ascott|fraser|residence|suites|apartment", h["name"], re.I))
-        h["serves_breakfast"] = h["hotel_id"] == GOLDEN_HOTEL or rng.random() < {2: 0.35, 3: 0.7, 4: 0.9, 5: 0.97}[h["star"]] * (0.6 if apartment else 1)
+        h["serves_breakfast"] = h["golden"] or rng.random() < {2: 0.35, 3: 0.7, 4: 0.9, 5: 0.97}[h["star"]] * (0.6 if apartment else 1)
         for sup, st in STYLE.items():
             p = st["coverage"] * (0.6 + 0.12 * h["star"]) * (1.15 if h["family"] else 1.0)
-            if h["hotel_id"] == GOLDEN_HOTEL or rng.random() < min(p, 0.97):
+            if h["golden"] or rng.random() < min(p, 0.97):
                 copies = 2 if rng.random() < st["dup_rate"] else 1
                 for c in range(copies):
                     lid = _new_id(f"{sup}:{sup[:2].upper()}", f"{h['hotel_id']}|{sup}|{c}")
@@ -233,7 +240,7 @@ def generate(hotels: list[dict], rng: np.random.Generator):
                     ph = None if rng.random() < st["phone_missing"] else phone(h["phone"], st["phone"])
                     if ph is None:
                         corr.append("phone_missing")
-                    elif h["family"] and uses_chain_line.get((sup, h["family"])) and h["hotel_id"] != GOLDEN_HOTEL:
+                    elif h["family"] and uses_chain_line.get((sup, h["family"])) and not h["golden"]:
                         ph = phone(chain_line[h["family"]], st["phone"]); corr.append("chain_phone")
                     k_img = int(rng.integers(st["images"][0], st["images"][1] + 1))
                     amen = [a for a in amen_true if rng.random() < st["amenity_share"]]
@@ -242,7 +249,7 @@ def generate(hotels: list[dict], rng: np.random.Generator):
                         if wrong:
                             amen.append(str(rng.choice(wrong))); corr.append("wrong_amenity")
                     listings.append({
-                        "listing_id": lid, "supplier_id": sup, "name": (former_name(h, rng, corr) if rng.random() < 0.03 and h["hotel_id"] != GOLDEN_HOTEL
+                        "listing_id": lid, "supplier_id": sup, "name": (former_name(h, rng, corr) if rng.random() < 0.03 and not h["golden"]
                                  else hotel_name(h["name"], sup, st, rng, corr, config.is_holdout(h["family"] or h["hotel_id"]))),
                         "lat": round(lat, 6), "lng": round(lng, 6), "address": address(h, sup, rng), "phone": ph, "star": star,
                         "checkin_time": "15:00" if sup == "bulbul" and rng.random() < 0.5 else h["checkin_time"],
@@ -251,9 +258,9 @@ def generate(hotels: list[dict], rng: np.random.Generator):
                     })
                     truth.append({"listing_id": lid, "hotel_id": h["hotel_id"], "corruptions": corr})
                     # not every supplier loads a breakfast rate even where the hotel serves breakfast
-                    loads_bb = h["serves_breakfast"] and (h["hotel_id"] == GOLDEN_HOTEL or rng.random() < 0.8)
+                    loads_bb = h["serves_breakfast"] and (h["golden"] or rng.random() < 0.8)
                     carried = [r for i, r in enumerate(rooms) if (i == 0 and rng.random() < 0.95) or rng.random() < 0.55
-                               or h["hotel_id"] == GOLDEN_HOTEL and i < 2]
+                               or h["golden"] and i < 2]
                     for r in carried:
                         rc = []
                         sr_id = f"{lid}:{r['room_id'].rsplit(':', 1)[1]}"
@@ -264,7 +271,7 @@ def generate(hotels: list[dict], rng: np.random.Generator):
                                 continue
                             ro = h["base_rate"] * r["tier_mult"] * st["price"] * mult * float(np.exp(rng.normal(0, 0.04)))
                             price = ro + (2 * bf_pp * float(np.exp(rng.normal(0, 0.08))) if board == "BB" else 0)
-                            if h["hotel_id"] == GOLDEN_HOTEL and r["room_id"].endswith(":R1") and (sup, board) in GOLDEN_OFFERS:
+                            if h["golden"] and r["room_id"].endswith(":R1") and (sup, board) in GOLDEN_OFFERS:
                                 if GOLDEN_OFFERS[(sup, board)] is None:
                                     continue
                                 price = GOLDEN_OFFERS[(sup, board)]
