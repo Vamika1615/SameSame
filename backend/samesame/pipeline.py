@@ -3,7 +3,7 @@
     python -m samesame.pipeline
 
 Stages: base (OSM curation) -> feeds (6 supplier hotel feeds) -> activities -> booking log -> images
--> matcher (hotels, rooms, Variant DNA) -> evaluation report.
+-> Promise model (fitted on the booking log) -> matcher (hotels, rooms, Variant DNA) -> evaluation report.
 Tables are written as parquet and registered as views in samesame.duckdb. Truth tables (*_truth, rooms,
 hard_negatives) are for evaluation and the data card only; the matcher (M3) must never read them.
 """
@@ -16,6 +16,7 @@ import polars as pl
 
 from samesame import config
 from samesame.data import activities, booking_log, feeds, images_gen, osm_base
+from samesame.pricing import promise
 
 TABLES = ["base_hotels", "osm_duplicates", "hard_negatives", "hotel_listings", "hotel_truth", "rooms", "supplier_rooms",
           "room_truth", "offers", "osm_reference", "attractions", "activity_variants", "activity_listings", "activity_truth", "booking_log", "images"]
@@ -44,18 +45,21 @@ def main(skip_images: bool = False):
     for name in TABLES:
         if data[name]:
             _write(name, data[name])
+    prom, prom_info = promise.fit(pl.read_parquet(config.BUILD / "booking_log.parquet"))
+    _write("promise_model", prom)
+    (config.BUILD / "promise.json").write_text(json.dumps(prom_info, indent=2), encoding="utf-8")
     if config.DB_PATH.exists():
         config.DB_PATH.unlink()
     with duckdb.connect(str(config.DB_PATH)) as con:
-        for name in TABLES:
-            if data[name]:
+        for name in TABLES + ["promise_model"]:
+            if name == "promise_model" or data[name]:
                 con.execute(f"CREATE VIEW {name} AS SELECT * FROM read_parquet('{(config.BUILD / f'{name}.parquet').as_posix()}')")
     from samesame.matching import run as matcher
     matcher.main()
     from samesame.eval import report
     report.main()
     counts = {k: len(v) for k, v in data.items()}
-    manifest = {"built_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "seed": config.SEED, "stages": ["m0", "m2", "m3"],
+    manifest = {"built_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "seed": config.SEED, "stages": ["m0", "m2", "m3", "m4"],
                 "counts": counts, "seconds": round(time.time() - t0, 1)}
     (config.BUILD / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     print("pipeline:", json.dumps(counts), f"in {manifest['seconds']}s")

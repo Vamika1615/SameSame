@@ -3,7 +3,7 @@
 Same contracts as the M1 mock, now computed from data/build:
 - golden records are votes across supplier listings, weighted by a trust score that is itself
   measured (how often each supplier agrees with the majority on checkable fields);
-- Promise (honour rate, reprice / sold-out odds, typical increase) is estimated from the booking log;
+- Promise (honour rate, reprice / sold-out odds, typical increase) is a hierarchical Beta-binomial fitted on the booking log;
 - popularity is counted in the booking log (Indian agents, last 90 days);
 - the breakfast fill cost is the catalogue median of BB-minus-RO supplements.
 Clusters, canonical rooms and sightseeing variants are the matcher's predictions (store.py).
@@ -22,6 +22,7 @@ from samesame.booking import sandbox
 from samesame.data import world
 from samesame.data.booking_log import ANCHOR
 from samesame.data.osm_base import district_at, family, norm
+from samesame.pricing import promise as promise_model
 from samesame.pricing import true_price as tp
 from samesame.ranking import score as rk
 from samesame.schemas import (ActivityGroup, ActivityListing, ActivitySearch, ActivityVariant, CanonicalRoom, DnaFilter,
@@ -70,21 +71,14 @@ def osm_link(hid: str) -> dict | None:
 # ------------------------------------------------------------------ estimates from the booking log
 @lru_cache
 def promise(supplier: str, product: str, lead_days: int = LEAD_DAYS) -> Promise:
+    """The fitted Promise model (pricing/promise.py): posterior means and a 95% credible interval."""
     bucket = world.lead_bucket(lead_days)[0]
-    log = store.get().log.filter((pl.col("supplier_id") == supplier) & (pl.col("product_type") == product)
-                                 & (pl.col("lead_bucket") == bucket))
-    n = log.height
-    k = {o: log.filter(pl.col("outcome") == o).height for o in ("confirmed", "price_changed", "sold_out", "error")}
-    honour = k["confirmed"] / n
-    z = 1.96                                                       # Wilson interval
-    centre = (honour + z * z / (2 * n)) / (1 + z * z / n)
-    half = z * (honour * (1 - honour) / n + z * z / (4 * n * n)) ** 0.5 / (1 + z * z / n)
-    rep = log.filter(pl.col("outcome") == "price_changed")
-    inc = float((rep["final_price"] / rep["quoted"] - 1).mean()) if rep.height else 0.0
-    return Promise(supplier_id=supplier, supplier=SUPPLIERS[supplier], lead_bucket=bucket, honour_rate=round(honour, 3),
-                   ci_low=round(centre - half, 3), ci_high=round(min(centre + half, 1), 3), n=n,
-                   p_price_change=round(k["price_changed"] / n, 4), p_sold_out=round(k["sold_out"] / n, 4),
-                   p_error=round(k["error"] / n, 4), exp_increase_pct=round(inc, 4))
+    r = store.get().promise[(supplier, product, bucket)]
+    m = promise_model.summarise(r)
+    return Promise(supplier_id=supplier, supplier=SUPPLIERS[supplier], lead_bucket=bucket, honour_rate=round(m["honour_rate"], 3),
+                   ci_low=round(m["ci_low"], 3), ci_high=round(m["ci_high"], 3), n=r["n"],
+                   p_price_change=round(m["p_price_change"], 4), p_sold_out=round(m["p_sold_out"], 4),
+                   p_error=round(m["p_error"], 4), exp_increase_pct=r["exp_increase_pct"], prior_weight=r["prior_weight"])
 
 
 def risk(supplier: str, product: str) -> tp.Risk:

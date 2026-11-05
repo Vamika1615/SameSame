@@ -114,7 +114,7 @@ export function FlipBoard({ text, className, tone = "dark" }: { text: string; cl
 }
 
 /** Semicircle gauge for a supplier's honour rate at this lead time. */
-export function PromiseMeter({ rate, n, lo, hi, size = 64 }: { rate: number; n: number; lo: number; hi: number; size?: number }) {
+export function PromiseMeter({ rate, n, lo, hi, prior, size = 64 }: { rate: number; n: number; lo: number; hi: number; prior?: number; size?: number }) {
   const color = rate >= 0.9 ? "#2f9461" : rate >= 0.8 ? "#e07b2e" : "#d23c2f";
   const r = size / 2 - 5, cx = size / 2, cy = size / 2;
   const arc = (p: number) => {
@@ -122,7 +122,7 @@ export function PromiseMeter({ rate, n, lo, hi, size = 64 }: { rate: number; n: 
     return `${cx + r * Math.cos(a)} ${cy - r * Math.sin(a)}`;
   };
   return (
-    <Tip content={<>Honoured {(rate * 100).toFixed(0)}% at this lead time<br />95% interval {(lo * 100).toFixed(0)}-{(hi * 100).toFixed(0)}% · n = {n.toLocaleString("en-IN")} attempts</>}>
+    <Tip content={<>Honoured {(rate * 100).toFixed(0)}% at this lead time<br />95% credible interval {(lo * 100).toFixed(0)}-{(hi * 100).toFixed(0)}% · n = {n.toLocaleString("en-IN")} attempts{prior != null && <><br />{Math.round(prior * 100)}% of the estimate borrowed from this supplier's other lead times and the market</>}</>}>
       <span className="inline-flex flex-col items-center">
         <svg width={size} height={size / 2 + 4} viewBox={`0 0 ${size} ${size / 2 + 4}`}>
           <path d={`M ${arc(0)} A ${r} ${r} 0 0 1 ${arc(1)}`} stroke="#e7dcc9" strokeWidth="7" fill="none" strokeLinecap="round" />

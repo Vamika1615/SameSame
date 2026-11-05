@@ -50,6 +50,7 @@ export interface CanonicalRoom { room_id: string; name: string; attrs: Record<st
 export interface Promise_ {
   supplier_id: string; supplier: string; lead_bucket: string; honour_rate: number;
   ci_low: number; ci_high: number; n: number; p_price_change: number; p_sold_out: number; p_error: number; exp_increase_pct: number;
+  prior_weight: number;   // share of the estimate borrowed from the supplier / market prior
 }
 export interface PriceTerm { key: "sticker" | "fill_needs" | "cancel_risk" | "price_change" | "failover" | "pay_later"; label: string; amount: number; assumption: string }
 export interface TruePrice { total: number; terms: PriceTerm[] }

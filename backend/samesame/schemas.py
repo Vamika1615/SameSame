@@ -248,6 +248,7 @@ class Promise(BaseModel):
     p_sold_out: float
     p_error: float
     exp_increase_pct: float
+    prior_weight: float = 0.0     # share of the estimate that comes from the supplier / market prior, not this cell's bookings
 
 
 class PriceTerm(BaseModel):

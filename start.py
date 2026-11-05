@@ -104,7 +104,7 @@ def ensure_node():
 def ensure_pipeline(force):
     manifest = ROOT / "data" / "build" / "manifest.json"
     pkg = BACKEND / "samesame"
-    gen = [pkg / "pipeline.py", *[f for d in ("data", "matching", "variants", "eval") for f in (pkg / d).glob("*.py")]]
+    gen = [pkg / "pipeline.py", pkg / "pricing" / "promise.py", *[f for d in ("data", "matching", "variants", "eval") for f in (pkg / d).glob("*.py")]]
     if force or not manifest.exists() or manifest.stat().st_mtime < max(p.stat().st_mtime for p in gen):
         run([VPY, "-m", "samesame.pipeline"], cwd=BACKEND)
 

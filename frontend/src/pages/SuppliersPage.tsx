@@ -12,7 +12,7 @@ export default function SuppliersPage() {
   return (
     <div className="mx-auto max-w-[1200px] px-8 pb-20 pt-6">
       <PageHeader eyebrow="Suppliers" title={<>Who keeps <span className="italic">their promise.</span></>}
-        subtitle="Honour rate at 15–45 days lead, measured on our own booking attempts. Fictional suppliers, synthetic logs." />
+        subtitle="Honour rate at 15–45 days lead, fitted on our own booking attempts: thin data borrows from the supplier’s other lead times and the market, so a new supplier starts near average and earns its rate. Fictional suppliers, synthetic logs." />
       <table className="mt-6 w-full overflow-hidden rounded-3xl border border-paper-line bg-paper shadow-card">
         <thead className="text-left text-sm uppercase tracking-wide text-ink-mute">
           <tr className="border-b border-paper-line">
@@ -24,8 +24,8 @@ export default function SuppliersPage() {
           {res.data.map((r) => (
             <tr key={r.supplier_id} className="border-b border-paper-line last:border-0">
               <td className="px-4 py-3"><SupplierBadge name={r.supplier} /></td>
-              <td className="px-4 py-2 text-center"><PromiseMeter rate={r.honour_rate_hotel} n={r.hotel?.n ?? r.n_attempts} lo={r.hotel?.ci_low ?? r.honour_rate_hotel} hi={r.hotel?.ci_high ?? r.honour_rate_hotel} /></td>
-              <td className="px-4 py-2 text-center"><PromiseMeter rate={r.honour_rate_activity} n={r.activity?.n ?? r.n_attempts} lo={r.activity?.ci_low ?? r.honour_rate_activity} hi={r.activity?.ci_high ?? r.honour_rate_activity} /></td>
+              <td className="px-4 py-2 text-center"><PromiseMeter rate={r.honour_rate_hotel} n={r.hotel?.n ?? r.n_attempts} lo={r.hotel?.ci_low ?? r.honour_rate_hotel} hi={r.hotel?.ci_high ?? r.honour_rate_hotel} prior={r.hotel?.prior_weight} /></td>
+              <td className="px-4 py-2 text-center"><PromiseMeter rate={r.honour_rate_activity} n={r.activity?.n ?? r.n_attempts} lo={r.activity?.ci_low ?? r.honour_rate_activity} hi={r.activity?.ci_high ?? r.honour_rate_activity} prior={r.activity?.prior_weight} /></td>
               <td className="px-4 py-3 text-right tabular-nums">{r.n_attempts.toLocaleString("en-IN")}</td>
               <td className="px-4 py-3 text-right tabular-nums">{Math.round(r.duplicate_share * 100)}%</td>
               <td className="px-4 py-3 text-right tabular-nums">±{r.price_spread_pct.toFixed(1)}%</td>

@@ -39,6 +39,30 @@ We call this set **held-out**, not blind: the model never trained on these famil
 - Scores are out-of-fold, 5 folds grouped by hotel: every hotel's pairs were scored by a model that never saw that hotel's labels.
 - Thresholds: auto-merge p ≥ 0.9907, review p ≥ 0.3. The out-of-fold scores of trainable families (never held-out data) alone would have chosen 0.9907 and 0.6053; the policy floors (auto ≥ 0.90, review from 0.30) win when stricter. Validation precision at auto-merge 0.995, recall 0.951 (n = 8,669 out-of-fold pairs).
 
+## Promise model (booking reliability)
+
+Fitted on the booking log up to 30 days before its end, scored on the last 30 days (3,987 attempts). Log loss per attempt over the four outcomes (confirmed / price changed / sold out / error); lower is better.
+
+| Training data | Attempts | Fitted model | Each cell's own counts | One market rate |
+|---|---|---|---|---|
+| 100% of window | 20,013 | **0.4649** | 0.4665 | 0.516 |
+| 10% of window | 2,001 | **0.482** | 0.4985 | 0.5186 |
+| 2% of window | 400 | **0.5042** | 0.5866 | 0.5219 |
+
+Hotel honour rate, predicted for the test window's own mix of lead times vs what happened:
+
+| Supplier | Test attempts | Predicted | Observed |
+|---|---|---|---|
+| bulbul | 293 | 87.5% | 84.0% |
+| heron | 480 | 94.1% | 96.2% |
+| hornbill | 346 | 90.8% | 92.8% |
+| kestrel | 947 | 72.0% | 68.7% |
+| mynah | 586 | 96.0% | 96.8% |
+| sunbird | 344 | 84.8% | 86.1% |
+
+- Fitted concentrations (empirical Bayes): activity: supplier prior 54.8, cell prior at the search grid's edge (100,000); hotel: supplier prior 39.3, cell prior at the search grid's edge (100,000). A large cell prior means lead-time effects look the same for every supplier, so cells borrow heavily from their supplier (capped at the bookings that prior was estimated from).
+- The log comes from our own behaviour model, so this checks that the estimator recovers it from noisy, time-ordered data, not that real suppliers behave this way.
+
 ## Caveats (read before quoting any number above)
 
 - **We wrote both the generator and the matcher.** Feature design, the room parser and the Variant DNA rules were written knowing how the generator corrupts names, so even held-out numbers are an upper bound on real-world performance.

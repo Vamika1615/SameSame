@@ -7,12 +7,16 @@ and METRICS.md. Never imports the trainer, never writes anything training reads.
 """
 import itertools
 import json
+import math
 import time
+from datetime import timedelta
 
+import numpy as np
 import polars as pl
 
 from samesame import config
 from samesame.eval import blind
+from samesame.pricing import promise as pm
 
 
 def _rows(name):
@@ -102,7 +106,7 @@ def compute() -> dict:
                "validation": {"precision_at_auto": m["val_precision_at_auto"], "recall_at_auto": m["val_recall_at_auto"],
                               "n_val": m["n_val"], "scoring": m.get("scoring", "")}}
     return {"generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "hotels": hotels, "hard_negatives": hard, "rooms": rooms,
-            "activities": acts, "routing": routing, "blind": blind_metrics(cl, rm, am), "matcher": {k: m[k] for k in (
+            "activities": acts, "routing": routing, "blind": blind_metrics(cl, rm, am), "promise": promise_metrics(), "matcher": {k: m[k] for k in (
                 "n_train", "train_pos", "excluded_holdout", "embeddings", "importance", "seconds")}}
 
 
@@ -155,8 +159,48 @@ def _f(x):
     return "—" if x is None else f"{x:.3f}"
 
 
+PROMISE_TEST_DAYS = 30
+PROMISE_SUBSAMPLES = (1.0, 0.1, 0.02)
+
+
+def promise_metrics() -> dict:
+    """Time split: fit the Promise model on everything before the last 30 days of the log, score the last 30.
+    Also refit on thin random slices of the training window, which is where shrinkage should earn its keep.
+    Baselines: each cell's own counts (+0.5 smoothing, what the Wilson estimate used) and one market-wide rate per product."""
+    log = pl.read_parquet(config.BUILD / "booking_log.parquet")
+    cut = log["ts"].max() - timedelta(days=PROMISE_TEST_DAYS)
+    train, test = log.filter(pl.col("ts") <= cut), log.filter(pl.col("ts") > cut)
+    keys = list(zip(test["supplier_id"], test["product_type"], test["lead_bucket"]))
+    y = [pm.OUTCOMES.index(o) for o in test["outcome"]]
+
+    def loss(prob):
+        return round(float(np.mean([-math.log(prob(k)[t]) for k, t in zip(keys, y)])), 4)
+
+    rows = []
+    for frac in PROMISE_SUBSAMPLES:
+        t = train if frac == 1.0 else train.sample(fraction=frac, seed=config.SEED)
+        fitted = pm.predict(pm.fit(t)[0])
+        cell = pm._counts(t, ["supplier_id", "product_type", "lead_bucket"])
+        glob = pm._counts(t, ["product_type"])
+        rows.append({"train_share": frac, "train_attempts": t.height,
+                     "model": loss(lambda k: fitted[k]),
+                     "cell_counts": loss(lambda k: pm._norm(cell.get(k, np.zeros(4)) + 0.5)),
+                     "market_rate": loss(lambda k: pm._norm(glob[(k[1],)] + 0.5))})
+    fitted_rows = pm.fit(train)[0]
+    calib = []
+    for s in sorted(test["supplier_id"].unique()):
+        mine = test.filter((pl.col("supplier_id") == s) & (pl.col("product_type") == "hotel"))
+        pred = {(r["lead_bucket"]): pm.summarise(r)["honour_rate"] for r in fitted_rows if r["supplier_id"] == s and r["product_type"] == "hotel"}
+        calib.append({"supplier_id": s, "attempts": mine.height,
+                      "predicted_honour": round(float(np.mean([pred[b] for b in mine["lead_bucket"]])), 4),
+                      "observed_honour": round(mine.filter(pl.col("outcome") == "confirmed").height / mine.height, 4)})
+    info = json.loads((config.BUILD / "promise.json").read_text(encoding="utf-8"))
+    return {"test_days": PROMISE_TEST_DAYS, "test_attempts": test.height, "log_loss": rows, "hotel_calibration": calib,
+            "fit": {p: {k: v[k] for k in ("k_supplier", "k_cell", "k_cell_at_grid_edge")} for p, v in info["products"].items()}}
+
+
 def render(r: dict) -> str:
-    h, rm, a, rt, b, hn = r["hotels"], r["rooms"], r["activities"], r["routing"], r["blind"], r["hard_negatives"]
+    h, rm, a, rt, b, hn, pr = r["hotels"], r["rooms"], r["activities"], r["routing"], r["blind"], r["hard_negatives"], r["promise"]
     lines = [
         "# METRICS",
         "",
@@ -211,6 +255,29 @@ def render(r: dict) -> str:
         f"- Thresholds: auto-merge p ≥ {rt['thresholds']['auto_merge']}, review p ≥ {rt['thresholds']['gray_low']}. The out-of-fold scores of trainable "
         f"families (never held-out data) alone would have chosen {rt['thresholds']['from_validation']['auto_merge']} and {rt['thresholds']['from_validation']['gray_low']}; "
         f"the policy floors (auto ≥ 0.90, review from 0.30) win when stricter. Validation precision at auto-merge {_f(rt['validation']['precision_at_auto'])}, recall {_f(rt['validation']['recall_at_auto'])} (n = {rt['validation']['n_val']:,} out-of-fold pairs).",
+        "",
+        "## Promise model (booking reliability)",
+        "",
+        f"Fitted on the booking log up to {pr['test_days']} days before its end, scored on the last {pr['test_days']} days ({pr['test_attempts']:,} attempts). "
+        "Log loss per attempt over the four outcomes (confirmed / price changed / sold out / error); lower is better.",
+        "",
+        "| Training data | Attempts | Fitted model | Each cell's own counts | One market rate |",
+        "|---|---|---|---|---|",
+        *[f"| {x['train_share']:.0%} of window | {x['train_attempts']:,} | **{x['model']}** | {x['cell_counts']} | {x['market_rate']} |" for x in pr["log_loss"]],
+        "",
+        "Hotel honour rate, predicted for the test window's own mix of lead times vs what happened:",
+        "",
+        "| Supplier | Test attempts | Predicted | Observed |",
+        "|---|---|---|---|",
+        *[f"| {x['supplier_id']} | {x['attempts']:,} | {x['predicted_honour']:.1%} | {x['observed_honour']:.1%} |" for x in pr["hotel_calibration"]],
+        "",
+        "- Fitted concentrations (empirical Bayes): " + "; ".join(f"{p}: supplier prior {v['k_supplier']:g}, cell prior "
+                                                     + (f"at the search grid's edge ({v['k_cell']:,.0f})" if v["k_cell_at_grid_edge"] else f"{v['k_cell']:g}")
+                                                     for p, v in pr["fit"].items())
+        + ". A large cell prior means lead-time effects look the same for every supplier, so cells borrow heavily from their supplier "
+        "(capped at the bookings that prior was estimated from).",
+        "- The log comes from our own behaviour model, so this checks that the estimator recovers it from noisy, time-ordered data, "
+        "not that real suppliers behave this way.",
         "",
         "## Caveats (read before quoting any number above)",
         "",

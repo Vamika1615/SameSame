@@ -2,7 +2,33 @@
 
 _Update after every milestone. Newest first._
 
-## Status: Dubai + coastal redesign → M4 next
+## Status: M4 done → M5 next
+
+### Done: M4, fitted Promise model (2026-11-06)
+- **Promise is now a fitted model** (`backend/samesame/pricing/promise.py`), not raw Wilson counts. It is a hierarchical Dirichlet-multinomial (a Beta-binomial on the honour rate):
+  - per product: market-wide outcome shares, plus how each lead bucket shifts them
+  - supplier × product: shrunk toward the market
+  - supplier × product × lead bucket: shrunk toward its supplier, moved by the market's lead-time shift
+- **How the priors are set:**
+  - Concentrations are fitted by empirical Bayes (maximum marginal likelihood on the log).
+  - The supplier prior is capped at 200 bookings (assumption): a few similar suppliers can't make us sure about the next one. It fits at 39 (hotels) and 55 (activities), so the cap doesn't bind today.
+  - A cell's prior is capped at the bookings it was estimated from, so intervals stay honest.
+  - Price-rise size is shrunk with 20 pseudo-observations (assumption).
+- **Pipeline:** a new stage after the booking log writes `promise_model.parquet` and `promise.json`. The API serves posterior means, a 95% credible interval, and the share borrowed from the prior (shown in the gauge tooltip).
+- **Honest check (METRICS.md, rebuilt every build):** fit on the log up to 30 days before its end, score the last 30 days (3,987 attempts). Log loss:
+
+| Training data | Fitted model | Cell's own counts | Market rate |
+|---|---|---|---|
+| 100% (20,013 attempts) | **0.465** | 0.467 | 0.516 |
+| 10% | **0.482** | 0.499 | 0.519 |
+| 2% (400 attempts) | **0.505** | 0.587 | 0.522 |
+
+  - The model wins at every data size, and by the most when data is thin, which is when shrinkage should matter.
+  - Hotel honour calibration on the test window: Kestrel predicted 72.0% vs observed 68.7%, Mynah 96.0 vs 96.8.
+- **Tests: 48 passing** (+10).
+  - `test_golden_api.py`: the brief's golden case through the HTTP API. A is cheaper on sticker and ≥ ₹2,000 dearer on True Price, and the ranks are consistent. Risk terms use the same fitted Promise the supplier report shows. Over 40 seeds, "Book both" fails over at least once and only ever to the same hotel, room and board. A seed reproduces its story exactly.
+  - `test_promise.py`: 3 failures don't condemn a new supplier, and its interval stays wide. Lots of evidence overrides the prior. An empty cell borrows its supplier's behaviour. Shares sum to 1. The model never reads the generator's behaviour table.
+- **What didn't change:** the sandbox still draws outcomes from the world's behaviour model, not from our estimate (the estimate is the app; the sandbox is the world), so the "Book both" story at seed 1 is identical.
 
 ### Done: visual redesign (2026-11-05)
 - **Palette** from the "Sunseeker" reference: deep navy, dusty sky blue, warm cream and sand, with burnt orange as the single accent. Red stays reserved for "Looks the same, isn't". Colours are tokens in `tailwind.config.js`.
@@ -42,8 +68,8 @@ _Update after every milestone. Newest first._
 |---|---|
 | Demo search | 84 listings → 21 hotels, 63 duplicates collapsed |
 | Look-alike trap | Flora Hotel Apts. ↔ Flora Al Souq Hotel, 198 m |
-| Offer A: Kestrel ₹18,600 | True Price **₹24,178** (sticker #1 → True #4) |
-| Offer B: Mynah ₹20,100 | True Price **₹20,760** (sticker #4 → True #1) |
+| Offer A: Kestrel ₹18,600 | True Price **₹24,175** (sticker #1 → True #4) |
+| Offer B: Mynah ₹20,100 | True Price **₹20,773** (sticker #4 → True #1) |
 | Book both, seed 1 | Kestrel ₹18,600 → ₹20,860 → SAME twin via Sunbird ₹19,230; Mynah first time |
 | Seeds 1–1,000 | Kestrel 55.5% clean / 5.3% paid a rise / 38.7% failover / 0.5% failed; Mynah 95.4 / 2.6 / 2.0 / 0 |
 | Hotels, whole catalogue | precision 0.997, recall 0.963 (1 false merge: two generic "Rove" entries 1.2 km apart) |
@@ -165,9 +191,8 @@ Every stack, room mapping and sightseeing variant on screen is now **predicted f
 - **The golden hotel is found by name** ("Radisson Blu Plaza"), not by a generator id.
 - **Sightseeing rules and the room parser were refined while looking at errors across the whole catalogue.** METRICS.md says their numbers are not blind; only C's labels are.
 
-### Next: M4, Promise model (B)
-- Beta-binomial Promise model with a prior, shrunk per supplier × product × lead bucket.
-- True Price on fitted rates, with a golden integration test through the API.
+### Next: M5
+- Real Monte-Carlo session simulator (replaces the MOCK closed form), crop-robust image matching.
 - Review-label retrain path: `start.py --rebuild` already picks labels up. Add a "labels since last build" counter on Ops.
 
 ### Known issues

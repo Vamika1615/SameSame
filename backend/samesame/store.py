@@ -51,6 +51,7 @@ class Store:
     pairs: pl.DataFrame                  # every scored hotel candidate pair
     matcher: dict
     log: pl.DataFrame
+    promise: dict                        # (supplier, product, lead bucket) -> fitted Promise row (pricing/promise.py)
     manifest: dict = field(default_factory=dict)
 
 
@@ -90,6 +91,7 @@ def get() -> Store:
         osm_reference=_rows("osm_reference"), descriptions=_descriptions(), pairs=pl.read_parquet(config.BUILD / "hotel_pairs.parquet"),
         matcher=json.loads((config.BUILD / "matcher.json").read_text(encoding="utf-8")),
         log=pl.read_parquet(config.BUILD / "booking_log.parquet"),
+        promise={(r["supplier_id"], r["product_type"], r["lead_bucket"]): r for r in _rows("promise_model")},
         manifest=json.loads((config.BUILD / "manifest.json").read_text(encoding="utf-8")),
     )
 
@@ -141,4 +143,4 @@ def world_relation(entity_type: str, a: str, b: str) -> str:
 
 def ready() -> bool:
     m = config.BUILD / "manifest.json"
-    return m.exists() and "m3" in json.loads(m.read_text(encoding="utf-8")).get("stages", [])
+    return m.exists() and "m4" in json.loads(m.read_text(encoding="utf-8")).get("stages", [])

@@ -215,7 +215,7 @@ function OffersTable({ offers, tpOn }: { offers: Offer[]; tpOn: boolean }) {
               <div className={cn("text-sm font-medium", o.availability === "limited" ? "text-warn-500" : "text-ok-700")}>{o.availability === "limited" ? "Limited" : "Available"}</div>
               <div className={cn("text-sm", o.refundable_until ? "text-ok-700" : "text-danger-700")}>{o.cancel_text}</div>
               <div className="text-sm">{o.pay_text}</div>
-              <div className="flex justify-center"><PromiseMeter rate={o.promise.honour_rate} n={o.promise.n} lo={o.promise.ci_low} hi={o.promise.ci_high} /></div>
+              <div className="flex justify-center"><PromiseMeter rate={o.promise.honour_rate} n={o.promise.n} lo={o.promise.ci_low} hi={o.promise.ci_high} prior={o.promise.prior_weight} /></div>
             </motion.div>
           );
         })}
