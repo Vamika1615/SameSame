@@ -57,3 +57,19 @@ OSM_KNOWN_DUPLICATES = [("Address Dubai Mall", "The Address - Dubai Mall"),
                         ("ibis One Central", "Ibis World Trade Centre"),
                         ("ibis hotel al Rigga", "IBIS Hotel Dubai Al Rigga")]
 OSM_WATER = 'way["waterway"~"^(canal|river)$"]["name:en"~"Dubai Creek|Dubai Water Canal"]'
+
+# Remix: where clients stay and how long the roads take (data/components.py). Zone centroids are real places.
+ZONES = [("deira", "Deira", 25.2697, 55.3078), ("bur-dubai", "Bur Dubai", 25.2532, 55.2960),
+         ("downtown", "Downtown", 25.1972, 55.2744), ("marina", "Dubai Marina", 25.0805, 55.1403),
+         ("palm", "Palm Jumeirah", 25.1124, 55.1390), ("dxb", "DXB Airport", 25.2532, 55.3657)]
+DEMO_ZONE = "deira"                     # the demo search is in Deira
+AIRPORT_ZONE = "dxb"
+ROAD_FACTOR = 1.35                      # road km per straight-line km (assumption)
+CITY_KMH, HIGHWAY_KMH = 25, 65          # first 15 km at city speed, the rest at highway speed (assumption)
+# Meeting points that differ from the attraction's own pin
+MEETING_POINTS = {"burj-khalifa": ("Dubai Mall, At the Top entrance", 25.1975, 55.2796),
+                  "dhow-cruise": ("Al Seef dhow pier", 25.2550, 55.3030),
+                  "desert-safari": ("Lahbab desert camp meeting point", 24.8300, 55.6200),
+                  "dubai-fountain": ("Dubai Mall, Fountain boardwalk", 25.1959, 55.2758)}
+COACH_BAY = ("Dubai Mall coach bay", 25.1990, 55.2790)   # where "meet at Dubai Mall" day trips leave from
+AIRPORT_POINT = ("DXB Terminal 3 arrivals", 25.2490, 55.3530)

@@ -1,4 +1,4 @@
-"""Booking-attempt log: 24,000 attempts over 180 days, sampled from world.BEHAVIOUR.
+"""Booking-attempt log: 24,000 hotel/activity attempts plus 6,000 Remix-part attempts over 180 days, sampled from world.BEHAVIOUR.
 
 This is the only thing the Promise model and popularity features see. Each row is what an agency
 platform would really record: who tried to book what, how far ahead, the quoted price, and what the
@@ -12,6 +12,9 @@ from samesame import city
 from samesame.data import world
 
 N_ATTEMPTS = 24_000
+N_COMPONENT_ATTEMPTS = 6_000               # Remix parts (tickets, lunch vouchers, transfers), appended after the rest
+TICKET_SHARE = 0.5                         # agents buy tickets about as often as transfers (by role, not per SKU: there are
+                                           # ~12x more transfer SKUs than ticket SKUs, and per-SKU sampling starved tickets)
 DAYS = 180
 ANCHOR = date(2026, 11, 3)                 # snapshot date; "last 90 days" is relative to this
 MARKETS = [("IN", 0.40), ("TH", 0.14), ("MY", 0.10), ("SG", 0.09), ("AE", 0.08), ("GB", 0.07), ("AU", 0.06), ("CN", 0.06)]
@@ -22,7 +25,7 @@ def _pick(rng, items, weights):
     return items[int(rng.choice(len(items), p=w / w.sum()))]
 
 
-def generate(hotels, listings, truth, offers, attractions, act_listings, act_truth, rng: np.random.Generator):
+def generate(hotels, listings, truth, offers, attractions, act_listings, act_truth, rng: np.random.Generator, components=()):
     hotel_of = {t["listing_id"]: t["hotel_id"] for t in truth}
     by_hotel = {h["hotel_id"]: h for h in hotels}
     offers_of: dict[str, list] = {}
@@ -83,6 +86,29 @@ def generate(hotels, listings, truth, offers, attractions, act_listings, act_tru
             final = None
         rows.append({"attempt_id": f"ba-{i:05d}", "ts": ts, "supplier_id": sup, "product_type": product, "listing_id": item,
                      "offer_id": offer_id, "lead_days": lead, "lead_bucket": world.lead_bucket(lead)[0], "source_market": market,
+                     "agent_id": agents[market][int(rng.integers(len(agents[market])))], "quoted": float(quoted),
+                     "final_price": None if final is None else float(final), "outcome": outcome})
+
+    # Remix parts: sold on their own today (agents already buy tickets and transfers), so the log has their history too
+    vol_att_c = {c["component_id"]: vol_att.get(c["attraction_id"], 1.0) if c["role"] != "transfer" else 1.0 for c in components}
+    tickets = [c for c in components if c["role"] != "transfer"]
+    transfers = [c for c in components if c["role"] == "transfer"]
+    for i in range(N_COMPONENT_ATTEMPTS if components else 0):
+        pool = tickets if rng.random() < TICKET_SHARE else transfers
+        c = pool[int(rng.integers(len(pool)))]
+        market = _pick(rng, [m for m, _ in MARKETS], [w for _, w in MARKETS])
+        ts = ANCHOR - timedelta(days=int(rng.integers(0, DAYS)))
+        lead = int(min(180, max(0, rng.lognormal(np.log(21), 0.85))))
+        product = "transfer" if c["role"] == "transfer" else "ticket"
+        quoted = c["price"] * (1 if c["price_unit"] == "per vehicle" else int(rng.choice([1, 2, 2, 3, 4])))
+        pc, so, err, inc = world.behaviour(c["supplier_id"], product, lead, vol_att_c[c["component_id"]])
+        u = rng.random()
+        outcome = "price_changed" if u < pc else "sold_out" if u < pc + so else "error" if u < pc + so + err else "confirmed"
+        final = round(quoted * (1 + inc * float(rng.uniform(0.5, 1.5))), -1) if outcome == "price_changed" else \
+            None if outcome in ("sold_out", "error") else quoted
+        rows.append({"attempt_id": f"bc-{i:05d}", "ts": ts, "supplier_id": c["supplier_id"], "product_type": product,
+                     "listing_id": c["component_id"], "offer_id": c["component_id"], "lead_days": lead,
+                     "lead_bucket": world.lead_bucket(lead)[0], "source_market": market,
                      "agent_id": agents[market][int(rng.integers(len(agents[market])))], "quoted": float(quoted),
                      "final_price": None if final is None else float(final), "outcome": outcome})
     return rows

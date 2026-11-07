@@ -2,7 +2,9 @@ import { LayoutGroup, motion } from "framer-motion";
 import { Dna, Layers, Star } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import type { ActivityListing, ActivitySearch, ActivityVariant, DnaKey } from "@/contracts";
+import type { ActivityListing, ActivitySearch, ActivityVariant, DnaKey, RemixOverview } from "@/contracts";
+import { Link } from "react-router-dom";
+import { Sparkles } from "lucide-react";
 import { inr, useApi } from "@/lib/api";
 import { usePresenterAction } from "@/lib/presenter";
 import { Empty, ErrorState, Loading } from "@/components/States";
@@ -100,6 +102,7 @@ function Results({ data, view }: { data: ActivitySearch; view: "today" | "samesa
           </div>
         ) : (
           <div className="mt-5 space-y-5">
+            <RemixCards attraction={data.groups[0]?.group_id} />
             {visibleVariants.length === 0 && <Empty title="No variant has all of these">Remove a filter.</Empty>}
             {visibleVariants.map((v) => <VariantRow key={v.variant_id} v={v} />)}
           </div>
@@ -161,5 +164,29 @@ function VariantRow({ v }: { v: ActivityVariant }) {
       <WhyChips why={v.why} score={v.score} className="mt-3" />
       </div>
     </motion.div>
+  );
+}
+
+/** TBO's own Remix of this attraction, ranked above the packages when it passes every guardrail. */
+function RemixCards({ attraction }: { attraction?: string }) {
+  const o = useApi<RemixOverview>("/api/remix");
+  if (o.status !== "ready" || !attraction) return null;
+  const mine = o.data.items.filter((r) => r.attraction_id === attraction && r.status === "ready");
+  return (
+    <>
+      {mine.map((r) => (
+        <Link key={r.variant_id} to={`/remix?v=${r.variant_id}`}
+          className="flex items-center gap-5 rounded-3xl border-2 border-sun-500 bg-paper p-5 shadow-card hover:bg-sun-50">
+          <span className="flex items-center gap-1.5 rounded-full bg-sun-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white"><Sparkles className="h-3.5 w-3.5" />TBO Remix</span>
+          <div className="min-w-0 flex-1">
+            <div className="font-display text-[22px] font-semibold text-accent-700">{r.target_dna.pickup !== "No transfer" ? r.target_dna.pickup : r.target_dna.meals} · built from {r.parts} parts by {r.suppliers?.length} suppliers</div>
+            <div className="text-sm text-ink-soft">The SAME product as the package, cheaper on True Price: agent saves {inr(r.agent_saving_inr ?? 0)} ({((r.agent_saving ?? 0) * 100).toFixed(1)}%), TBO keeps {((r.margin ?? 0) * 100).toFixed(1)}%.</div>
+          </div>
+          <div className="text-right"><div className="text-xs uppercase text-ink-mute">True Price for 2</div>
+            <div className="font-display text-2xl font-semibold tabular-nums text-sun-600">{inr(r.agent_true_price ?? 0)}</div>
+            <div className="text-sm text-ink-mute line-through">{inr(r.packaged_true_price ?? 0)} package</div></div>
+        </Link>
+      ))}
+    </>
   );
 }

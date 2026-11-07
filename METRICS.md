@@ -41,13 +41,13 @@ We call this set **held-out**, not blind: the model never trained on these famil
 
 ## Promise model (booking reliability)
 
-Fitted on the booking log up to 30 days before its end, scored on the last 30 days (3,987 attempts). Log loss per attempt over the four outcomes (confirmed / price changed / sold out / error); lower is better.
+Fitted on the booking log up to 30 days before its end, scored on the last 30 days (4,988 attempts). Log loss per attempt over the four outcomes (confirmed / price changed / sold out / error); lower is better.
 
 | Training data | Attempts | Fitted model | Each cell's own counts | One market rate |
 |---|---|---|---|---|
-| 100% of window | 20,013 | **0.4649** | 0.4665 | 0.516 |
-| 10% of window | 2,001 | **0.482** | 0.4985 | 0.5186 |
-| 2% of window | 400 | **0.5042** | 0.5866 | 0.5219 |
+| 100% of window | 25,012 | **0.4512** | 0.4537 | 0.4965 |
+| 10% of window | 2,501 | **0.4692** | 0.4898 | 0.4988 |
+| 2% of window | 500 | **0.5049** | 0.6242 | 0.5097 |
 
 Hotel honour rate, predicted for the test window's own mix of lead times vs what happened:
 
@@ -60,8 +60,76 @@ Hotel honour rate, predicted for the test window's own mix of lead times vs what
 | mynah | 586 | 96.0% | 96.8% |
 | sunbird | 344 | 84.8% | 86.1% |
 
-- Fitted concentrations (empirical Bayes): activity: supplier prior 54.8, cell prior at the search grid's edge (100,000); hotel: supplier prior 39.3, cell prior at the search grid's edge (100,000). A large cell prior means lead-time effects look the same for every supplier, so cells borrow heavily from their supplier (capped at the bookings that prior was estimated from).
+- Fitted concentrations (empirical Bayes): activity: supplier prior 54.8, cell prior at the search grid's edge (100,000); hotel: supplier prior 39.3, cell prior at the search grid's edge (100,000); ticket: supplier prior 106.9, cell prior at the search grid's edge (100,000); transfer: supplier prior 90.5, cell prior at the search grid's edge (100,000). A large cell prior means lead-time effects look the same for every supplier, so cells borrow heavily from their supplier (capped at the bookings that prior was estimated from).
 - The log comes from our own behaviour model, so this checks that the estimator recovers it from noisy, time-ordered data, not that real suppliers behave this way.
+
+## Remix (sightseeing, client in Deira, 2 adults, 21 days out)
+
+Guardrails: agent saves ≥ 3%, TBO margin ≥ 4%, Remix Promise ≥ 95%, arrive ≥ 20 min before the slot; the agent gets 50% of the gap. Reproduce: `python -m samesame.pipeline` (or `python -m samesame.eval.report` on an existing build). Parts and their prices are synthetic (DATA.md).
+
+| Multi-part packages | SAME Remix exists | Cheaper on True Price | Passes every guardrail | Package cheaper |
+|---|---|---|---|---|
+| 30 | 17 (57%) | 10 | **4 (13%)** | 7 |
+
+| Publishable Remix | Agent saves | TBO margin | Remix Promise (est.) | Secured in sandbox, seeds 1–1,000 | Suppliers |
+|---|---|---|---|---|---|
+| Old Dubai Street Food Tour · Private hotel pickup | ₹690 (4.0%) | ₹687 (4.1%) | 95.1% | 93.8% | hornbill, kestrel, mynah |
+| Helicopter Tour over Dubai · Private hotel pickup | ₹8,011 (11.9%) | ₹7,977 (13.5%) | 95.7% | 93.0% | bulbul, mynah, sunbird |
+| IMG Worlds of Adventure · Lunch | ₹750 (4.7%) | ₹746 (4.9%) | 97.6% | 96.1% | mynah, sunbird |
+| Ski Dubai · Lunch | ₹1,229 (7.2%) | ₹1,223 (7.8%) | 95.5% | 94.5% | bulbul, heron |
+
+- Saving to the agent: avg 6.9%, range 4.0%–11.9%. TBO margin: avg 7.6%, range 4.1%–13.5%.
+- Remix Promise across all 17 buildable Remixes: min 82.9%, median 93.3%, max 97.6%.
+- **Estimated vs sandbox:** the sandbox secures fewer Remixes than the estimated Remix Promise (see the table). The estimate uses each supplier's fitted Promise and assumes parts fail independently; the sandbox draws from the world, where each attraction has its own demand volatility. We have not separated how much of the gap each explains, so read the Remix Promise as optimistic by about that much.
+
+Sandbox outcomes over seeds 1–1,000 (same draws), Remix vs its best package:
+
+| Product | Arm | Clean | Paid a rise | Part / offer failover | Unwound, package bought | Failed |
+|---|---|---|---|---|---|---|
+| Old Dubai Street Food Tour · Private hotel pickup | Remix | 75.9% | 8.1% | 9.8% | 6.2% | 0.0% |
+| | Package | 90.8% | 4.3% | 4.8% | — | 0.1% |
+| Helicopter Tour over Dubai · Private hotel pickup | Remix | 82.1% | 5.4% | 5.5% | 6.8% | 0.2% |
+| | Package | 76.0% | 14.9% | 8.5% | — | 0.6% |
+| IMG Worlds of Adventure · Lunch | Remix | 91.5% | 3.2% | 1.4% | 3.9% | 0.0% |
+| | Package | 73.3% | 7.8% | 18.9% | — | 0.0% |
+| Ski Dubai · Lunch | Remix | 84.0% | 2.4% | 8.1% | 5.5% | 0.0% |
+| | Package | 95.2% | 1.0% | 3.2% | — | 0.6% |
+
+**Where the package beats the Remix** (a strength to show: Remix never pretends):
+
+- Desert Safari, Lahbab Red Dunes · Sandboarding · Morning departure · Shared hotel pickup: package cheaper by ₹4,006 on True Price
+- Desert Safari, Lahbab Red Dunes · BBQ dinner · Private hotel pickup: package cheaper by ₹3,178 on True Price
+- Dhow Dinner Cruise, Dubai Creek · Buffet dinner · Shared hotel pickup: package cheaper by ₹371 on True Price
+- Dubai Fountain Boat Ride · Private hotel pickup: package cheaper by ₹1,590 on True Price
+- Global Village · Lunch: package cheaper by ₹78 on True Price
+- Dubai Miracle Garden · Lunch: package cheaper by ₹791 on True Price
+- Old Dubai Souks & Abra Walk · Private hotel pickup: package cheaper by ₹603 on True Price
+
+**Cheaper, but blocked by a guardrail:**
+
+- Aquaventure Waterpark, Atlantis · Shared hotel pickup: Remix Promise 93.8%, below the 95% guardrail
+- Aquaventure Waterpark, Atlantis · Lunch: agent saves 2.7%, below the 3% guardrail; TBO margin 2.8%, below the 4% guardrail
+- Dubai Aquarium & Underwater Zoo · Shared hotel pickup: Remix Promise 85.1%, below the 95% guardrail
+- Dubai Aquarium & Underwater Zoo · Lunch: TBO margin 3.6%, below the 4% guardrail; Remix Promise 93.9%, below the 95% guardrail
+- IMG Worlds of Adventure · Shared hotel pickup: Remix Promise 91.5%, below the 95% guardrail
+- Ski Dubai · Shared hotel pickup: Remix Promise 82.9%, below the 95% guardrail
+
+**No valid assembly (first reason):** no supplier sells a ticket with the same DNA on its own (7); transfer rate is package-only (4); no outbound transfer fits the 15:30 slot (1); no outbound transfer fits the 15:00 slot (1)
+
+**Pessimistic preset** (transfers +30%, part failures ×1.5): 2 of 30 pass (helicopter-g1, img-worlds-g1).
+
+**By client zone** (passes every guardrail): deira 4, bur-dubai 5, downtown 5, marina 3, palm 4, dxb 5.
+
+**Gap Remixes** (agents search for it, nobody sells it): 78 searched-for gaps (≥ 10 searches in 90 days), 18 pass every guardrail against booking the pieces separately, 38 blocked. Most searched:
+
+- Dubai Dolphinarium · Standard seat · Private hotel pickup: 86 searches, agent saves 4.9%, TBO margin 5.2%
+- Dubai Aquarium & Underwater Zoo · Private hotel pickup: 57 searches, agent saves 4.1%, TBO margin 4.2%
+- Abu Dhabi City Tour & Sheikh Zayed Grand Mosque · Private hotel pickup: 54 searches, agent saves 5.8%, TBO margin 6.1%
+- Global Village · Private hotel pickup: 53 searches, agent saves 5.2%, TBO margin 5.5%
+- Global Village · Lunch · Private hotel pickup: 53 searches, agent saves 5.0%, TBO margin 5.2%
+- Jumeirah Mosque Guided Visit · Guide · Private hotel pickup: 51 searches, agent saves 5.5%, TBO margin 5.8%
+
+**Connected Trip** (golden-case hotel + DXB cars + best tour Remix): blocked; agent saves 8.3%, TBO margin 9.1%, Trip Promise 92.9%. Trip Promise 92.9%, below the 95% guardrail.
 
 ## Caveats (read before quoting any number above)
 

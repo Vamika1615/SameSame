@@ -6,12 +6,15 @@ import { getJSON } from "@/lib/api";
 import { Empty, ErrorState, Loading } from "@/components/States";
 import { Illustrative, SupplierBadge, cn } from "@/components/ui";
 import { PageHeader } from "@/components/PageHeader";
+import { RemixApprovals } from "@/components/RemixApprovals";
+import { Segmented } from "@/components/ui";
+import { useSearchParams } from "react-router-dom";
 
 type Audit = { audit_id: string; pair_id: string; label: string; reviewer: string; truth: string; correct: boolean; undone?: boolean };
 const LABEL = { S: "SAME", V: "VARIANT", D: "DIFFERENT" } as const;
 const ROUTE = { gray_zone: "Gray zone: below the auto-merge bar", llm_unsure: "LLM unsure", constraint_block: "Blocked by a never-merge rule" };
 
-export default function OpsPage() {
+function TwinQueue() {
   const [queue, setQueue] = useState<ReviewItem[] | null>(null);
   const [audit, setAudit] = useState<Audit[]>([]);
   const [err, setErr] = useState<string | null>(null);
@@ -158,6 +161,23 @@ function Side({ s, other }: { s: ReviewSide; other: ReviewSide }) {
           );
         })}
       </dl>
+    </div>
+  );
+}
+
+/** Ops: Spot the Twin (matcher review) and Remix approvals (product team), side by side. */
+export default function OpsPage() {
+  const [params, setParams] = useSearchParams();
+  const tab = params.get("tab") === "remix" ? "remix" : "twin";
+  const tabs = <Segmented size="md" value={tab} onChange={(v) => setParams({ tab: v }, { replace: true })}
+    options={[{ value: "twin", label: "Spot the Twin" }, { value: "remix", label: "Remix approvals" }]} />;
+  if (tab === "twin") return <><div className="mx-auto max-w-[1600px] px-8 pt-5">{tabs}</div><TwinQueue /></>;
+  return (
+    <div className="mx-auto max-w-[1600px] px-8 pb-20 pt-5">
+      {tabs}
+      <div className="mt-4"><PageHeader eyebrow="Ops · product team" title={<>Nothing is sold <span className="italic">until a person approves it.</span></>}
+        subtitle="Every Remix that passes its guardrails waits here: recipe, suppliers, margin, Promise and terms. Approvals are logged and reversible; the matcher's held-out quality is below." /></div>
+      <RemixApprovals />
     </div>
   );
 }

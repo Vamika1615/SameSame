@@ -75,7 +75,7 @@ export default function SimulatorPage() {
                       <div className="mb-1 font-semibold">{label as string}</div>
                       {res.arms.map((a) => (
                         <div key={a.arm} className="mb-1 flex items-center gap-3">
-                          <span className="w-24 text-sm text-ink-mute">{a.arm === "today" ? "Today" : "SameSame"}</span>
+                          <span className="w-24 text-sm text-ink-mute">{a.arm === "today" ? "Today" : "With Remix"}</span>
                           <div className="h-7 flex-1 rounded-full bg-paper-warm">
                             <div className={cn("h-7 rounded-full transition-all duration-500", a.arm === "today" ? "bg-sky-300" : "bg-accent-700")} style={{ width: `${(100 * a[key]) / max}%` }} />
                           </div>
@@ -86,12 +86,31 @@ export default function SimulatorPage() {
                   );
                 })}
               </div>
+              {res.remix && (
+                <div className="mt-6 rounded-2xl border-2 border-sun-500 bg-sun-50/40 p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="font-display text-xl font-semibold text-accent-700">Remix business case, per 1,000 sightseeing searches</div>
+                    <span className="rounded-full bg-warn-50 px-2 py-0.5 text-xs font-bold uppercase text-warn-500">simulated</span>
+                  </div>
+                  <div className="mt-2 grid grid-cols-2 gap-3 md:grid-cols-4">
+                    <Small k="Searches a publishable Remix answers" v={`${(res.remix.matched_share * 100).toFixed(1)}%`} />
+                    <Small k="Remix bookings" v={res.remix.bookings_per_1000_searches.toFixed(1)} />
+                    <Small k="TBO margin" v={inr(res.remix.tbo_margin_per_1000_searches)} />
+                    <Small k="Agents save" v={inr(res.remix.agent_saving_per_1000_searches)} />
+                  </div>
+                  <div className="mt-2 text-xs text-ink-mute">{res.remix.publishable_remixes} publishable Remixes{res.remix.pessimistic ? " under the pessimistic preset" : ""}; {inr(res.remix.avg_margin_per_booking)} average margin per Remix booking. {res.remix.note}</div>
+                </div>
+              )}
             </>
           )}
         </div>
       </div>
     </div>
   );
+}
+
+function Small({ k, v }: { k: string; v: string }) {
+  return <div className="rounded-xl bg-paper px-3 py-2"><div className="text-[11px] uppercase text-ink-mute">{k}</div><div className="text-lg font-semibold tabular-nums">{v}</div></div>;
 }
 
 function Big({ label, value, good }: { label: string; value: string; good: boolean }) {

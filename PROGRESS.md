@@ -2,7 +2,169 @@
 
 _Update after every milestone. Newest first._
 
-## Status: M4 done → M5 next
+## Status: Remix pivot, R1–R5 done (branch `remix`, not merged)
+
+### Done: R5, Connected Trip, metrics, simulator, docs (2026-11-07)
+- **Connected Trip (`remix/trip.py`; hotel page, key 6):** the golden-case hotel's #1 True Price offer + private DXB cars both ways + the best sightseeing Remix from that zone, as one product with one price, one Promise and one cancellation rule.
+  - Airport cars are generated in their own pipeline stage after the booking log, so no earlier draw moves. They use each supplier's fitted transfer Promise.
+  - **Result: blocked.** The agent would save 8.3% (₹7,798) and TBO keep 9.1%, but four independent parts multiply to a 92.9% Promise, under the 95% floor. The UI says so and has a Promise slider. I didn't swap the activity or loosen the guardrail to make it pass.
+  - A first version picked airport cars on cost alone and gave them no twins (87.1%). It was aligned with the activity engine (smallest fitting car per supplier as twins; cheapest that clears the floor).
+- **METRICS.md → Remix section**, rebuilt every build:
+  - coverage funnel and per-Remix saving / margin / Promise
+  - sandbox seeds 1–1,000, Remix vs package
+  - every product where the package wins, and every product that is cheaper but blocked
+  - why the others can't be assembled
+  - pessimistic preset, per-zone counts, gap Remixes, Connected Trip
+  - the estimated-vs-sandbox Promise gap (sandbox 1–3 points lower; disclosed as making the estimate optimistic)
+- **Simulator:** a Remix business case per 1,000 sightseeing searches, labelled SIMULATED. Searches are matched to publishable Remixes, using computed margins and savings and the simulator's conversion rate.
+- **Rebrand:** remaining "SameSame" labels in the UI now say Twin Finder / With Remix. The page title is "Remix · TBO".
+- **Docs:** README (headline, how it works, Mermaid diagram, provenance), DEMO.md (8 beats, 3 presenters, computed numbers, fallbacks), QA.md (new; Remix answers plus the matching/pricing answers that still apply).
+- **Tests: 71 passing.** All 48 pre-pivot tests still pass; none was obsolete.
+- **Server:** warms the Remix catalogue, gaps and trip at start-up, so no stage click waits (first gap list was 2 s).
+
+### Remix numbers right now (Deira, 2 adults, 21 days out, default guardrails)
+| Thing | Value |
+|---|---|
+| Multi-part packages → SAME Remix exists → cheaper → publishable | 30 → 17 → 10 → **4** |
+| Publishable | Helicopter + private pickup (agent −11.9%, TBO 13.5%); Ski Dubai + lunch (7.2%, 7.8%); IMG Worlds + lunch (4.7%, 4.9%); Old Dubai food tour + private pickup (4.0%, 4.1%) |
+| Package cheaper | 7, e.g. morning desert safari by ₹4,006, private desert safari by ₹3,178, dhow cruise with transfer by ₹371 |
+| Demo Remix (rule: largest rupee saving) | Helicopter: package ₹65,940 (True Price ₹67,341) → Remix sells ₹59,076 (agent True Price ₹59,329); TBO keeps ₹7,977 |
+| Book Remix, seed 22 (first seed with a failover) | Transfer out via Mynah failed → SAME transfer via Heron; whole trip confirmed |
+| Sandbox, seeds 1–1,000 (helicopter) | secured 93.0% vs 95.7% estimated; 6.8% unwound and package bought |
+| Gap Remixes | 78 searched-for, 18 publishable; demo: Dolphinarium + private pickup, 86 searches, agent −4.9%, TBO 5.2% |
+| Connected Trip | blocked: Trip Promise 92.9% (< 95%); would save the agent 8.3% |
+| Pessimistic preset | 2 publishable (helicopter, IMG Worlds) |
+| Simulated business case | 18.1% of sightseeing searches hit a publishable Remix; ≈ ₹52,000 TBO margin per 1,000 searches (≈ ₹29,000 pessimistic) |
+
+### Decisions taken without asking (Remix)
+1. A Remix needs ≥ 2 parts; single-part products are Twin Finder's job.
+2. SAME rule: strict fields equal, every field the package states equal; package-silent fields go to the approver.
+3. Duration is descriptive (as in Variant DNA). The Remix shows door-to-door time instead.
+4. Parts carry structured terms, but their text is read by the same Variant DNA extractor as packages.
+5. TBO carries the price-change and failover risk. The agent's True Price is the sell price plus cancellation risk under the strictest part's rule.
+6. Defaults, fixed before results: agent share 50%; saving ≥ 3%; margin ≥ 4%; Promise ≥ 95%; buffer 20 min; max wait 90 min.
+7. Gaps are priced against booking the pieces separately, with the same rule and guardrails. Friction is ₹500 per extra booking.
+8. The demo products and seeds are chosen by rule and disclosed on screen.
+9. Changed after seeing results, and disclosed: booking-log part attempts are sampled by role, not SKU; the private-safari VARIANT leak was closed.
+10. The `remix` branch is not merged into `main`; the user decides.
+
+
+### Done: R4, gap Remixes and the approvals queue (2026-11-07)
+- **Agent searches (synthetic, `data/search_log.py`):** 5,000 sightseeing searches over 90 days.
+  - Each search is an attraction (weighted by listing count), one of its ticket-level products, and a pickup wish: none 50%, shared 25%, private 25%.
+  - Drawn independently, so demand lands on combinations nobody packages. The gap finder sees only the events and the catalogue.
+- **Gap finder (`remix/gaps.py`):** a gap is a standalone ticket (DNA read from its text) plus a hotel pickup, where no packaged variant is SAME. It must have ≥ 10 searches in 90 days.
+  - **Decision:** with no package to beat, the baseline is what the agent does today. That is the best ticket-only package plus two transfers booked separately, at their True Price (the agent carries the risk), plus ₹500 friction per extra booking.
+  - Pricing and guardrails are the same as catalogue Remixes. (A first draft used a flat 10% margin; that priced most gaps just above doing it yourself, so it was dropped for consistency.)
+  - **Result:**
+
+| Gaps searched for | Pass every guardrail | Blocked | Can't be assembled |
+|---|---|---|---|
+| 78 | 18 | 38 | 22 |
+
+  - The most-searched publishable gap (demo, by rule) is the Dubai Dolphinarium standard seat with private pickup from Deira: 86 searches, the agent saves 4.9%, TBO keeps 5.2%. Burj Khalifa daytime with private pickup saves 7.7%.
+  - With no package to fall back on, a gap Remix whose part can't be secured is unwound and refunded.
+- **Approvals (`remix/approvals.py`, Ops → Remix approvals):**
+  - Every Remix that passes its guardrails (4 catalogue + 18 gap) waits for a person: recipe, suppliers, sell price, margin, saving, Promise, cancellation, and any unverified field to check. A / R keys work.
+  - The log is append-only and undo appends. Each decision snapshots what was approved; if a rebuild changes the recipe or numbers, the Remix returns to the queue.
+  - Remix Studio says "awaiting approval" or "published". The matcher's held-out metrics sit under the queue (beat 7).
+- **Tests: 69 passing** (+2: a gap Remix is something nobody sells, at the threshold, SAME; approve → published → undo; unknown id 404; a gap with no package unwinds to a refund).
+
+
+### Done: R3, Remix Studio, Book Remix, rebrand (2026-11-07)
+- **Decision (yours):** build on the publishable winners.
+- **Chrome is now "Remix"**, with the tagline in the footer and logo tooltip. The `samesame` package name stays.
+- **Remix Studio** (`/remix`):
+  - a funnel: multi-part → SAME Remix exists → cheaper → passes guardrails
+  - a product picker, with "package wins" and "blocked" shown, not hidden
+  - the packaged version (DNA, best package on True Price) next to the TBO Remix card: recipe with supplier, price, twins and per-part Promise gauge; a pickup → slot → return timeline; a SAME check per DNA field
+  - the True Price proof (bars plus the full arithmetic) and the publish guardrails as live sliders (zone, agent share, saving, margin, Promise, buffer, pessimistic preset)
+- **Book Remix:** riskiest part first, per-part failover to SAME twins, compensation (unwind, then buy the package), and seeds 1–1,000 compared against the best package. The demo product is chosen by rule (largest rupee saving among publishable Remixes): the helicopter tour with private pickup. The demo seed is the first that shows a part failing over (seed 22), disclosed on screen.
+- **The Sightseeing ranking** shows a TBO Remix card above the packages when that attraction has a publishable Remix.
+- **Presenter:** 8 new beats (keys 1–8). Beats 5–6 land in R4–R5.
+- **Tests: 67 passing** (+7: per-part SAME failover, compensation exercised, riskiest-first, seed reproduction, API, no typed-in numbers).
+
+### Correction to the R2 gate (found while building R3)
+1. **The R2 gate numbers came from a stale build.** I changed the day-trip meeting point after the last pipeline run. A fresh build shifted the random draws, and at first gave **0** publishable Remixes, because every Remix Promise fell.
+2. **Root cause, a generator design flaw:** part attempts were sampled per SKU. Transfers are ~92% of SKUs, so each supplier had only 24–57 ticket attempts per lead bucket, and the Promise model rightly leaned on the market average (Sunbird tickets estimated at 6.5% failure vs 2.5% true).
+3. **Fix:** attempts are now sampled by role, half tickets and half transfers (`booking_log.TICKET_SHARE`). This was changed **after** seeing the gate, and is disclosed here and in DATA.md.
+4. **After the fix**, the same 4 products pass:
+
+| Product | Agent saves | TBO margin | Remix Promise |
+|---|---|---|---|
+| Helicopter + private pickup | 11.9% | 13.5% | 95.7% |
+| Ski Dubai + lunch | 7.2% | 7.8% | 95.5% |
+| IMG Worlds + lunch | 4.7% | 4.9% | 97.6% |
+| Food tour + private pickup | 4.0% | 4.1% | 95.1% |
+
+5. **Honest reading:** the winners sit close to the guardrails, so the count is sensitive to random draws. The food tour clears the 4% margin by 0.1 point.
+6. **Sandbox vs estimate:** over 1,000 seeds the helicopter Remix is secured about 93% of the time, against the estimated 95.7%. Helicopter demand is more volatile than the average the Promise model sees. METRICS will report this gap.
+
+## Earlier: R1 + R2, stopped at the R2 gate
+
+### Pivot (2026-11-07)
+The headline moves from SameSame to **Remix**: TBO products assembled from parts suppliers already sell (ticket + transfers + lunch), published only when the Remix is the SAME product as a package, cheaper on True Price, and leaves TBO a margin. The plan is in [REMIX_PLAN.md](REMIX_PLAN.md). Every existing engine is reused unchanged, and all 48 earlier tests still pass.
+
+### Done: R1, component catalogue (synthetic, disclosed in DATA.md)
+- `data/components.py`:
+  - 159 entry tickets with slots
+  - 12 lunch vouchers
+  - 1,840 one-way transfers between 6 hotel zones and 25 meeting points: 1,500 private (sedan/SUV, on request), 340 shared (fixed timetable)
+  - 313 rates are "package only" and never bundled
+- **Ticket price** is the market's own price for that ticket alone. The per-supplier net factor averages ~1.0, so parts carry no planted discount. Where every package of a core includes a transfer, the ticket is priced at the package minus 20% (shared) or 30% (private).
+- **Transfer prices** are Dubai-style tariffs on road distance: private ₹1,600 + ₹55/km per sedan; shared ₹350 + ₹9/km per seat.
+- All parameters were fixed before any Remix result was computed.
+- **Booking log:** +6,000 part attempts, appended after the existing 24,000 so earlier numbers are unchanged. The Promise model now fits `ticket` and `transfer` with no code change.
+
+### Done: R2, recipe search, pricing, guardrails (`remix/engine.py`, `tests/test_remix.py`)
+- **Search:** enumerate ticket × outbound × return × lunch. Keep only bundleable parts, drop-off at the ticket's meeting point, arrival ≥ 20 min before the slot, waits ≤ 90 min. Take the cheapest assembly that passes every guardrail.
+- **SAME, never VARIANT:** strict fields must be equal, and so must every descriptive field the package states. A field only the package is silent on becomes "unverified" and needs approval.
+  - The first gate run caught the engine building a *private* desert safari from a *shared* 4x4 ticket whose text didn't state its option. That is now a difference, and a test guards it.
+- **Pricing:**
+  - TBO's cost is the sum of part True Prices (fitted Promise per part) plus assembly risk (unwind and buy the package).
+  - The agent's True Price is the sell price plus cancellation risk under the strictest part's rule.
+  - The agent gets 50% of the gap.
+  - Guardrails: saving ≥ 3%, margin ≥ 4%, Remix Promise ≥ 95%, slack ≥ 20 min.
+- **Tests: 60 passing** (+12).
+
+### R2 gate: honest numbers (Deira, 2 adults, 21 days out, default settings)
+| | Count of 30 multi-part packages |
+|---|---|
+| A SAME Remix exists (bundleable, feasible timing) | 17 (57%) |
+| Remix cheaper than the best package on True Price | 9 (30%) |
+| **Passes every guardrail** | **4 (13%)** |
+| Package cheaper (reported, not hidden) | 8 |
+| No valid assembly | 13 |
+
+- **Publishable:**
+
+| Product | Agent saves | TBO margin | Remix Promise |
+|---|---|---|---|
+| Helicopter tour + private pickup | 12.2% | 13.9% | 96.3% |
+| Ski Dubai + lunch | 7.2% | 7.8% | 95.8% |
+| IMG Worlds + lunch | 5.0% | 5.2% | 99.4% |
+| Old Dubai food tour + private pickup | 5.0% | 5.2% | 99.5% |
+
+- **Cheaper, but blocked only by the Promise guardrail:** Aquaventure + shared transfer (9.3%, Promise 89.4%), Aquarium + shared transfer (6.6%, 90.7%), Ski Dubai + shared transfer (11.7%, 94.3%).
+- **Package wins:**
+
+| Product | Package cheaper by |
+|---|---|
+| Morning desert safari | ₹3,438 |
+| Private desert safari | ₹2,180 |
+| Dubai Fountain private | ₹1,635 |
+| Dhow cruise with transfer | ₹282 |
+
+  Also Miracle Garden, Global Village and Old Dubai. Pooled operator transfers beat standalone ones.
+- **No valid assembly:**
+  - Day trips: the coach is the tour, and the "meet at the mall" version is a different product.
+  - Evening shows and the evening desert safari: the shared coach arrives 15 min before the start, under the 20-min buffer.
+  - Parks: the last return coach leaves more than 90 min after closing.
+  - Some routes are only sold package-only.
+- **The three hand-written demo products have no publishable Remix:** Burj Khalifa is ticket-only (one part), and the desert safari and dhow cruise lose or fail on timing.
+- **Other zones:** 2–5 publishable (fewest from the Marina). **Pessimistic preset** (transfers +30%, part failures ×1.5): 2 publishable.
+
+## Earlier status: M4 done
 
 ### Done: M4, fitted Promise model (2026-11-06)
 - **Promise is now a fitted model** (`backend/samesame/pricing/promise.py`), not raw Wilson counts. It is a hierarchical Dirichlet-multinomial (a Beta-binomial on the honour rate):

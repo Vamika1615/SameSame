@@ -52,6 +52,9 @@ class Store:
     matcher: dict
     log: pl.DataFrame
     promise: dict                        # (supplier, product, lead bucket) -> fitted Promise row (pricing/promise.py)
+    components: dict                     # Remix parts: component_id -> row; tickets/add-ons carry Variant DNA read from their text
+    meeting_points: dict
+    search_events: list                  # agents' sightseeing searches (synthetic): what they asked for, sold or not
     manifest: dict = field(default_factory=dict)
 
 
@@ -92,8 +95,21 @@ def get() -> Store:
         matcher=json.loads((config.BUILD / "matcher.json").read_text(encoding="utf-8")),
         log=pl.read_parquet(config.BUILD / "booking_log.parquet"),
         promise={(r["supplier_id"], r["product_type"], r["lead_bucket"]): r for r in _rows("promise_model")},
+        components=_components(), meeting_points={m["meeting_point_id"]: m for m in _rows("meeting_points")},
+        search_events=_rows("search_events"),
         manifest=json.loads((config.BUILD / "manifest.json").read_text(encoding="utf-8")),
     )
+
+
+def _components() -> dict:
+    """Parts as suppliers send them: structured slots, meeting point, vehicle and terms; tickets and add-ons also get
+    Variant DNA read from their title and description by the same extractor that reads packages."""
+    out = {}
+    for c in _rows("components"):
+        if c["role"] != "transfer":
+            c["dna"] = dna.extract(c["title"], c["description"])
+        out[c["component_id"]] = c
+    return out
 
 
 def _descriptions() -> dict:
@@ -143,4 +159,4 @@ def world_relation(entity_type: str, a: str, b: str) -> str:
 
 def ready() -> bool:
     m = config.BUILD / "manifest.json"
-    return m.exists() and "m4" in json.loads(m.read_text(encoding="utf-8")).get("stages", [])
+    return m.exists() and "r1" in json.loads(m.read_text(encoding="utf-8")).get("stages", [])

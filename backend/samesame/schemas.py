@@ -399,6 +399,7 @@ class SimResult(BaseModel):
     lift_bookings_pct: float
     failed_reduction_pct: float
     note: str
+    remix: Optional[dict] = None          # Remix business case (simulated conversion, computed margins)
 
 
 class ReviewSide(BaseModel):

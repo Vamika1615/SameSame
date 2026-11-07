@@ -45,7 +45,7 @@ function HeroSearch({ data, onSearch }: { data: HotelSearch; onSearch: () => voi
         <div className={seg}><Star className="h-5 w-5 text-sun-500" /><div><div className="text-[11px] font-semibold uppercase tracking-wide text-ink-mute">Stars</div><div className="font-semibold">{p.star_min ? `${p.star_min}★ and up` : "Any"}</div></div></div>
         {p.needs.length > 0 && <div className={seg}><Coffee className="h-5 w-5 text-sun-500" /><div><div className="text-[11px] font-semibold uppercase tracking-wide text-ink-mute">Client wants</div><div className="font-semibold capitalize">{p.needs.join(", ")}</div></div></div>}
         <div className="ml-auto !border-l-0 pl-2">
-          <Tip side="bottom" content="Group the duplicates (same as the SameSame toggle)">
+          <Tip side="bottom" content="Group the duplicates (same as the Twin Finder toggle)">
             <button onClick={onSearch} aria-label="Group duplicates" className="flex h-12 w-12 items-center justify-center rounded-full bg-sun-500 text-white shadow-card transition-colors hover:bg-sun-600">
               <Search className="h-5 w-5" />
             </button>
@@ -178,7 +178,7 @@ function Listing({ data }: { data: HotelSearch }) {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Segmented value={view} onChange={setView}
               options={[{ value: "today", label: <span>Today <span className="font-normal opacity-75">({c.raw_listings} listings)</span></span> },
-                        { value: "samesame", label: <span className="flex items-center gap-2"><Layers className="h-5 w-5" />SameSame <span className="font-normal opacity-75">({c.unique_hotels} hotels)</span></span> }]} />
+                        { value: "samesame", label: <span className="flex items-center gap-2"><Layers className="h-5 w-5" />Twin Finder <span className="font-normal opacity-75">({c.unique_hotels} hotels)</span></span> }]} />
             <div className="text-[15px] text-ink-soft">
               {view === "today" ? <>{c.raw_listings} listings from 6 suppliers · <span className="text-ink-mute">sorted by sticker price</span></> : (
                 <><span className="font-display text-xl font-semibold text-sun-600"><AnimatedNumber value={c.duplicates_collapsed} /></span> duplicates collapsed
