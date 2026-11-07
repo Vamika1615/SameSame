@@ -4,6 +4,7 @@ from functools import lru_cache
 
 from samesame.remix import book as rb
 from samesame.remix import engine as E
+from samesame.remix import gaps
 
 SETTING_KEYS = ("zone", "agent_share", "min_saving", "min_margin", "min_promise", "buffer_min")
 
@@ -54,3 +55,14 @@ def overview(s: E.Settings) -> dict:
                 "ready": sum(1 for r in multi if r["status"] == "ready"),
                 "package_wins": sum(1 for r in multi if r.get("gap") is not None and r["gap"] <= 0)},
             "items": [summary(r) for r in multi]}
+
+
+def gap(variant_id: str) -> dict | None:
+    return next((r for r in gaps.find(E.Settings()) if r["variant_id"] == variant_id), None)
+
+
+@lru_cache
+def demo_gap() -> str | None:
+    """The most-searched gap Remix that passes every guardrail: chosen by rule."""
+    ready = [r for r in gaps.find(E.Settings()) if r["status"] == "ready"]
+    return max(ready, key=lambda r: (r["demand"], r["agent_saving_inr"]))["variant_id"] if ready else None

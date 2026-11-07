@@ -95,6 +95,14 @@ Four more are a short list in `city.py`, checked by hand. Each pair was mapped t
 - **Booking log:** +6,000 part attempts from new `ticket` and `transfer` behaviour profiles in `world.py`, half tickets and half transfers. This was changed after the first gate: per-SKU sampling starved tickets of history (see PROGRESS).
 - These parameters were set before any Remix result was computed.
 
+## Agent searches (synthetic, R4)
+`backend/samesame/data/search_log.py` generates 5,000 sightseeing searches over 90 days. Each one picks:
+- an attraction, in proportion to its listings;
+- one of its ticket-level products, uniformly;
+- a pickup wish: none 50%, shared 25%, private 25%.
+
+Only the gap finder reads them. The demand behind each gap Remix is a count of these events, so it is synthetic.
+
 ## Held-out partition
 `config.is_holdout()` holds out about 15% of brand families. In Dubai none of the 42 look-alike pairs fall in a held-out family, so that number is scored out-of-fold only. The held-out evaluation set has 128 pairs: 58 hotel, 40 room, 30 activity.
 

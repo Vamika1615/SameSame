@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { AlertTriangle, BarChart3, Bus, Car, Check, CheckCircle2, Dice5, Loader2, Package, RefreshCw, ShieldCheck, Sparkles, Ticket, Utensils, X, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import type { Meta, RemixBooking, RemixLeg, RemixOverview, RemixPart, RemixResult, RemixSettings, RemixStats, RemixSummary } from "@/contracts";
+import type { ApprovalItem, Meta, RemixBooking, RemixLeg, RemixOverview, RemixPart, RemixResult, RemixSettings, RemixStats, RemixSummary } from "@/contracts";
 import { getJSON, inr, useApi } from "@/lib/api";
 import { usePresenterAction } from "@/lib/presenter";
 import { CITY } from "@/lib/city";
@@ -10,12 +10,12 @@ import { PageHeader } from "@/components/PageHeader";
 import { ErrorState, Loading } from "@/components/States";
 import { PromiseMeter, SupplierBadge, Tip, cn } from "@/components/ui";
 
-const SUP: Record<string, string> = { kestrel: "Kestrel", mynah: "Mynah", heron: "Heron", bulbul: "Bulbul", hornbill: "Hornbill", sunbird: "Sunbird" };
+export const SUP: Record<string, string> = { kestrel: "Kestrel", mynah: "Mynah", heron: "Heron", bulbul: "Bulbul", hornbill: "Hornbill", sunbird: "Sunbird" };
 const ZONES = [["deira", "Deira"], ["bur-dubai", "Bur Dubai"], ["downtown", "Downtown"], ["marina", "Dubai Marina"], ["palm", "Palm Jumeirah"], ["dxb", "DXB Airport"]];
 const LEG_ICON = { ticket: Ticket, out: Car, back: Car, lunch: Utensils } as const;
 const LEG_LABEL = { ticket: "Entry ticket", out: "Transfer out", back: "Transfer back", lunch: "Lunch voucher" } as const;
 const DNA_LABEL: Record<string, string> = { pickup: "Pickup", meals: "Meals", access: "Access", stops: "Stops", option: "Option", slot: "Slot", cancel: "Cancellation" };
-const pct = (x?: number | null, d = 1) => (x == null ? "—" : `${(x * 100).toFixed(d)}%`);
+export const pct = (x?: number | null, d = 1) => (x == null ? "—" : `${(x * 100).toFixed(d)}%`);
 const hhmm = (m: number) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 
 type Knobs = Pick<RemixSettings, "zone" | "agent_share" | "min_saving" | "min_margin" | "min_promise" | "buffer_min"> & { preset: "" | "pessimistic" };
@@ -103,8 +103,11 @@ function Picker({ items, active, onPick }: { items: RemixSummary[]; active: stri
 function RemixView({ r, showTp, onToggleTp, bookBeat, seed, seedNote, isDemo }:
   { r: RemixResult; showTp: boolean; onToggleTp: () => void; bookBeat: boolean; seed: number; seedNote: string; isDemo: boolean }) {
   const pkg = r.packaged;
+  const appr = useApi<{ queue: ApprovalItem[] }>("/api/remix/approvals");
+  const decision = appr.status === "ready" ? appr.data.queue.find((i) => i.variant_id === r.variant_id)?.decision : undefined;
+  const published = decision === "approve" ? "Published after approval in Ops." : decision === "reject" ? "Rejected in Ops: not sold." : "Awaiting approval in Ops before it is sold.";
   const verdict = r.status === "ready"
-    ? { cls: "bg-ok-50 text-ok-700 border-ok-500", icon: <ShieldCheck className="h-5 w-5" />, text: r.reasons[0] }
+    ? { cls: "bg-ok-50 text-ok-700 border-ok-500", icon: <ShieldCheck className="h-5 w-5" />, text: `${r.reasons[0]}. ${published}` }
     : (r.gap ?? 1) <= 0
       ? { cls: "bg-sand-100 text-ink border-sand-200", icon: <Package className="h-5 w-5" />, text: `Package wins: ${r.reasons.join("; ")}. Remix never pretends otherwise.` }
       : { cls: "bg-danger-50 text-danger-700 border-danger-50", icon: <AlertTriangle className="h-5 w-5" />, text: `${r.status === "blocked" ? "Blocked" : "Not remixable"}: ${r.reasons.join("; ")}` };
@@ -159,7 +162,7 @@ function RemixView({ r, showTp, onToggleTp, bookBeat, seed, seedNote, isDemo }:
   );
 }
 
-function DnaStrip({ dna }: { dna: Record<string, string> }) {
+export function DnaStrip({ dna }: { dna: Record<string, string> }) {
   const keys = Object.keys(DNA_LABEL).filter((k) => dna[k]);
   return (
     <div className="mt-3 flex flex-wrap gap-1.5">
@@ -168,7 +171,7 @@ function DnaStrip({ dna }: { dna: Record<string, string> }) {
   );
 }
 
-function PartRow({ p }: { p: RemixPart }) {
+export function PartRow({ p }: { p: RemixPart }) {
   const Icon = LEG_ICON[p.leg];
   return (
     <li className="flex items-center gap-3 rounded-2xl border border-paper-line px-3 py-2">
@@ -185,7 +188,7 @@ function PartRow({ p }: { p: RemixPart }) {
   );
 }
 
-function Timeline({ r }: { r: RemixResult }) {
+export function Timeline({ r }: { r: RemixResult }) {
   const parts = r.parts!;
   const lo = Math.min(...parts.map((p) => p.start)), hi = Math.max(...parts.map((p) => p.end));
   const x = (m: number) => `${((m - lo) / (hi - lo)) * 100}%`;
@@ -203,7 +206,7 @@ function Timeline({ r }: { r: RemixResult }) {
   );
 }
 
-function SameCheck({ r }: { r: RemixResult }) {
+export function SameCheck({ r }: { r: RemixResult }) {
   const keys = Object.keys(DNA_LABEL).filter((k) => r.target_dna[k] != null || r.assembled_dna?.[k] != null);
   return (
     <div className="mt-4 flex flex-wrap gap-1.5">
@@ -334,7 +337,7 @@ const OUTCOME: Record<string, { label: string; c: string }> = {
   failed: { label: "Failed", c: "bg-danger-500" },
 };
 
-function BookRemix({ r, active, demoSeed, seedNote }: { r: RemixResult; active: boolean; demoSeed: number; seedNote: string }) {
+export function BookRemix({ r, active, demoSeed, seedNote, withStats = true }: { r: RemixResult; active: boolean; demoSeed: number; seedNote: string; withStats?: boolean }) {
   const [res, setRes] = useState<RemixBooking | null>(null);
   const [clock, setClock] = useState(0);
   const [seed, setSeed] = useState(demoSeed);
@@ -373,8 +376,8 @@ function BookRemix({ r, active, demoSeed, seedNote }: { r: RemixResult; active: 
         <div className="flex gap-2">
           <button onClick={() => run(demoSeed)} className="rounded-xl bg-accent-700 px-6 py-3 text-lg font-bold text-white shadow hover:bg-accent-900">Book Remix</button>
           <button onClick={() => run(Math.floor(Math.random() * 1e6))} className="flex items-center gap-1.5 rounded-xl border border-paper-line px-4 py-3 font-semibold text-ink-soft hover:bg-paper-warm"><Dice5 className="h-5 w-5" />Fresh seed</button>
-          <button onClick={async () => setStats(await getJSON<RemixStats>(`/api/remix/book/stats?variant_id=${r.variant_id}&runs=1000`))}
-            className="flex items-center gap-1.5 rounded-xl border border-paper-line px-4 py-3 font-semibold text-ink-soft hover:bg-paper-warm"><BarChart3 className="h-5 w-5" />Run 1,000×</button>
+          {withStats && <button onClick={async () => setStats(await getJSON<RemixStats>(`/api/remix/book/stats?variant_id=${r.variant_id}&runs=1000`))}
+            className="flex items-center gap-1.5 rounded-xl border border-paper-line px-4 py-3 font-semibold text-ink-soft hover:bg-paper-warm"><BarChart3 className="h-5 w-5" />Run 1,000×</button>}
         </div>
       </div>
       <div className="mt-1 text-sm text-ink-mute">Scenario seed <b className="font-mono text-ink-soft">{seed}</b>. {seed === demoSeed ? seedNote : "A fresh random draw."}</div>

@@ -203,6 +203,8 @@ def search(t: dict, s: Settings = Settings()) -> dict:
         reasons[r] = reasons.get(r, 0) + 1
 
     tickets = [c for c in st.components.values() if c["role"] == "ticket" and c["attraction_id"] == aid]
+    if not any(_ticket_ok(t, c)[0] for c in tickets):
+        return {"assemblies": [], "reasons": {"no supplier sells a ticket with the same DNA on its own": 1}}
     if not tickets:
         return {"assemblies": [], "reasons": {"no supplier sells this ticket on its own": 1}}
     need_transfer = t["dna"]["pickup"] in HOTEL_PICKUPS
@@ -210,7 +212,6 @@ def search(t: dict, s: Settings = Settings()) -> dict:
     for c in tickets:
         ok, need_lunch = _ticket_ok(t, c)
         if not ok:
-            no("no ticket with the same DNA")
             continue
         if not c["bundleable"]:
             no("ticket rate is package-only")

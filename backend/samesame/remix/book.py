@@ -77,7 +77,7 @@ def _compensate(r, legs, booked, t, rng, s):
         t += 400
     pkg = r.get("packaged")
     fallback = None
-    if pkg:
+    if pkg and r["variant_id"] in st.act_listings_of:
         members = next(x for x in [v for vs in st.variants_of.values() for v in vs] if x["variant_id"] == r["variant_id"])
         listings = st.act_listings_of[members["variant_id"]]
         pool = [sandbox.BookableOffer(m["listing_id"], SUPPLIERS[m["supplier_id"]], m["price_pp"] * s.pax, "pkg", 0) for m in listings]
@@ -108,6 +108,9 @@ def _summary(outcome, legs, paid, r, comp=None):
     if outcome == "compensated":
         return (f"{bad['label']} couldn't be secured from any SAME twin. TBO cancelled the booked parts ({inr(comp['unwind_cost'])} incl. friction) "
                 f"and bought the package via {comp['fallback']['final_supplier']}. The client still travels; TBO paid {inr(paid)}.")
+    if comp and comp["fallback"] is None:
+        return (f"{bad['label']} couldn't be secured from any SAME twin, and nobody sells this as a package. TBO cancelled the booked parts "
+                f"({inr(comp['unwind_cost'])} incl. friction) and refunds the agent in full.")
     return f"{bad['label']} couldn't be secured and the package fallback failed too: the agent must choose."
 
 

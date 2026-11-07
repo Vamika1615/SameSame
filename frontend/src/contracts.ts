@@ -120,7 +120,11 @@ export interface RemixResult {
   timeline?: { start: string; end: string; door_to_door_h: number; slot: string; slack_min: number }; suppliers?: string[];
   packaged?: RemixPackaged | null; sell?: number; agent_true_price?: TruePrice; agent_saving?: number; agent_saving_inr?: number;
   margin?: number; margin_inr?: number; gap?: number; settings: RemixSettings; alternatives?: number;
+  demand?: number; diy?: { total: number; ticket: number; ticket_from: string; transfers: number; friction: number };
 }
+export interface GapList { counts: Record<string, number>; demo: string | null; items: RemixResult[] }
+export interface ApprovalDecision { audit_id: string; variant_id: string; decision: "approve" | "reject"; approver: string; note: string; ts: string; undone?: boolean }
+export interface ApprovalItem { variant_id: string; remix: RemixResult; decision: "approve" | "reject" | null; decided: ApprovalDecision | null; stale: boolean }
 export interface RemixSummary {
   variant_id: string; attraction_id: string; attraction: string; name: string; status: RemixStatus; reasons: string[];
   agent_saving: number | null; agent_saving_inr: number | null; margin: number | null; promise: number | null; gap: number | null;

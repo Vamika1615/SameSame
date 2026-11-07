@@ -12,10 +12,12 @@ import SimulatorPage from "@/pages/SimulatorPage";
 import SuppliersPage from "@/pages/SuppliersPage";
 import LabelPage from "@/pages/LabelPage";
 import RemixStudioPage from "@/pages/RemixStudioPage";
+import GapsPage from "@/pages/GapsPage";
 import { Empty } from "@/components/States";
 
 const NAV = [
   { to: "/remix", label: "Remix Studio", icon: Sparkles },
+  { to: "/remix/gaps", label: "Gap Finder", icon: Ship },
   { to: "/sightseeing", label: "Sightseeing", icon: Ship },
   { to: "/hotels", label: "Hotels", icon: Building2 },
   { to: "/ops", label: "Ops Queue", icon: ClipboardCheck },
@@ -67,7 +69,7 @@ export default function App() {
           </NavLink>
           <nav className="flex h-full items-stretch gap-1">
             {NAV.map(({ to, label }) => (
-              <NavLink key={to} to={to}
+              <NavLink key={to} to={to} end={to === "/remix"}
                 className={({ isActive }) => `relative flex items-center px-4 text-[15px] font-semibold transition-colors ${isActive ? "text-accent-700" : "text-ink-mute hover:text-ink"}`}>
                 {({ isActive }) => (<>{label}{isActive && <span className="absolute inset-x-4 bottom-0 h-[3px] rounded-t-full bg-sun-500" />}</>)}
               </NavLink>
@@ -80,6 +82,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/remix" replace />} />
           <Route path="/remix" element={<RemixStudioPage />} />
+          <Route path="/remix/gaps" element={<GapsPage />} />
           <Route path="/hotels" element={<HotelsPage />} />
           <Route path="/hotels/:id" element={<HotelDetailPage />} />
           <Route path="/sightseeing" element={<SightseeingPage />} />

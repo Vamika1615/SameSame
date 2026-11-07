@@ -2,7 +2,29 @@
 
 _Update after every milestone. Newest first._
 
-## Status: Remix pivot, R3 done (branch `remix`)
+## Status: Remix pivot, R4 done (branch `remix`)
+
+### Done: R4, gap Remixes and the approvals queue (2026-11-07)
+- **Agent searches (synthetic, `data/search_log.py`):** 5,000 sightseeing searches over 90 days.
+  - Each search is an attraction (weighted by listing count), one of its ticket-level products, and a pickup wish: none 50%, shared 25%, private 25%.
+  - Drawn independently, so demand lands on combinations nobody packages. The gap finder sees only the events and the catalogue.
+- **Gap finder (`remix/gaps.py`):** a gap is a standalone ticket (DNA read from its text) plus a hotel pickup, where no packaged variant is SAME. It must have ≥ 10 searches in 90 days.
+  - **Decision:** with no package to beat, the baseline is what the agent does today. That is the best ticket-only package plus two transfers booked separately, at their True Price (the agent carries the risk), plus ₹500 friction per extra booking.
+  - Pricing and guardrails are the same as catalogue Remixes. (A first draft used a flat 10% margin; that priced most gaps just above doing it yourself, so it was dropped for consistency.)
+  - **Result:**
+
+| Gaps searched for | Pass every guardrail | Blocked | Can't be assembled |
+|---|---|---|---|
+| 78 | 18 | 38 | 22 |
+
+  - The most-searched publishable gap (demo, by rule) is the Dubai Dolphinarium standard seat with private pickup from Deira: 86 searches, the agent saves 4.9%, TBO keeps 5.2%. Burj Khalifa daytime with private pickup saves 7.7%.
+  - With no package to fall back on, a gap Remix whose part can't be secured is unwound and refunded.
+- **Approvals (`remix/approvals.py`, Ops → Remix approvals):**
+  - Every Remix that passes its guardrails (4 catalogue + 18 gap) waits for a person: recipe, suppliers, sell price, margin, saving, Promise, cancellation, and any unverified field to check. A / R keys work.
+  - The log is append-only and undo appends. Each decision snapshots what was approved; if a rebuild changes the recipe or numbers, the Remix returns to the queue.
+  - Remix Studio says "awaiting approval" or "published". The matcher's held-out metrics sit under the queue (beat 7).
+- **Tests: 69 passing** (+2: a gap Remix is something nobody sells, at the threshold, SAME; approve → published → undo; unknown id 404; a gap with no package unwinds to a refund).
+
 
 ### Done: R3, Remix Studio, Book Remix, rebrand (2026-11-07)
 - **Decision (yours):** build on the publishable winners.

@@ -82,3 +82,30 @@ def test_no_remix_number_is_typed_in():
         assert p["price"] == c["price"] * (1 if c["price_unit"] == "per vehicle" else 2)
     worse = E.remix(next(t for t in E.targets() if t["variant_id"] == r["variant_id"]), E.PESSIMISTIC)
     assert worse["tbo_cost"] > r["tbo_cost"]
+
+
+def test_gap_remixes_are_new_products_and_approvals_are_reversible():
+    from samesame.remix import approvals, gaps
+    rs_ = gaps.find(E.Settings())
+    ready = [r for r in rs_ if r["status"] == "ready"]
+    assert ready
+    for r in ready:
+        assert gaps.sold_as_package(r["attraction_id"], r["assembled_dna"]) is None, "a gap Remix must be something nobody sells"
+        assert r["demand"] >= gaps.GAP_MIN_DEMAND
+        diffs, _ = E.compare(r["target_dna"], r["assembled_dna"])
+        assert not diffs
+    vid = ready[0]["variant_id"]
+    q = client.get("/api/remix/approvals").json()["queue"]
+    assert any(i["variant_id"] == vid and i["decision"] is None for i in q)
+    a = client.post(f"/api/remix/approvals/{vid}", json={"decision": "approve"}).json()
+    assert vid in approvals.published()
+    client.post(f"/api/remix/approvals/undo/{a['audit_id']}")
+    assert vid not in approvals.published()
+    assert client.post("/api/remix/approvals/not-a-remix", json={"decision": "approve"}).status_code == 404
+
+
+def test_gap_booking_refunds_when_no_package_exists():
+    from samesame.remix import gaps
+    r = next(r for r in gaps.find(E.Settings()) if r["status"] == "ready")
+    outcomes = {rb.book(r, seed)["outcome"] for seed in range(1, 401)}
+    assert "compensated" not in outcomes          # nothing to fall back to: unwinding ends in a refund ("failed")

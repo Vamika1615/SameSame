@@ -9,7 +9,9 @@ from pydantic import BaseModel
 
 from samesame import city, config, images, placeholders, review, service, store
 from samesame.labelling.api import router as labelling_router
+from samesame.remix import approvals as remix_approvals
 from samesame.remix import book as remix_book
+from samesame.remix import gaps as remix_gaps
 from samesame.remix import service as remix
 from samesame.schemas import (ActivitySearch, BookResponse, BookStats, HotelDetail, HotelSearch, Meta, Mode, ReviewAck, ReviewItem,
                               ReviewLabel, SimParams, SimResult, SupplierRow)
@@ -69,6 +71,38 @@ def remix_overview(zone: str | None = None, agent_share: float | None = None, mi
     return remix.overview(_remix_settings(zone, agent_share, min_saving, min_margin, min_promise, buffer_min, preset))
 
 
+@app.get("/api/remix/gaps")
+def remix_gap_list():
+    rs = remix_gaps.find()
+    return {"counts": remix_gaps.summary_counts(), "demo": remix.demo_gap(), "items": rs}
+
+
+@app.get("/api/remix/approvals")
+def remix_approval_queue():
+    return {"queue": remix_approvals.queue(), "history": remix_approvals.history()}
+
+
+class ApprovalRequest(BaseModel):
+    decision: str
+    note: str = ""
+    approver: str = "product team"
+
+
+@app.post("/api/remix/approvals/undo/{audit_id}")
+def remix_approval_undo(audit_id: str):
+    return remix_approvals.undo(audit_id)
+
+
+@app.post("/api/remix/approvals/{variant_id}")
+def remix_approval_decide(variant_id: str, req: ApprovalRequest):
+    if req.decision not in ("approve", "reject"):
+        raise HTTPException(400, "decision must be approve or reject")
+    try:
+        return remix_approvals.decide(variant_id, req.decision, req.approver, req.note)
+    except KeyError:
+        raise HTTPException(404, f"{variant_id} is not a Remix awaiting approval")
+
+
 @app.get("/api/remix/{variant_id}")
 def remix_detail(variant_id: str, zone: str | None = None, agent_share: float | None = None, min_saving: float | None = None,
                  min_margin: float | None = None, min_promise: float | None = None, buffer_min: int | None = None, preset: str | None = None):
@@ -87,7 +121,7 @@ class RemixBookRequest(BaseModel):
 
 @app.post("/api/remix/book")
 def remix_book_route(req: RemixBookRequest):
-    r = remix.result(req.variant_id, remix.settings())
+    r = remix.result(req.variant_id, remix.settings()) or remix.gap(req.variant_id)
     if r is None or not r.get("parts"):
         raise HTTPException(404, f"no Remix for {req.variant_id}")
     return remix_book.book(r, req.seed)
@@ -96,8 +130,8 @@ def remix_book_route(req: RemixBookRequest):
 @app.get("/api/remix/book/stats")
 def remix_book_stats(variant_id: str, runs: int = 1000):
     r = remix.result(variant_id, remix.settings())
-    if r is None or not r.get("parts"):
-        raise HTTPException(404, f"no Remix for {variant_id}")
+    if r is None or not r.get("parts") or not r.get("packaged"):
+        raise HTTPException(404, f"no Remix with a package to compare for {variant_id}")
     return remix_book.stats(r, min(runs, 2000))
 
 
