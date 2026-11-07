@@ -109,3 +109,27 @@ def test_gap_booking_refunds_when_no_package_exists():
     r = next(r for r in gaps.find(E.Settings()) if r["status"] == "ready")
     outcomes = {rb.book(r, seed)["outcome"] for seed in range(1, 401)}
     assert "compensated" not in outcomes          # nothing to fall back to: unwinding ends in a refund ("failed")
+
+
+def test_connected_trip_is_one_product_with_honest_parts():
+    from samesame.remix import trip
+    t = trip.build(E.Settings())
+    assert t["promise"] == __import__("pytest").approx(t["hotel"]["p_secure"] * t["arrival"]["p_secure"] * t["departure"]["p_secure"]
+                                                       * t["activity"]["promise"], abs=1e-3)
+    s = t["separate"]
+    assert s["total"] == __import__("pytest").approx(s["hotel"] + s["cars"] + s["friction"] + s["activity"], abs=1)
+    assert t["hotel"]["offer"]["true_rank"] == 1
+    assert t["activity"]["status"] == "ready"
+    assert t["cancellation"]["strictest"] in [r["part"] for r in t["cancellation"]["rules"]]
+    assert (t["status"] == "ready") == (t["promise"] >= 0.95 and t["agent_saving"] >= 0.03 and t["margin"] >= 0.04)
+    assert trip.book(3) == trip.book(3)
+    looser = trip.build(E.Settings(min_promise=0.9))
+    assert looser["status"] == "ready" or looser["promise"] < 0.9
+
+
+def test_simulator_carries_the_remix_case_marked_simulated():
+    r = client.post("/api/sim", json={}).json()
+    assert r["remix"]["note"].startswith("SIMULATED")
+    assert 0 < r["remix"]["matched_share"] < 1 and r["remix"]["tbo_margin_per_1000_searches"] > 0
+    worse = client.post("/api/sim", json={"failure_scale": 1.5}).json()["remix"]
+    assert worse["pessimistic"] and worse["publishable_remixes"] <= r["remix"]["publishable_remixes"]

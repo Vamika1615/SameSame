@@ -6,7 +6,7 @@ export type EntityType = "hotel" | "room" | "activity";
 export interface Mode { llm: boolean; llm_model: string | null; data: "synthetic" | "mock" | "real" }
 export interface Meta {
   mode: Mode; city: string; currency: string; build: Record<string, unknown>;
-  demo: { book_offers?: string[]; book_seed?: number; book_seed_note?: string; remix_variant?: string; remix_seed?: number; remix_seed_note?: string; golden_hotel?: string };
+  demo: { book_offers?: string[]; book_seed?: number; book_seed_note?: string; remix_variant?: string; remix_seed?: number; remix_seed_note?: string; trip_seed?: number; golden_hotel?: string };
   sources: Record<string, string>;
 }
 export interface BookStats {
@@ -96,7 +96,9 @@ export interface ReviewAck { ok: boolean; audit_id: string; streak: number; mode
 
 export interface SimParams { sessions: number; price_sensitivity: number; dup_abandon: number; failure_scale: number; seed: number }
 export interface SimArm { arm: "today" | "samesame"; bookings_per_search: number; failed_at_booking: number; avg_true_cost: number }
-export interface SimResult { params: SimParams; arms: SimArm[]; lift_bookings_pct: number; failed_reduction_pct: number; note: string }
+export interface RemixCase { searches: number; matched_share: number; publishable_remixes: number; bookings_per_1000_searches: number;
+  tbo_margin_per_1000_searches: number; agent_saving_per_1000_searches: number; avg_margin_per_booking: number; pessimistic: boolean; note: string }
+export interface SimResult { params: SimParams; arms: SimArm[]; lift_bookings_pct: number; failed_reduction_pct: number; note: string; remix?: RemixCase | null }
 
 export interface SupplierRow {
   supplier_id: string; supplier: string; honour_rate_hotel: number; honour_rate_activity: number;
@@ -138,3 +140,13 @@ export interface RemixBooking { seed: number; variant_id: string; outcome: "clea
   legs: RemixLeg[]; tbo_paid: number; planned: number; extra_cost: number; summary: string;
   compensation: { steps: (BookingStep & { leg: string })[]; unwind_cost: number; fallback: { status: string; final_supplier: string | null; final_price: number | null } | null } | null }
 export interface RemixStats { runs: number; remix: Record<string, number>; package: Record<string, number>; remix_avg_paid: number; package_avg_paid: number }
+export interface ConnectedTrip {
+  hotel_id: string; zone: string; status: RemixStatus; reasons: string[]; settings: RemixSettings;
+  hotel: { name: string; offer: Offer; tbo_cost: number; p_secure: number; nights: number; checkin: string };
+  arrival: RemixPart & { true_price: number }; departure: RemixPart & { true_price: number }; activity: RemixResult;
+  tbo_cost: number; promise: number; sell: number; agent_true_price: TruePrice;
+  separate: { total: number; hotel: number; cars: number; friction: number; activity: number; activity_from: string };
+  gap: number; agent_saving: number; agent_saving_inr: number; margin: number; margin_inr: number;
+  cancellation: { rules: { part: string; rule: string }[]; strictest: string; summary: string };
+}
+export interface TripBooking { seed: number; outcome: string; summary: string; legs: { leg: string; label: string; status: string; outcome: string; summary: string; steps: BookingStep[] }[] }

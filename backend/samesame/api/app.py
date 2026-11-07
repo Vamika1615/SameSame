@@ -11,13 +11,25 @@ from samesame import city, config, images, placeholders, review, service, store
 from samesame.labelling.api import router as labelling_router
 from samesame.remix import approvals as remix_approvals
 from samesame.remix import book as remix_book
+from samesame.remix import business as remix_business
 from samesame.remix import gaps as remix_gaps
+from samesame.remix import trip as remix_trip
 from samesame.remix import service as remix
 from samesame.schemas import (ActivitySearch, BookResponse, BookStats, HotelDetail, HotelSearch, Meta, Mode, ReviewAck, ReviewItem,
                               ReviewLabel, SimParams, SimResult, SupplierRow)
 
 app = FastAPI(title="Remix", version="0.1.0")
 app.include_router(labelling_router)
+
+
+@app.on_event("startup")
+def _warm_remix():
+    """Compute the Remix catalogue, gaps and Connected Trip once at start, so no stage click waits on them."""
+    if store.ready():
+        remix.overview(remix.settings())
+        remix_gaps.find()
+        remix_trip.build()
+        remix_trip.demo_seed()
 
 
 @lru_cache
@@ -56,7 +68,7 @@ def meta():
                 sources=SOURCES,
                 demo={"book_offers": service.demo_basket(), "book_seed": service.DEMO_SEED, "golden_hotel": service.demo_hotel(),
                       "book_seed_note": "Seed 1 is the first seed tried; it happens to show a failover. Press Fresh seed for new draws, or Run 1,000× for the distribution.",
-                      "remix_variant": remix.demo_variant(), "remix_seed": remix.demo_seed(),
+                      "remix_variant": remix.demo_variant(), "remix_seed": remix.demo_seed(), "trip_seed": remix_trip.demo_seed(),
                       "remix_seed_note": f"Seed {remix.demo_seed()} is the first seed that shows a part failing over (chosen to show it). Press Fresh seed for new draws, or Run 1,000× for how often each outcome happens."})
 
 
@@ -69,6 +81,20 @@ def _remix_settings(zone=None, agent_share=None, min_saving=None, min_margin=Non
 def remix_overview(zone: str | None = None, agent_share: float | None = None, min_saving: float | None = None, min_margin: float | None = None,
                    min_promise: float | None = None, buffer_min: int | None = None, preset: str | None = None):
     return remix.overview(_remix_settings(zone, agent_share, min_saving, min_margin, min_promise, buffer_min, preset))
+
+
+@app.get("/api/trip")
+def connected_trip(min_promise: float | None = None):
+    return remix_trip.build(remix.settings(min_promise=min_promise))
+
+
+class TripBookRequest(BaseModel):
+    seed: int
+
+
+@app.post("/api/trip/book")
+def connected_trip_book(req: TripBookRequest):
+    return remix_trip.book(req.seed)
 
 
 @app.get("/api/remix/gaps")
@@ -211,7 +237,11 @@ def metrics():
 
 @app.post("/api/sim", response_model=SimResult)
 def sim(p: SimParams):
-    return placeholders.simulate(p)
+    res = placeholders.simulate(p)
+    arm = next(a for a in res.arms if a.arm == "samesame")
+    preset = "pessimistic" if p.failure_scale > 1.2 else None
+    res.remix = remix_business.case(arm.bookings_per_search, remix.settings(preset))
+    return res
 
 
 @app.get("/api/suppliers", response_model=list[SupplierRow])

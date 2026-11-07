@@ -8,6 +8,7 @@ import { usePresenterAction } from "@/lib/presenter";
 import { ErrorState, Loading } from "@/components/States";
 import { FlipBoard, Illustrative, PromiseMeter, Segmented, SupplierBadge, Tip, cn } from "@/components/ui";
 import { BookingPanel } from "@/components/BookingPanel";
+import { ConnectedTripCard } from "@/components/ConnectedTripCard";
 import { PageHeader } from "@/components/PageHeader";
 
 export default function HotelDetailPage() {
@@ -15,13 +16,14 @@ export default function HotelDetailPage() {
   const res = useApi<HotelDetail>(`/api/hotels/${id}`);
   if (res.status === "loading") return <Loading what="Building the golden record" />;
   if (res.status === "error") return <ErrorState error={res.error} onRetry={res.reload} />;
-  return <Detail d={res.data} />;
+  return <Detail d={res.data} demo={id === "demo"} />;
 }
 
-function Detail({ d }: { d: HotelDetail }) {
+function Detail({ d, demo }: { d: HotelDetail; demo: boolean }) {
   const [params, setParams] = useSearchParams();
   const tpOn = params.get("tp") === "1";
   const booking = params.get("book") === "1";
+  const trip = params.get("trip") === "1";
   const enrich = params.get("enrich") === "before" ? "before" : "after";
   const bookRef = useRef<HTMLDivElement>(null);
   const offersRef = useRef<HTMLElement>(null);
@@ -30,7 +32,7 @@ function Detail({ d }: { d: HotelDetail }) {
   useEffect(() => { if (booking) setTimeout(() => bookRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 450); }, [booking]);
   useEffect(() => { if (tpOn && !booking) offersRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }, [tpOn, booking]);
   // Beat 3: Space flips True Price. Beat 4's Space is handled by the booking panel.
-  usePresenterAction(useCallback(() => { if (!booking) set("tp", tpOn ? "0" : "1"); }, [booking, tpOn, set]));
+  usePresenterAction(useCallback(() => { if (!booking && !trip) set("tp", tpOn ? "0" : "1"); }, [booking, trip, tpOn, set]));
 
   const fact = (k: string) => d.facts.find((f) => f.key === k);
   const p = d.params;
@@ -49,6 +51,8 @@ function Detail({ d }: { d: HotelDetail }) {
             </div>
           )} />
       </div>
+
+      {trip && <ConnectedTripCard active={trip} />}
 
       <EnrichmentSection d={d} mode={enrich} onMode={(m) => set("enrich", m)} />
 
@@ -82,6 +86,7 @@ function Detail({ d }: { d: HotelDetail }) {
       <div ref={bookRef} className="scroll-mt-6">
         <BookingPanel offers={d.offers} active={booking} />
       </div>
+      {demo && !trip && <ConnectedTripCard active={false} />}
     </div>
   );
 }
@@ -249,7 +254,7 @@ function RoomsSection({ d }: { d: HotelDetail }) {
   return (
     <>
       <h2 className="text-[28px] font-semibold text-accent-700">Room types, mapped</h2>
-      <p className="mt-1 text-ink-mute">Every supplier names rooms differently. SameSame maps them to one canonical room.</p>
+      <p className="mt-1 text-ink-mute">Every supplier names rooms differently. Twin Finder maps them to one canonical room.</p>
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         {d.rooms.map((r) => (
           <div key={r.room_id} className="rounded-2xl border border-paper-line bg-paper shadow-card p-4">

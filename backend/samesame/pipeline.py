@@ -41,6 +41,8 @@ def main(skip_images: bool = False):
     meeting_points, parts = components.generate(attractions, variants, act_listings, act_truth, _rng("components"))
     searches = search_log.generate(variants, act_listings, act_truth, _rng("searches"))
     log = booking_log.generate(hotels, listings, truth, offers, attractions, act_listings, act_truth, _rng("log"), parts)
+    airport_mp, airport_parts = components.airport(_rng("airport"))      # after the log: adds no draws to it
+    meeting_points, parts = meeting_points + [airport_mp], parts + airport_parts
     imgs = [] if skip_images else images_gen.generate(hotels, listings, truth, attractions, act_listings, act_truth, hard, _rng("images"))
     data = dict(osm_reference=osm_base.reference(), base_hotels=hotels, osm_duplicates=dups, hard_negatives=hard, hotel_listings=listings, hotel_truth=truth,
                 rooms=rooms, supplier_rooms=sup_rooms, room_truth=room_truth, offers=offers, attractions=attractions, activity_variants=variants,
@@ -60,11 +62,13 @@ def main(skip_images: bool = False):
                 con.execute(f"CREATE VIEW {name} AS SELECT * FROM read_parquet('{(config.BUILD / f'{name}.parquet').as_posix()}')")
     from samesame.matching import run as matcher
     matcher.main()
-    from samesame.eval import report
-    report.main()
     counts = {k: len(v) for k, v in data.items()}
     manifest = {"built_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "seed": config.SEED, "stages": ["m0", "m2", "m3", "m4", "r1"],
-                "counts": counts, "seconds": round(time.time() - t0, 1)}
+                "counts": counts, "seconds": None}
+    (config.BUILD / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")   # the report reads the app's store
+    from samesame.eval import report
+    report.main()
+    manifest["seconds"] = round(time.time() - t0, 1)
     (config.BUILD / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     print("pipeline:", json.dumps(counts), f"in {manifest['seconds']}s")
 

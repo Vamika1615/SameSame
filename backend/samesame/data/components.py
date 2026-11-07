@@ -203,3 +203,31 @@ def generate(attractions: list[dict], variants: list[dict], listings: list[dict]
                                            "resale_terms": "Bundleable" if ok else "Package only: not for resale in bundles", "source_variant": None})
     meeting_points = [by_id[m] for m in used]
     return meeting_points, components
+
+
+def airport(rng: np.random.Generator) -> tuple[dict, list[dict]]:
+    """Airport transfers for Connected Trips: DXB <-> every hotel zone, private (per vehicle) and shared (hourly).
+    Generated in their own pipeline stage after the booking log, so adding them doesn't move any earlier draw;
+    their reliability comes from each supplier's fitted 'transfer' Promise (per supplier, not per route)."""
+    name, lat, lng = city.AIRPORT_POINT
+    mp = {"meeting_point_id": "mp-dxb", "name": name, "lat": lat, "lng": lng, "attraction_id": None, "shared": True}
+    out = []
+    for zid, zname, zlat, zlng in city.ZONES:
+        if zid == city.AIRPORT_ZONE:
+            continue
+        km = road_km(zlat, zlng, lat, lng)
+        drive = drive_min(km)
+        for direction in ("from", "to"):
+            route = f"DXB airport → {zname} hotels" if direction == "from" else f"{zname} hotels → DXB airport"
+            for sup in _pick_suppliers(rng, TRANSFER_SHARE, 2, 3):
+                for vname, seats, vmult in VEHICLES:
+                    ok = _bundleable(rng, sup)
+                    out.append({"component_id": _new_id(f"{sup}:X", f"mp-dxb|{zid}|{direction}|private|{vname}|{sup}"), "supplier_id": sup,
+                                "role": "transfer", "attraction_id": None, "meeting_point_id": "mp-dxb",
+                                "title": f"Private airport transfer, {route} ({vname}, up to {seats})", "description": "",
+                                "price": round((PRIVATE_BASE + PRIVATE_KM * km) * vmult * TRANSFER_NET[sup] * float(np.exp(rng.normal(0, 0.06))), -1),
+                                "price_unit": "per vehicle", "max_pax": seats, "mode": "private", "vehicle": vname, "zone_id": zid,
+                                "direction": direction, "slots": [], "hours": None, "travel_min": drive,
+                                "cancel": "Non-refundable" if rng.random() < NRF_TRANSFER.get(sup, 0.05) else "Free until 24 h", "bundleable": ok,
+                                "resale_terms": "Bundleable" if ok else "Package only: not for resale in bundles", "source_variant": None})
+    return mp, out

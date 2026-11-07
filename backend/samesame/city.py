@@ -72,3 +72,4 @@ MEETING_POINTS = {"burj-khalifa": ("Dubai Mall, At the Top entrance", 25.1975, 5
                   "desert-safari": ("Lahbab desert camp meeting point", 24.8300, 55.6200),
                   "dubai-fountain": ("Dubai Mall, Fountain boardwalk", 25.1959, 55.2758)}
 COACH_BAY = ("Dubai Mall coach bay", 25.1990, 55.2790)   # where "meet at Dubai Mall" day trips leave from
+AIRPORT_POINT = ("DXB Terminal 3 arrivals", 25.2490, 55.3530)

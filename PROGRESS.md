@@ -2,7 +2,52 @@
 
 _Update after every milestone. Newest first._
 
-## Status: Remix pivot, R4 done (branch `remix`)
+## Status: Remix pivot, R1–R5 done (branch `remix`, not merged)
+
+### Done: R5, Connected Trip, metrics, simulator, docs (2026-11-07)
+- **Connected Trip (`remix/trip.py`; hotel page, key 6):** the golden-case hotel's #1 True Price offer + private DXB cars both ways + the best sightseeing Remix from that zone, as one product with one price, one Promise and one cancellation rule.
+  - Airport cars are generated in their own pipeline stage after the booking log, so no earlier draw moves. They use each supplier's fitted transfer Promise.
+  - **Result: blocked.** The agent would save 8.3% (₹7,798) and TBO keep 9.1%, but four independent parts multiply to a 92.9% Promise, under the 95% floor. The UI says so and has a Promise slider. I didn't swap the activity or loosen the guardrail to make it pass.
+  - A first version picked airport cars on cost alone and gave them no twins (87.1%). It was aligned with the activity engine (smallest fitting car per supplier as twins; cheapest that clears the floor).
+- **METRICS.md → Remix section**, rebuilt every build:
+  - coverage funnel and per-Remix saving / margin / Promise
+  - sandbox seeds 1–1,000, Remix vs package
+  - every product where the package wins, and every product that is cheaper but blocked
+  - why the others can't be assembled
+  - pessimistic preset, per-zone counts, gap Remixes, Connected Trip
+  - the estimated-vs-sandbox Promise gap (sandbox 1–3 points lower; disclosed as making the estimate optimistic)
+- **Simulator:** a Remix business case per 1,000 sightseeing searches, labelled SIMULATED. Searches are matched to publishable Remixes, using computed margins and savings and the simulator's conversion rate.
+- **Rebrand:** remaining "SameSame" labels in the UI now say Twin Finder / With Remix. The page title is "Remix · TBO".
+- **Docs:** README (headline, how it works, Mermaid diagram, provenance), DEMO.md (8 beats, 3 presenters, computed numbers, fallbacks), QA.md (new; Remix answers plus the matching/pricing answers that still apply).
+- **Tests: 71 passing.** All 48 pre-pivot tests still pass; none was obsolete.
+- **Server:** warms the Remix catalogue, gaps and trip at start-up, so no stage click waits (first gap list was 2 s).
+
+### Remix numbers right now (Deira, 2 adults, 21 days out, default guardrails)
+| Thing | Value |
+|---|---|
+| Multi-part packages → SAME Remix exists → cheaper → publishable | 30 → 17 → 10 → **4** |
+| Publishable | Helicopter + private pickup (agent −11.9%, TBO 13.5%); Ski Dubai + lunch (7.2%, 7.8%); IMG Worlds + lunch (4.7%, 4.9%); Old Dubai food tour + private pickup (4.0%, 4.1%) |
+| Package cheaper | 7, e.g. morning desert safari by ₹4,006, private desert safari by ₹3,178, dhow cruise with transfer by ₹371 |
+| Demo Remix (rule: largest rupee saving) | Helicopter: package ₹65,940 (True Price ₹67,341) → Remix sells ₹59,076 (agent True Price ₹59,329); TBO keeps ₹7,977 |
+| Book Remix, seed 22 (first seed with a failover) | Transfer out via Mynah failed → SAME transfer via Heron; whole trip confirmed |
+| Sandbox, seeds 1–1,000 (helicopter) | secured 93.0% vs 95.7% estimated; 6.8% unwound and package bought |
+| Gap Remixes | 78 searched-for, 18 publishable; demo: Dolphinarium + private pickup, 86 searches, agent −4.9%, TBO 5.2% |
+| Connected Trip | blocked: Trip Promise 92.9% (< 95%); would save the agent 8.3% |
+| Pessimistic preset | 2 publishable (helicopter, IMG Worlds) |
+| Simulated business case | 18.1% of sightseeing searches hit a publishable Remix; ≈ ₹52,000 TBO margin per 1,000 searches (≈ ₹29,000 pessimistic) |
+
+### Decisions taken without asking (Remix)
+1. A Remix needs ≥ 2 parts; single-part products are Twin Finder's job.
+2. SAME rule: strict fields equal, every field the package states equal; package-silent fields go to the approver.
+3. Duration is descriptive (as in Variant DNA). The Remix shows door-to-door time instead.
+4. Parts carry structured terms, but their text is read by the same Variant DNA extractor as packages.
+5. TBO carries the price-change and failover risk. The agent's True Price is the sell price plus cancellation risk under the strictest part's rule.
+6. Defaults, fixed before results: agent share 50%; saving ≥ 3%; margin ≥ 4%; Promise ≥ 95%; buffer 20 min; max wait 90 min.
+7. Gaps are priced against booking the pieces separately, with the same rule and guardrails. Friction is ₹500 per extra booking.
+8. The demo products and seeds are chosen by rule and disclosed on screen.
+9. Changed after seeing results, and disclosed: booking-log part attempts are sampled by role, not SKU; the private-safari VARIANT leak was closed.
+10. The `remix` branch is not merged into `main`; the user decides.
+
 
 ### Done: R4, gap Remixes and the approvals queue (2026-11-07)
 - **Agent searches (synthetic, `data/search_log.py`):** 5,000 sightseeing searches over 90 days.

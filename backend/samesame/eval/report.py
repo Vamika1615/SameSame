@@ -106,7 +106,7 @@ def compute() -> dict:
                "validation": {"precision_at_auto": m["val_precision_at_auto"], "recall_at_auto": m["val_recall_at_auto"],
                               "n_val": m["n_val"], "scoring": m.get("scoring", "")}}
     return {"generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "hotels": hotels, "hard_negatives": hard, "rooms": rooms,
-            "activities": acts, "routing": routing, "blind": blind_metrics(cl, rm, am), "promise": promise_metrics(), "matcher": {k: m[k] for k in (
+            "activities": acts, "routing": routing, "blind": blind_metrics(cl, rm, am), "promise": promise_metrics(), "remix": remix_metrics(), "matcher": {k: m[k] for k in (
                 "n_train", "train_pos", "excluded_holdout", "embeddings", "importance", "seconds")}}
 
 
@@ -199,6 +199,61 @@ def promise_metrics() -> dict:
             "fit": {p: {k: v[k] for k in ("k_supplier", "k_cell", "k_cell_at_grid_edge")} for p, v in info["products"].items()}}
 
 
+def remix_metrics() -> dict:
+    """Remix, recomputed from the engines on every build (no number typed in)."""
+    from samesame import city
+    from samesame.remix import book as rb
+    from samesame.remix import engine as E
+    from samesame.remix import gaps, trip
+    from samesame.remix import service as rs
+
+    def counts(results):
+        multi = [r for r in results if r["status"] != "single_part" and not (r["status"] == "not_remixable" and "review" in r["reasons"][0])]
+        return {"multi_part": len(multi), "remix_exists": sum(bool(r.get("parts")) for r in multi),
+                "cheaper": sum((r.get("gap") or 0) > 0 for r in multi), "ready": sum(r["status"] == "ready" for r in multi),
+                "package_wins": sum(r.get("gap") is not None and r["gap"] <= 0 for r in multi)}, multi
+
+    base, multi = counts(rs.all_results(E.Settings()))
+    ready = [r for r in multi if r["status"] == "ready"]
+    built = [r for r in multi if r.get("parts")]
+    sandbox = []
+    for r in ready:
+        st = rb.stats(r, 1000)
+        secured = 1 - (st["remix"]["compensated"] + st["remix"]["failed"]) / st["runs"]
+        sandbox.append({"variant_id": r["variant_id"], "name": f"{r['attraction'].split(':')[0]} · {r['name']}", "estimated_promise": r["promise"],
+                        "sandbox_secured": round(secured, 4), **{f"remix_{k}": v for k, v in st["remix"].items()},
+                        **{f"package_{k}": v for k, v in st["package"].items()}})
+    no_build: dict = {}
+    for r in multi:
+        if not r.get("parts"):
+            no_build[r["reasons"][0]] = no_build.get(r["reasons"][0], 0) + 1
+    pess, _ = counts(rs.all_results(E.PESSIMISTIC))
+    pess_ready = [r["variant_id"] for r in rs.all_results(E.PESSIMISTIC) if r["status"] == "ready"]
+    zones = {z: counts(rs.all_results(E.with_zone(E.Settings(), z)))[0] for z, *_ in city.ZONES}
+    g = gaps.find(E.Settings())
+    t = trip.build(E.Settings())
+    sv = [r["agent_saving"] for r in ready]
+    mg = [r["margin"] for r in ready]
+    pr = sorted(r["promise"] for r in built)
+    return {"counts": base, "ready": [{"variant_id": r["variant_id"], "name": f"{r['attraction'].split(':')[0]} · {r['name']}", "saving": r["agent_saving"],
+                                      "saving_inr": r["agent_saving_inr"], "margin": r["margin"], "margin_inr": r["margin_inr"], "promise": r["promise"],
+                                      "suppliers": r["suppliers"]} for r in ready],
+            "saving": {"avg": round(sum(sv) / len(sv), 4) if sv else None, "min": min(sv, default=None), "max": max(sv, default=None)},
+            "margin": {"avg": round(sum(mg) / len(mg), 4) if mg else None, "min": min(mg, default=None), "max": max(mg, default=None)},
+            "promise": {"min": pr[0] if pr else None, "median": pr[len(pr) // 2] if pr else None, "max": pr[-1] if pr else None, "n": len(pr)},
+            "sandbox": sandbox,
+            "package_wins": [{"name": f"{r['attraction'].split(':')[0]} · {r['name']}", "by": round(-r["gap"], 0), "reasons": r["reasons"]}
+                             for r in multi if r.get("gap") is not None and r["gap"] <= 0],
+            "blocked_cheaper": [{"name": f"{r['attraction'].split(':')[0]} · {r['name']}", "reasons": r["reasons"]}
+                                for r in multi if r["status"] == "blocked" and (r.get("gap") or 0) > 0],
+            "no_assembly": no_build, "pessimistic": {**pess, "ready_ids": pess_ready}, "zones": zones,
+            "gaps": {"searched": len(g), "ready": sum(r["status"] == "ready" for r in g), "blocked": sum(r["status"] == "blocked" for r in g),
+                     "top": [{"name": f"{r['attraction'].split(':')[0]} · {r['name']}", "demand": r["demand"], "saving": r["agent_saving"], "margin": r["margin"]}
+                             for r in g if r["status"] == "ready"][:6]},
+            "trip": {"status": t["status"], "reasons": t["reasons"], "saving": t.get("agent_saving"), "margin": t.get("margin"), "promise": t.get("promise")},
+            "settings": {k: v for k, v in E.Settings().__dict__.items()}}
+
+
 def render(r: dict) -> str:
     h, rm, a, rt, b, hn, pr = r["hotels"], r["rooms"], r["activities"], r["routing"], r["blind"], r["hard_negatives"], r["promise"]
     lines = [
@@ -279,6 +334,7 @@ def render(r: dict) -> str:
         "- The log comes from our own behaviour model, so this checks that the estimator recovers it from noisy, time-ordered data, "
         "not that real suppliers behave this way.",
         "",
+        *_render_remix(r["remix"]),
         "## Caveats (read before quoting any number above)",
         "",
         "- **We wrote both the generator and the matcher.** Feature design, the room parser and the Variant DNA rules were written knowing how the "
@@ -298,6 +354,48 @@ def main():
     b = r["blind"]["by_type"]
     print("eval:", json.dumps({k: (v["vs_generator"]["precision"], v["vs_generator"]["recall"]) for k, v in b.items()}),
           "hotels all", (r["hotels"]["all"]["precision"], r["hotels"]["all"]["recall"]))
+
+
+def _render_remix(x: dict) -> list[str]:
+    c, st = x["counts"], x["settings"]
+    pct = lambda v: "—" if v is None else f"{v:.1%}"  # noqa: E731
+    out = ["## Remix (sightseeing, client in Deira, 2 adults, 21 days out)", "",
+           f"Guardrails: agent saves ≥ {st['min_saving']:.0%}, TBO margin ≥ {st['min_margin']:.0%}, Remix Promise ≥ {st['min_promise']:.0%}, "
+           f"arrive ≥ {st['buffer_min']} min before the slot; the agent gets {st['agent_share']:.0%} of the gap. Reproduce: `python -m samesame.pipeline` "
+           "(or `python -m samesame.eval.report` on an existing build). Parts and their prices are synthetic (DATA.md).", "",
+           "| Multi-part packages | SAME Remix exists | Cheaper on True Price | Passes every guardrail | Package cheaper |", "|---|---|---|---|---|",
+           f"| {c['multi_part']} | {c['remix_exists']} ({c['remix_exists'] / c['multi_part']:.0%}) | {c['cheaper']} | **{c['ready']} ({c['ready'] / c['multi_part']:.0%})** | {c['package_wins']} |", "",
+           "| Publishable Remix | Agent saves | TBO margin | Remix Promise (est.) | Secured in sandbox, seeds 1–1,000 | Suppliers |", "|---|---|---|---|---|---|"]
+    sb = {s["variant_id"]: s for s in x["sandbox"]}
+    for r in x["ready"]:
+        out.append(f"| {r['name']} | ₹{r['saving_inr']:,.0f} ({r['saving']:.1%}) | ₹{r['margin_inr']:,.0f} ({r['margin']:.1%}) | {r['promise']:.1%} | "
+                   f"{sb[r['variant_id']]['sandbox_secured']:.1%} | {', '.join(r['suppliers'])} |")
+    out += ["", f"- Saving to the agent: avg {pct(x['saving']['avg'])}, range {pct(x['saving']['min'])}–{pct(x['saving']['max'])}. "
+            f"TBO margin: avg {pct(x['margin']['avg'])}, range {pct(x['margin']['min'])}–{pct(x['margin']['max'])}.",
+            f"- Remix Promise across all {x['promise']['n']} buildable Remixes: min {pct(x['promise']['min'])}, median {pct(x['promise']['median'])}, max {pct(x['promise']['max'])}.",
+            "- **Estimated vs sandbox:** the sandbox secures fewer Remixes than the estimated Remix Promise (see the table). The estimate uses "
+            "each supplier's fitted Promise and assumes parts fail independently; the sandbox draws from the world, where each attraction has "
+            "its own demand volatility. We have not separated how much of the gap each explains, so read the Remix Promise as optimistic by "
+            "about that much.", "",
+            "Sandbox outcomes over seeds 1–1,000 (same draws), Remix vs its best package:", "",
+            "| Product | Arm | Clean | Paid a rise | Part / offer failover | Unwound, package bought | Failed |", "|---|---|---|---|---|---|---|"]
+    for s in x["sandbox"]:
+        out.append(f"| {s['name']} | Remix | {s['remix_clean'] / 10:.1f}% | {s['remix_paid_rise'] / 10:.1f}% | {s['remix_failover'] / 10:.1f}% | {s['remix_compensated'] / 10:.1f}% | {s['remix_failed'] / 10:.1f}% |")
+        out.append(f"| | Package | {s['package_clean'] / 10:.1f}% | {s['package_paid_rise'] / 10:.1f}% | {s['package_failover'] / 10:.1f}% | — | {s['package_failed'] / 10:.1f}% |")
+    out += ["", "**Where the package beats the Remix** (a strength to show: Remix never pretends):", ""]
+    out += [f"- {p['name']}: package cheaper by ₹{p['by']:,.0f} on True Price" for p in x["package_wins"]]
+    out += ["", "**Cheaper, but blocked by a guardrail:**", ""] + [f"- {b['name']}: {'; '.join(b['reasons'])}" for b in x["blocked_cheaper"]]
+    out += ["", "**No valid assembly (first reason):** " + "; ".join(f"{k} ({v})" for k, v in sorted(x["no_assembly"].items(), key=lambda kv: -kv[1])), "",
+            f"**Pessimistic preset** (transfers +30%, part failures ×1.5): {x['pessimistic']['ready']} of {x['pessimistic']['multi_part']} pass "
+            f"({', '.join(x['pessimistic']['ready_ids']) or 'none'}).", "",
+            "**By client zone** (passes every guardrail): " + ", ".join(f"{z} {v['ready']}" for z, v in x["zones"].items()) + ".", "",
+            f"**Gap Remixes** (agents search for it, nobody sells it): {x['gaps']['searched']} searched-for gaps (≥ 10 searches in 90 days), "
+            f"{x['gaps']['ready']} pass every guardrail against booking the pieces separately, {x['gaps']['blocked']} blocked. Most searched:", ""]
+    out += [f"- {g['name']}: {g['demand']} searches, agent saves {g['saving']:.1%}, TBO margin {g['margin']:.1%}" for g in x["gaps"]["top"]]
+    t = x["trip"]
+    out += ["", f"**Connected Trip** (golden-case hotel + DXB cars + best tour Remix): {t['status']}; "
+            f"agent saves {pct(t['saving'])}, TBO margin {pct(t['margin'])}, Trip Promise {pct(t['promise'])}. {'; '.join(t['reasons'])}.", ""]
+    return out
 
 
 if __name__ == "__main__":
