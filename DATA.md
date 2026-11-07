@@ -92,7 +92,7 @@ Four more are a short list in `city.py`, checked by hand. Each pair was mapped t
   - Road km = straight line × 1.35. Speed: 25 km/h for the first 15 km, 65 km/h after.
   - Shared coaches run a fixed timetable and spend 30 min collecting.
 - **Resale terms:** 35% of Kestrel's rates and 10% of others are package-only. 30% of Kestrel's private transfers and 5% of others are non-refundable.
-- **Booking log:** +6,000 part attempts from new `ticket` and `transfer` behaviour profiles in `world.py`.
+- **Booking log:** +6,000 part attempts from new `ticket` and `transfer` behaviour profiles in `world.py`, half tickets and half transfers. This was changed after the first gate: per-SKU sampling starved tickets of history (see PROGRESS).
 - These parameters were set before any Remix result was computed.
 
 ## Held-out partition

@@ -1,21 +1,22 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { DEFAULT_QUERY } from "@/lib/city";
 
-/** The seven demo beats. Keys 1-7 jump straight to each with its state in the URL;
+/** The eight demo beats. Keys 1-8 jump straight to each with its state in the URL;
  *  ←/→ step; Space fires the beat's primary action; "." toggles the step indicator. */
+const BURJ = encodeURIComponent("burj khalifa");
 export const BEATS = [
-  { key: 1, path: "/hotels?view=today", title: "Today: duplicates everywhere", action: "Space → SameSame", owner: "C" },
-  { key: 2, path: "/hotels?view=samesame&focus=lookalike", title: "Stacks + look-alike trap", action: "Space → back to Today", owner: "A" },
-  { key: 3, path: "/hotels/demo?tp=0", title: "Offers + True Price flip", action: "Space → flip True Price", owner: "B" },
-  { key: 4, path: "/hotels/demo?tp=1&book=1", title: "Book both + failover", action: "Space → Book both", owner: "B" },
-  { key: 5, path: `/sightseeing?q=${encodeURIComponent(DEFAULT_QUERY)}&view=today`, title: "Sightseeing Variant DNA", action: "Space → group variants", owner: "A" },
-  { key: 6, path: "/ops", title: "Ops queue: the catch", action: "S / V / D to label", owner: "A" },
-  { key: 7, path: "/simulator", title: "Simulator + metrics", action: "Space → pessimistic preset", owner: "C" },
+  { key: 1, path: `/sightseeing?q=${BURJ}&view=today`, title: "The problem: one experience, many packages", action: "Space → Variant DNA", owner: "A" },
+  { key: 2, path: "/remix", title: "Remix Studio: package vs Remix", action: "Space → show the arithmetic", owner: "B" },
+  { key: 3, path: "/remix?tp=1", title: "True Price proof + TBO margin", action: "Space → hide arithmetic", owner: "B" },
+  { key: 4, path: "/remix?book=1", title: "Book Remix live: a part fails over", action: "Space → Book Remix", owner: "B" },
+  { key: 5, path: "/remix/gaps", title: "Gap Remix: nobody sells this", action: "Space → next gap", owner: "C" },
+  { key: 6, path: "/hotels/demo?trip=1", title: "Connected Trip: hotel + transfer + tour", action: "Space → book the trip", owner: "C" },
+  { key: 7, path: "/ops?tab=remix", title: "Trust: approvals + held-out metrics", action: "A / R to approve or reject", owner: "A" },
+  { key: 8, path: "/simulator", title: "Business case", action: "Space → pessimistic preset", owner: "C" },
 ] as const;
 
-const ACTION = "samesame:presenter-action";
+const ACTION = "remix:presenter-action";
 
 /** Pages subscribe to Space presses for their beat's primary action. */
 export function usePresenterAction(fn: () => void) {
@@ -63,7 +64,7 @@ export function Presenter() {
           <div className="flex gap-1">
             {BEATS.map((b) => <span key={b.key} className={`h-1.5 w-5 rounded-full ${beat?.key === b.key ? "bg-accent-500" : "bg-white/25"}`} />)}
           </div>
-          <div className="mt-1.5 font-semibold">{beat ? `${beat.key}/7 · ${beat.title} · ${beat.owner}` : "off-script"}</div>
+          <div className="mt-1.5 font-semibold">{beat ? `${beat.key}/${BEATS.length} · ${beat.title} · ${beat.owner}` : "off-script"}</div>
           {beat && <div className="text-white/70">{beat.action}</div>}
         </motion.div>
       )}

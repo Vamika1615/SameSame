@@ -9,10 +9,12 @@ from pydantic import BaseModel
 
 from samesame import city, config, images, placeholders, review, service, store
 from samesame.labelling.api import router as labelling_router
+from samesame.remix import book as remix_book
+from samesame.remix import service as remix
 from samesame.schemas import (ActivitySearch, BookResponse, BookStats, HotelDetail, HotelSearch, Meta, Mode, ReviewAck, ReviewItem,
                               ReviewLabel, SimParams, SimResult, SupplierRow)
 
-app = FastAPI(title="SameSame", version="0.0.1")
+app = FastAPI(title="Remix", version="0.1.0")
 app.include_router(labelling_router)
 
 
@@ -37,7 +39,8 @@ def _osm_hotels() -> list[dict]:
 DATA_SOURCE = "synthetic"
 SOURCES = {"hotels": "6 synthetic supplier feeds over 300 real OSM hotels",
            "clusters": store.CLUSTER_SOURCE,
-           "promise": "estimated from the 24,000-attempt booking log",
+           "promise": "fitted on the 30,000-attempt booking log (hotels, tours, tickets, transfers)",
+           "remix_parts": "synthetic tickets, lunch vouchers and zone transfers; prices from disclosed tariffs (DATA.md)",
            "review_queue": "the matcher's gray-zone and blocked pairs",
            "metrics": "rebuilt every build: METRICS.md",
            "simulator": "closed-form mock until M5"}
@@ -50,7 +53,52 @@ def meta():
     return Meta(mode=Mode(**{**config.mode(), "data": DATA_SOURCE}), city=config.CITY, currency=config.CURRENCY, build=build,
                 sources=SOURCES,
                 demo={"book_offers": service.demo_basket(), "book_seed": service.DEMO_SEED, "golden_hotel": service.demo_hotel(),
-                      "book_seed_note": "Seed 1 is the first seed tried; it happens to show a failover. Press Fresh seed for new draws, or Run 1,000× for the distribution."})
+                      "book_seed_note": "Seed 1 is the first seed tried; it happens to show a failover. Press Fresh seed for new draws, or Run 1,000× for the distribution.",
+                      "remix_variant": remix.demo_variant(), "remix_seed": remix.demo_seed(),
+                      "remix_seed_note": f"Seed {remix.demo_seed()} is the first seed that shows a part failing over (chosen to show it). Press Fresh seed for new draws, or Run 1,000× for how often each outcome happens."})
+
+
+def _remix_settings(zone=None, agent_share=None, min_saving=None, min_margin=None, min_promise=None, buffer_min=None, preset=None):
+    return remix.settings(preset, zone=zone, agent_share=agent_share, min_saving=min_saving, min_margin=min_margin,
+                          min_promise=min_promise, buffer_min=buffer_min)
+
+
+@app.get("/api/remix")
+def remix_overview(zone: str | None = None, agent_share: float | None = None, min_saving: float | None = None, min_margin: float | None = None,
+                   min_promise: float | None = None, buffer_min: int | None = None, preset: str | None = None):
+    return remix.overview(_remix_settings(zone, agent_share, min_saving, min_margin, min_promise, buffer_min, preset))
+
+
+@app.get("/api/remix/{variant_id}")
+def remix_detail(variant_id: str, zone: str | None = None, agent_share: float | None = None, min_saving: float | None = None,
+                 min_margin: float | None = None, min_promise: float | None = None, buffer_min: int | None = None, preset: str | None = None):
+    if variant_id == "demo":
+        variant_id = remix.demo_variant()
+    r = remix.result(variant_id, _remix_settings(zone, agent_share, min_saving, min_margin, min_promise, buffer_min, preset))
+    if r is None:
+        raise HTTPException(404, f"no packaged product {variant_id}")
+    return r
+
+
+class RemixBookRequest(BaseModel):
+    variant_id: str
+    seed: int
+
+
+@app.post("/api/remix/book")
+def remix_book_route(req: RemixBookRequest):
+    r = remix.result(req.variant_id, remix.settings())
+    if r is None or not r.get("parts"):
+        raise HTTPException(404, f"no Remix for {req.variant_id}")
+    return remix_book.book(r, req.seed)
+
+
+@app.get("/api/remix/book/stats")
+def remix_book_stats(variant_id: str, runs: int = 1000):
+    r = remix.result(variant_id, remix.settings())
+    if r is None or not r.get("parts"):
+        raise HTTPException(404, f"no Remix for {variant_id}")
+    return remix_book.stats(r, min(runs, 2000))
 
 
 @app.get("/api/hotels/search", response_model=HotelSearch)

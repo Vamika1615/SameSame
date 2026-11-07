@@ -41,13 +41,13 @@ We call this set **held-out**, not blind: the model never trained on these famil
 
 ## Promise model (booking reliability)
 
-Fitted on the booking log up to 30 days before its end, scored on the last 30 days (5,006 attempts). Log loss per attempt over the four outcomes (confirmed / price changed / sold out / error); lower is better.
+Fitted on the booking log up to 30 days before its end, scored on the last 30 days (4,988 attempts). Log loss per attempt over the four outcomes (confirmed / price changed / sold out / error); lower is better.
 
 | Training data | Attempts | Fitted model | Each cell's own counts | One market rate |
 |---|---|---|---|---|
-| 100% of window | 24,994 | **0.4482** | 0.4513 | 0.4913 |
-| 10% of window | 2,499 | **0.4631** | 0.4814 | 0.4924 |
-| 2% of window | 499 | **0.506** | 0.6072 | 0.5069 |
+| 100% of window | 25,012 | **0.4512** | 0.4537 | 0.4965 |
+| 10% of window | 2,501 | **0.4692** | 0.4898 | 0.4988 |
+| 2% of window | 500 | **0.5049** | 0.6242 | 0.5097 |
 
 Hotel honour rate, predicted for the test window's own mix of lead times vs what happened:
 
@@ -60,7 +60,7 @@ Hotel honour rate, predicted for the test window's own mix of lead times vs what
 | mynah | 586 | 96.0% | 96.8% |
 | sunbird | 344 | 84.8% | 86.1% |
 
-- Fitted concentrations (empirical Bayes): activity: supplier prior 54.8, cell prior at the search grid's edge (100,000); hotel: supplier prior 39.3, cell prior at the search grid's edge (100,000); ticket: supplier prior 20.2, cell prior at the search grid's edge (100,000); transfer: supplier prior 90.5, cell prior at the search grid's edge (100,000). A large cell prior means lead-time effects look the same for every supplier, so cells borrow heavily from their supplier (capped at the bookings that prior was estimated from).
+- Fitted concentrations (empirical Bayes): activity: supplier prior 54.8, cell prior at the search grid's edge (100,000); hotel: supplier prior 39.3, cell prior at the search grid's edge (100,000); ticket: supplier prior 106.9, cell prior at the search grid's edge (100,000); transfer: supplier prior 90.5, cell prior at the search grid's edge (100,000). A large cell prior means lead-time effects look the same for every supplier, so cells borrow heavily from their supplier (capped at the bookings that prior was estimated from).
 - The log comes from our own behaviour model, so this checks that the estimator recovers it from noisy, time-ordered data, not that real suppliers behave this way.
 
 ## Caveats (read before quoting any number above)

@@ -2,7 +2,38 @@
 
 _Update after every milestone. Newest first._
 
-## Status: Remix pivot, R1 + R2 done, stopped at the R2 gate (branch `remix`)
+## Status: Remix pivot, R3 done (branch `remix`)
+
+### Done: R3, Remix Studio, Book Remix, rebrand (2026-11-07)
+- **Decision (yours):** build on the publishable winners.
+- **Chrome is now "Remix"**, with the tagline in the footer and logo tooltip. The `samesame` package name stays.
+- **Remix Studio** (`/remix`):
+  - a funnel: multi-part → SAME Remix exists → cheaper → passes guardrails
+  - a product picker, with "package wins" and "blocked" shown, not hidden
+  - the packaged version (DNA, best package on True Price) next to the TBO Remix card: recipe with supplier, price, twins and per-part Promise gauge; a pickup → slot → return timeline; a SAME check per DNA field
+  - the True Price proof (bars plus the full arithmetic) and the publish guardrails as live sliders (zone, agent share, saving, margin, Promise, buffer, pessimistic preset)
+- **Book Remix:** riskiest part first, per-part failover to SAME twins, compensation (unwind, then buy the package), and seeds 1–1,000 compared against the best package. The demo product is chosen by rule (largest rupee saving among publishable Remixes): the helicopter tour with private pickup. The demo seed is the first that shows a part failing over (seed 22), disclosed on screen.
+- **The Sightseeing ranking** shows a TBO Remix card above the packages when that attraction has a publishable Remix.
+- **Presenter:** 8 new beats (keys 1–8). Beats 5–6 land in R4–R5.
+- **Tests: 67 passing** (+7: per-part SAME failover, compensation exercised, riskiest-first, seed reproduction, API, no typed-in numbers).
+
+### Correction to the R2 gate (found while building R3)
+1. **The R2 gate numbers came from a stale build.** I changed the day-trip meeting point after the last pipeline run. A fresh build shifted the random draws, and at first gave **0** publishable Remixes, because every Remix Promise fell.
+2. **Root cause, a generator design flaw:** part attempts were sampled per SKU. Transfers are ~92% of SKUs, so each supplier had only 24–57 ticket attempts per lead bucket, and the Promise model rightly leaned on the market average (Sunbird tickets estimated at 6.5% failure vs 2.5% true).
+3. **Fix:** attempts are now sampled by role, half tickets and half transfers (`booking_log.TICKET_SHARE`). This was changed **after** seeing the gate, and is disclosed here and in DATA.md.
+4. **After the fix**, the same 4 products pass:
+
+| Product | Agent saves | TBO margin | Remix Promise |
+|---|---|---|---|
+| Helicopter + private pickup | 11.9% | 13.5% | 95.7% |
+| Ski Dubai + lunch | 7.2% | 7.8% | 95.5% |
+| IMG Worlds + lunch | 4.7% | 4.9% | 97.6% |
+| Food tour + private pickup | 4.0% | 4.1% | 95.1% |
+
+5. **Honest reading:** the winners sit close to the guardrails, so the count is sensitive to random draws. The food tour clears the 4% margin by 0.1 point.
+6. **Sandbox vs estimate:** over 1,000 seeds the helicopter Remix is secured about 93% of the time, against the estimated 95.7%. Helicopter demand is more volatile than the average the Promise model sees. METRICS will report this gap.
+
+## Earlier: R1 + R2, stopped at the R2 gate
 
 ### Pivot (2026-11-07)
 The headline moves from SameSame to **Remix**: TBO products assembled from parts suppliers already sell (ticket + transfers + lunch), published only when the Remix is the SAME product as a package, cheaper on True Price, and leaves TBO a margin. The plan is in [REMIX_PLAN.md](REMIX_PLAN.md). Every existing engine is reused unchanged, and all 48 earlier tests still pass.

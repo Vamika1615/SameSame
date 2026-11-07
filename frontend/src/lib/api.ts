@@ -24,4 +24,4 @@ export function useApi<T>(path: string | null): Loadable<T> & { reload: () => vo
 }
 
 // Indian digit grouping: ₹1,24,020
-export const inr = (n: number) => "₹" + Math.round(n).toLocaleString("en-IN");
+export const inr = (n: number) => "₹" + (Math.round(n) || 0).toLocaleString("en-IN");

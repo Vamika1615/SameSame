@@ -13,6 +13,8 @@ from samesame.data import world
 
 N_ATTEMPTS = 24_000
 N_COMPONENT_ATTEMPTS = 6_000               # Remix parts (tickets, lunch vouchers, transfers), appended after the rest
+TICKET_SHARE = 0.5                         # agents buy tickets about as often as transfers (by role, not per SKU: there are
+                                           # ~12x more transfer SKUs than ticket SKUs, and per-SKU sampling starved tickets)
 DAYS = 180
 ANCHOR = date(2026, 11, 3)                 # snapshot date; "last 90 days" is relative to this
 MARKETS = [("IN", 0.40), ("TH", 0.14), ("MY", 0.10), ("SG", 0.09), ("AE", 0.08), ("GB", 0.07), ("AU", 0.06), ("CN", 0.06)]
@@ -89,8 +91,11 @@ def generate(hotels, listings, truth, offers, attractions, act_listings, act_tru
 
     # Remix parts: sold on their own today (agents already buy tickets and transfers), so the log has their history too
     vol_att_c = {c["component_id"]: vol_att.get(c["attraction_id"], 1.0) if c["role"] != "transfer" else 1.0 for c in components}
+    tickets = [c for c in components if c["role"] != "transfer"]
+    transfers = [c for c in components if c["role"] == "transfer"]
     for i in range(N_COMPONENT_ATTEMPTS if components else 0):
-        c = components[int(rng.integers(len(components)))]
+        pool = tickets if rng.random() < TICKET_SHARE else transfers
+        c = pool[int(rng.integers(len(pool)))]
         market = _pick(rng, [m for m, _ in MARKETS], [w for _, w in MARKETS])
         ts = ANCHOR - timedelta(days=int(rng.integers(0, DAYS)))
         lead = int(min(180, max(0, rng.lognormal(np.log(21), 0.85))))

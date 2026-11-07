@@ -1,4 +1,4 @@
-import { BarChart3, Building2, ClipboardCheck, Ship, SlidersHorizontal } from "lucide-react";
+import { BarChart3, Building2, ClipboardCheck, Ship, SlidersHorizontal, Sparkles } from "lucide-react";
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { useApi } from "@/lib/api";
 import { Presenter } from "@/lib/presenter";
@@ -11,11 +11,13 @@ import OpsPage from "@/pages/OpsPage";
 import SimulatorPage from "@/pages/SimulatorPage";
 import SuppliersPage from "@/pages/SuppliersPage";
 import LabelPage from "@/pages/LabelPage";
+import RemixStudioPage from "@/pages/RemixStudioPage";
 import { Empty } from "@/components/States";
 
 const NAV = [
-  { to: "/hotels", label: "Hotels", icon: Building2 },
+  { to: "/remix", label: "Remix Studio", icon: Sparkles },
   { to: "/sightseeing", label: "Sightseeing", icon: Ship },
+  { to: "/hotels", label: "Hotels", icon: Building2 },
   { to: "/ops", label: "Ops Queue", icon: ClipboardCheck },
   { to: "/suppliers", label: "Suppliers", icon: BarChart3 },
   { to: "/simulator", label: "Simulator", icon: SlidersHorizontal },
@@ -57,10 +59,10 @@ export default function App() {
     <div className="flex h-full flex-col">
       <header className="sticky top-0 z-40 border-b border-paper-line/80 bg-paper/85 backdrop-blur-md">
         <div className="mx-auto flex h-[68px] max-w-[1760px] items-center gap-10 px-8">
-          <NavLink to="/hotels" className="flex items-center gap-2.5">
+          <NavLink to="/remix" className="flex items-center gap-2.5" title="Remix makes new products from parts suppliers already sell.">
             <SunMark />
             <span className="font-display text-[26px] font-semibold leading-none tracking-tight text-accent-700">
-              Same<span className="italic text-sun-500">Same</span>
+              Re<span className="italic text-sun-500">mix</span>
             </span>
           </NavLink>
           <nav className="flex h-full items-stretch gap-1">
@@ -76,7 +78,8 @@ export default function App() {
       </header>
       <main className="min-w-0 flex-1 overflow-auto">
         <Routes>
-          <Route path="/" element={<Navigate to="/hotels" replace />} />
+          <Route path="/" element={<Navigate to="/remix" replace />} />
+          <Route path="/remix" element={<RemixStudioPage />} />
           <Route path="/hotels" element={<HotelsPage />} />
           <Route path="/hotels/:id" element={<HotelDetailPage />} />
           <Route path="/sightseeing" element={<SightseeingPage />} />
@@ -87,7 +90,7 @@ export default function App() {
           <Route path="*" element={<Empty title="Page not found" />} />
         </Routes>
         <footer className="mx-auto max-w-[1760px] px-8 pb-8 pt-4 text-xs leading-relaxed text-ink-mute">
-          <span className="font-semibold text-ink-soft">Built for TBO · Track 2.</span> Suppliers are fictional and their data synthetic.
+          <span className="font-semibold text-ink-soft">Remix · built for TBO · Track 2.</span> Remix makes new products from parts suppliers already sell. Suppliers are fictional and their data synthetic.
           Photos from Wikimedia Commons (credited on hover); stock photos are labelled. Map data © OpenStreetMap contributors, ODbL.
         </footer>
       </main>
