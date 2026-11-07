@@ -2,7 +2,71 @@
 
 _Update after every milestone. Newest first._
 
-## Status: M4 done → M5 next
+## Status: Remix pivot, R1 + R2 done, stopped at the R2 gate (branch `remix`)
+
+### Pivot (2026-11-07)
+The headline moves from SameSame to **Remix**: TBO products assembled from parts suppliers already sell (ticket + transfers + lunch), published only when the Remix is the SAME product as a package, cheaper on True Price, and leaves TBO a margin. The plan is in [REMIX_PLAN.md](REMIX_PLAN.md). Every existing engine is reused unchanged, and all 48 earlier tests still pass.
+
+### Done: R1, component catalogue (synthetic, disclosed in DATA.md)
+- `data/components.py`:
+  - 159 entry tickets with slots
+  - 12 lunch vouchers
+  - 1,840 one-way transfers between 6 hotel zones and 25 meeting points: 1,500 private (sedan/SUV, on request), 340 shared (fixed timetable)
+  - 313 rates are "package only" and never bundled
+- **Ticket price** is the market's own price for that ticket alone. The per-supplier net factor averages ~1.0, so parts carry no planted discount. Where every package of a core includes a transfer, the ticket is priced at the package minus 20% (shared) or 30% (private).
+- **Transfer prices** are Dubai-style tariffs on road distance: private ₹1,600 + ₹55/km per sedan; shared ₹350 + ₹9/km per seat.
+- All parameters were fixed before any Remix result was computed.
+- **Booking log:** +6,000 part attempts, appended after the existing 24,000 so earlier numbers are unchanged. The Promise model now fits `ticket` and `transfer` with no code change.
+
+### Done: R2, recipe search, pricing, guardrails (`remix/engine.py`, `tests/test_remix.py`)
+- **Search:** enumerate ticket × outbound × return × lunch. Keep only bundleable parts, drop-off at the ticket's meeting point, arrival ≥ 20 min before the slot, waits ≤ 90 min. Take the cheapest assembly that passes every guardrail.
+- **SAME, never VARIANT:** strict fields must be equal, and so must every descriptive field the package states. A field only the package is silent on becomes "unverified" and needs approval.
+  - The first gate run caught the engine building a *private* desert safari from a *shared* 4x4 ticket whose text didn't state its option. That is now a difference, and a test guards it.
+- **Pricing:**
+  - TBO's cost is the sum of part True Prices (fitted Promise per part) plus assembly risk (unwind and buy the package).
+  - The agent's True Price is the sell price plus cancellation risk under the strictest part's rule.
+  - The agent gets 50% of the gap.
+  - Guardrails: saving ≥ 3%, margin ≥ 4%, Remix Promise ≥ 95%, slack ≥ 20 min.
+- **Tests: 60 passing** (+12).
+
+### R2 gate: honest numbers (Deira, 2 adults, 21 days out, default settings)
+| | Count of 30 multi-part packages |
+|---|---|
+| A SAME Remix exists (bundleable, feasible timing) | 17 (57%) |
+| Remix cheaper than the best package on True Price | 9 (30%) |
+| **Passes every guardrail** | **4 (13%)** |
+| Package cheaper (reported, not hidden) | 8 |
+| No valid assembly | 13 |
+
+- **Publishable:**
+
+| Product | Agent saves | TBO margin | Remix Promise |
+|---|---|---|---|
+| Helicopter tour + private pickup | 12.2% | 13.9% | 96.3% |
+| Ski Dubai + lunch | 7.2% | 7.8% | 95.8% |
+| IMG Worlds + lunch | 5.0% | 5.2% | 99.4% |
+| Old Dubai food tour + private pickup | 5.0% | 5.2% | 99.5% |
+
+- **Cheaper, but blocked only by the Promise guardrail:** Aquaventure + shared transfer (9.3%, Promise 89.4%), Aquarium + shared transfer (6.6%, 90.7%), Ski Dubai + shared transfer (11.7%, 94.3%).
+- **Package wins:**
+
+| Product | Package cheaper by |
+|---|---|
+| Morning desert safari | ₹3,438 |
+| Private desert safari | ₹2,180 |
+| Dubai Fountain private | ₹1,635 |
+| Dhow cruise with transfer | ₹282 |
+
+  Also Miracle Garden, Global Village and Old Dubai. Pooled operator transfers beat standalone ones.
+- **No valid assembly:**
+  - Day trips: the coach is the tour, and the "meet at the mall" version is a different product.
+  - Evening shows and the evening desert safari: the shared coach arrives 15 min before the start, under the 20-min buffer.
+  - Parks: the last return coach leaves more than 90 min after closing.
+  - Some routes are only sold package-only.
+- **The three hand-written demo products have no publishable Remix:** Burj Khalifa is ticket-only (one part), and the desert safari and dhow cruise lose or fail on timing.
+- **Other zones:** 2–5 publishable (fewest from the Marina). **Pessimistic preset** (transfers +30%, part failures ×1.5): 2 publishable.
+
+## Earlier status: M4 done
 
 ### Done: M4, fitted Promise model (2026-11-06)
 - **Promise is now a fitted model** (`backend/samesame/pricing/promise.py`), not raw Wilson counts. It is a hierarchical Dirichlet-multinomial (a Beta-binomial on the honour rate):

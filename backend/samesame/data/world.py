@@ -58,6 +58,13 @@ BEHAVIOUR = {
     ("bulbul", "hotel"): (0.05, 0.04, 0.02, 0.06), ("bulbul", "activity"): (0.04, 0.03, 0.02, 0.05),
     ("hornbill", "hotel"): (0.04, 0.03, 0.01, 0.05), ("hornbill", "activity"): (0.03, 0.02, 0.01, 0.05),
     ("sunbird", "hotel"): (0.08, 0.04, 0.02, 0.07), ("sunbird", "activity"): (0.03, 0.02, 0.01, 0.04),
+    # Remix parts (R1). Tickets are gate-priced, so they rarely reprice; slots sell out. Transfers fail when no vehicle is free.
+    ("kestrel", "ticket"): (0.05, 0.06, 0.02, 0.06), ("kestrel", "transfer"): (0.06, 0.08, 0.03, 0.10),
+    ("mynah", "ticket"): (0.01, 0.01, 0.005, 0.03), ("mynah", "transfer"): (0.01, 0.01, 0.005, 0.04),
+    ("heron", "ticket"): (0.03, 0.08, 0.03, 0.05), ("heron", "transfer"): (0.03, 0.04, 0.02, 0.06),
+    ("bulbul", "ticket"): (0.02, 0.03, 0.02, 0.04), ("bulbul", "transfer"): (0.03, 0.04, 0.02, 0.05),
+    ("hornbill", "ticket"): (0.015, 0.02, 0.01, 0.04), ("hornbill", "transfer"): (0.02, 0.02, 0.01, 0.05),
+    ("sunbird", "ticket"): (0.015, 0.015, 0.01, 0.03), ("sunbird", "transfer"): (0.03, 0.03, 0.02, 0.06),
 }
 # Lead-time shape: (price-change multiplier, sold-out multiplier). Late bookings hit stale caches and full houses.
 LEAD_BUCKETS = [("0-7 days", 0, 7, 1.35, 1.9), ("8-14 days", 8, 14, 1.15, 1.35),

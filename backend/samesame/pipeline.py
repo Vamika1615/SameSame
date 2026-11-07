@@ -3,7 +3,7 @@
     python -m samesame.pipeline
 
 Stages: base (OSM curation) -> feeds (6 supplier hotel feeds) -> activities -> booking log -> images
--> Promise model (fitted on the booking log) -> matcher (hotels, rooms, Variant DNA) -> evaluation report.
+-> Remix components -> Promise model (fitted on the booking log) -> matcher (hotels, rooms, Variant DNA) -> evaluation report.
 Tables are written as parquet and registered as views in samesame.duckdb. Truth tables (*_truth, rooms,
 hard_negatives) are for evaluation and the data card only; the matcher (M3) must never read them.
 """
@@ -15,11 +15,12 @@ import numpy as np
 import polars as pl
 
 from samesame import config
-from samesame.data import activities, booking_log, feeds, images_gen, osm_base
+from samesame.data import activities, booking_log, components, feeds, images_gen, osm_base
 from samesame.pricing import promise
 
 TABLES = ["base_hotels", "osm_duplicates", "hard_negatives", "hotel_listings", "hotel_truth", "rooms", "supplier_rooms",
-          "room_truth", "offers", "osm_reference", "attractions", "activity_variants", "activity_listings", "activity_truth", "booking_log", "images"]
+          "room_truth", "offers", "osm_reference", "attractions", "activity_variants", "activity_listings", "activity_truth", "booking_log", "images",
+          "meeting_points", "components"]
 
 
 def _rng(stage: str) -> np.random.Generator:
@@ -37,11 +38,13 @@ def main(skip_images: bool = False):
     hotels, dups, hard = osm_base.curate(_rng("base"))
     listings, truth, rooms, sup_rooms, room_truth, offers = feeds.generate(hotels, _rng("feeds"))
     attractions, variants, act_listings, act_truth = activities.generate(_rng("activities"))
-    log = booking_log.generate(hotels, listings, truth, offers, attractions, act_listings, act_truth, _rng("log"))
+    meeting_points, parts = components.generate(attractions, variants, act_listings, act_truth, _rng("components"))
+    log = booking_log.generate(hotels, listings, truth, offers, attractions, act_listings, act_truth, _rng("log"), parts)
     imgs = [] if skip_images else images_gen.generate(hotels, listings, truth, attractions, act_listings, act_truth, hard, _rng("images"))
     data = dict(osm_reference=osm_base.reference(), base_hotels=hotels, osm_duplicates=dups, hard_negatives=hard, hotel_listings=listings, hotel_truth=truth,
                 rooms=rooms, supplier_rooms=sup_rooms, room_truth=room_truth, offers=offers, attractions=attractions, activity_variants=variants,
-                activity_listings=act_listings, activity_truth=act_truth, booking_log=log, images=imgs)
+                activity_listings=act_listings, activity_truth=act_truth, booking_log=log, images=imgs,
+                meeting_points=meeting_points, components=parts)
     for name in TABLES:
         if data[name]:
             _write(name, data[name])

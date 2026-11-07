@@ -82,6 +82,19 @@ Four more are a short list in `city.py`, checked by hand. Each pair was mapped t
   - 10 copies show a sibling hotel's photo (a mix-up planted for M5 to catch).
 - **Booking log:** 24,000 attempts drawn from the behaviour model.
 
+## Remix parts (synthetic, R1)
+`backend/samesame/data/components.py`.
+- **Catalogue:** 159 entry tickets with slots, 12 lunch vouchers, and 1,840 one-way transfers between 6 hotel zones (`city.ZONES`) and 25 meeting points. Of these, 313 rates are package-only.
+- **Ticket price:** the median price of packages selling the same core without a transfer, times a per-supplier net factor (0.95–1.02). Where no such package exists, the package price is cut by 20% (shared pickup) or 30% (private).
+- **Transfers:**
+  - Private: ₹1,600 + ₹55/km per sedan (SUV ×1.35).
+  - Shared: ₹350 + ₹9/km per seat.
+  - Road km = straight line × 1.35. Speed: 25 km/h for the first 15 km, 65 km/h after.
+  - Shared coaches run a fixed timetable and spend 30 min collecting.
+- **Resale terms:** 35% of Kestrel's rates and 10% of others are package-only. 30% of Kestrel's private transfers and 5% of others are non-refundable.
+- **Booking log:** +6,000 part attempts from new `ticket` and `transfer` behaviour profiles in `world.py`.
+- These parameters were set before any Remix result was computed.
+
 ## Held-out partition
 `config.is_holdout()` holds out about 15% of brand families. In Dubai none of the 42 look-alike pairs fall in a held-out family, so that number is scored out-of-fold only. The held-out evaluation set has 128 pairs: 58 hotel, 40 room, 30 activity.
 
