@@ -36,26 +36,25 @@ export default function SimulatorPage() {
   usePresenterAction(useCallback(() => setP((cur) => (cur.failure_scale === PESSIMISTIC.failure_scale && cur.dup_abandon === PESSIMISTIC.dup_abandon ? DEFAULTS : PESSIMISTIC)), []));
 
   return (
-    <div className="mx-auto max-w-[1400px] px-8 pb-20 pt-6">
-      <PageHeader eyebrow="Metrics · simulator" title={<>Does it <span className="italic">hold up?</span></>}
-        subtitle={<>Matcher quality on held-out data, then {p.sessions.toLocaleString("en-IN")} simulated agent sessions. The assumptions are yours to attack.</>} />
-      <div className="mt-5"><MatcherQuality /></div>
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[420px_1fr]">
-        <div className="rounded-3xl border border-paper-line bg-paper shadow-card p-5">
+    <div className="mx-auto max-w-[1400px] px-8 pb-20 pt-8">
+      <PageHeader title="Does it hold up?"
+        subtitle={<>A simulation of {p.sessions.toLocaleString("en-IN")} agent sessions, with assumptions you can change, then how accurately duplicates are found on data the model never trained on. Simulated, and labelled so.</>} />
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[360px_1fr]">
+        <div className="h-fit rounded-2xl border border-paper-line bg-paper p-5">
           {SLIDERS.map((s) => (
             <label key={s.key} className="mb-5 block">
-              <div className="flex justify-between font-semibold"><span>{s.label}</span><span className="tabular-nums text-accent-700">{s.fmt(p[s.key] as number)}</span></div>
+              <div className="flex justify-between text-sm font-medium"><span>{s.label}</span><span className="tabular-nums text-accent-700">{s.fmt(p[s.key] as number)}</span></div>
               <input type="range" min={s.min} max={s.max} step={s.step} value={p[s.key] as number}
-                onChange={(e) => setP({ ...p, [s.key]: Number(e.target.value) })} className="mt-2 w-full accent-[#0b7a70]" />
+                onChange={(e) => setP({ ...p, [s.key]: Number(e.target.value) })} className="mt-2 w-full accent-[#163a6b]" />
               <div className="text-sm text-ink-mute">{s.help}</div>
             </label>
           ))}
           <div className="flex gap-2">
-            <button onClick={() => setP(PESSIMISTIC)} className={cn("flex-1 rounded-xl border-2 px-4 py-2.5 font-bold", preset ? "border-danger-500 bg-danger-50 text-danger-700" : "border-danger-500 text-danger-700 hover:bg-danger-50")}>Pessimistic preset</button>
-            <button onClick={() => setP(DEFAULTS)} className="rounded-xl border border-paper-line px-4 py-2.5 font-semibold text-ink-soft hover:bg-paper-warm">Reset</button>
+            <button onClick={() => setP(PESSIMISTIC)} className={cn("flex-1 rounded-full border px-4 py-2 text-sm font-medium", preset ? "border-danger-500 bg-danger-50 text-danger-700" : "border-paper-line text-ink-soft hover:border-danger-500")}>Pessimistic assumptions</button>
+            <button onClick={() => setP(DEFAULTS)} className="rounded-full px-4 py-2 text-sm font-medium text-ink-soft hover:bg-paper-warm">Reset</button>
           </div>
         </div>
-        <div className="rounded-3xl border border-paper-line bg-paper shadow-card p-6">
+        <div className="rounded-2xl border border-paper-line bg-paper p-6">
           {err && <ErrorState error={err} />}
           {!res && !err && <Loading what="Simulating sessions" />}
           {res && (
@@ -87,9 +86,9 @@ export default function SimulatorPage() {
                 })}
               </div>
               {res.remix && (
-                <div className="mt-6 rounded-2xl border-2 border-sun-500 bg-sun-50/40 p-4">
+                <div className="mt-6 rounded-2xl border border-sun-500/50 bg-sun-50/40 p-4">
                   <div className="flex items-center justify-between gap-2">
-                    <div className="font-display text-xl font-semibold text-accent-700">Remix business case, per 1,000 sightseeing searches</div>
+                    <div className="text-[16px] font-semibold text-ink">Remix, per 1,000 tour searches</div>
                     <span className="rounded-full bg-warn-50 px-2 py-0.5 text-xs font-bold uppercase text-warn-500">simulated</span>
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -105,6 +104,7 @@ export default function SimulatorPage() {
           )}
         </div>
       </div>
+      <div className="mt-6"><MatcherQuality /></div>
     </div>
   );
 }
@@ -116,7 +116,7 @@ function Small({ k, v }: { k: string; v: string }) {
 function Big({ label, value, good }: { label: string; value: string; good: boolean }) {
   return (
     <div>
-      <div className={cn("text-5xl font-extrabold tabular-nums", good ? "text-accent-700" : "text-danger-700")}>{value}</div>
+      <div className={cn("font-display text-4xl font-semibold tabular-nums", good ? "text-accent-700" : "text-danger-700")}>{value}</div>
       <div className="mt-1 text-ink-mute">{label}</div>
     </div>
   );

@@ -3,7 +3,6 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import type { SheetHotel, SheetResult, SheetRoom, SheetSample } from "@/contracts";
 import { inr, useApi } from "@/lib/api";
 import { usePresenterAction } from "@/lib/presenter";
-import { CITY } from "@/lib/city";
 import { PageHeader } from "@/components/PageHeader";
 import { ErrorState } from "@/components/States";
 import { Tip, cn } from "@/components/ui";
@@ -40,32 +39,23 @@ export default function SheetsPage() {
   usePresenterAction(trySample);
 
   return (
-    <div className="mx-auto max-w-[1560px] px-8 pb-10 pt-6">
-      <PageHeader eyebrow={`Supplier sheets · ${CITY}`} title={<>Many names, <span className="italic">one hotel.</span></>}
-        subtitle={<>Suppliers send rate sheets where one hotel is “Hyatt Place”, “HP” or “HYATT PLACE DXB”, and one room is “HP SUP KG CV” or just “Hyatt Place Room”.
-          Drop a sheet in: every row resolves to one hotel and one room in TBO’s catalogue, or goes to a person.</>}
-        right={sample.status === "ready" ? (
-          <div className="rounded-2xl bg-paper/90 px-5 py-3 text-sm shadow-card">
-            <div className="font-semibold">Weaver’s rate sheet <span className="ml-1 rounded-full bg-sand-200 px-2 py-0.5 text-[11px] font-bold uppercase text-ink-soft">synthetic</span></div>
-            <div className="text-xs text-ink-mute">{sample.data.rows} rows from a fictional 7th supplier, not in the catalogue.</div>
-            <div className="mt-1.5 flex gap-3 text-sm font-semibold text-accent-700">
-              {Object.entries(sample.data.files).map(([f, url]) => <a key={f} href={url} className="inline-flex items-center gap-1 hover:underline"><Download className="h-3.5 w-3.5" />{f.toUpperCase()}</a>)}
-            </div>
-          </div>) : null} />
-
+    <div className="mx-auto max-w-[1400px] px-8 pb-10 pt-8">
+      <PageHeader title="Map a supplier's rate sheet"
+        subtitle={<>Suppliers write one hotel as “Hyatt Place”, “HP” or “HYATT PLACE DXB”, and one room as “HP SUP KG CV”. Drop in their spreadsheet: every row is matched to one hotel and room in the catalogue, or handed to a person.</>} />
       <section onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)}
         onDrop={(e) => { e.preventDefault(); setDrag(false); const f = e.dataTransfer.files[0]; if (f) upload(f); }}
-        className={cn("mt-5 flex flex-wrap items-center gap-5 rounded-3xl border-2 border-dashed bg-paper px-7 py-6 shadow-card transition-colors",
+        className={cn("mt-6 flex flex-wrap items-center gap-5 rounded-2xl border-2 border-dashed bg-paper px-6 py-5 transition-colors",
           drag ? "border-sun-500 bg-sun-50" : "border-paper-line")}>
         <FileSpreadsheet className="h-10 w-10 text-accent-500" />
         <div className="min-w-0 flex-1">
-          <div className="text-lg font-semibold">Drop a supplier’s rate sheet here</div>
-          <div className="text-sm text-ink-mute">CSV or Excel. Needs a hotel column and a room column; coordinates, phone, stars, meal plan, price and cancellation are used when present. Nothing is saved.</div>
+          <div className="text-[16px] font-semibold">Drop a CSV or Excel file here</div>
+          <div className="text-sm text-ink-mute">It needs a hotel column and a room column; anything else (location, phone, stars, price) helps. Nothing is saved.
+            {sample.status === "ready" && <> No sheet handy? Download the sample from Weaver, a made-up supplier: {Object.entries(sample.data.files).map(([f, url], i) => <span key={f}>{i ? " · " : ""}<a href={url} className="font-medium text-accent-700 hover:underline">{f.toUpperCase()}</a></span>)}.</>}</div>
         </div>
         <input ref={input} type="file" accept=".csv,.xlsx,.xlsm,.txt" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ""; }} />
-        <button onClick={() => input.current?.click()} className="inline-flex items-center gap-2 rounded-full border border-accent-700 px-5 py-2.5 font-semibold text-accent-700 hover:bg-accent-50">
+        <button onClick={() => input.current?.click()} className="inline-flex items-center gap-2 rounded-full border border-paper-line px-4 py-2 text-sm font-medium text-ink-soft hover:border-accent-500">
           <Upload className="h-4 w-4" />Choose file</button>
-        <button onClick={trySample} disabled={res.status === "loading"} className="inline-flex items-center gap-2 rounded-full bg-sun-500 px-5 py-2.5 font-semibold text-white shadow-card hover:bg-sun-600 disabled:opacity-60">
+        <button onClick={trySample} disabled={res.status === "loading"} className="inline-flex items-center gap-2 rounded-full bg-accent-700 px-4 py-2 text-sm font-semibold text-white hover:bg-accent-900 disabled:opacity-60">
           {res.status === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}Try Weaver’s sheet</button>
       </section>
 
@@ -89,9 +79,9 @@ function Result({ r, picks, setPicks, filter, setFilter }: { r: SheetResult; pic
   return (
     <>
       <section className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-        <div className="rounded-3xl border border-paper-line bg-paper p-6 shadow-card">
-          <div className="text-xs font-semibold uppercase tracking-wide text-ink-mute">{r.file}</div>
-          <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 font-display text-[34px] font-semibold text-accent-700">
+        <div className="rounded-2xl border border-paper-line bg-paper p-6">
+          <div className="text-xs font-medium text-ink-mute">{r.file}</div>
+          <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 font-display text-[28px] font-semibold text-ink">
             <span>{s.rows} rows</span><ArrowRight className="h-6 w-6 self-center text-ink-mute" /><span>{s.names} hotel names</span>
             <ArrowRight className="h-6 w-6 self-center text-ink-mute" /><span className="text-sun-600">{s.hotels} real hotels</span>
           </div>
@@ -112,7 +102,7 @@ function Result({ r, picks, setPicks, filter, setFilter }: { r: SheetResult; pic
           <div className="mt-1 text-xs text-ink-mute">Same Twin Finder model and thresholds as the catalogue: auto-merge at p ≥ {r.thresholds.auto_merge.toFixed(3)}, a person from {r.thresholds.review_floor.toFixed(2)}. Short codes are written out before comparing.</div>
         </div>
         {r.check ? (
-          <div className="rounded-3xl border-2 border-ok-500/40 bg-paper p-6 shadow-card">
+          <div className="rounded-2xl border border-ok-500/40 bg-paper p-6">
             <div className="flex items-center gap-2 text-lg font-semibold text-ok-700"><CheckCircle2 className="h-5 w-5" />Checked against Weaver’s answer key</div>
             <ul className="mt-2 space-y-1 text-[15px]">
               <li><b>{r.check.hotels.matched_right}</b> of {r.check.hotels.matched_right + r.check.hotels.matched_wrong} automatic hotel matches right</li>
@@ -123,7 +113,7 @@ function Result({ r, picks, setPicks, filter, setFilter }: { r: SheetResult; pic
             <div className="mt-2 text-xs text-ink-mute">{r.check.note} Synthetic data; we wrote both the generator and the matcher, so treat this as an upper bound.</div>
           </div>
         ) : (
-          <div className="rounded-3xl border border-paper-line bg-paper p-6 text-[15px] text-ink-soft shadow-card">
+          <div className="rounded-2xl border border-paper-line bg-paper p-6 text-[15px] text-ink-soft">
             <div className="text-lg font-semibold text-ink">Your sheet</div>
             There is no answer key for an uploaded sheet, so nothing is scored. Matches above the auto-merge bar are applied; everything else is listed under <b>Needs a person</b>.
           </div>
@@ -153,7 +143,7 @@ function HotelRow({ h, pick, setPick }: { h: SheetHotel; pick: Pick; setPick: (p
   const chosen = pick.hotel ? (pick.hotel === "new" ? null : h.candidates.find((c) => c.cluster_id === pick.hotel)) : h.decision === "matched" ? top : null;
   const d = DECISION[h.decision];
   return (
-    <li className="rounded-2xl border border-paper-line bg-paper shadow-card">
+    <li className="rounded-2xl border border-paper-line bg-paper">
       <button onClick={() => setOpen(!open)} className="grid w-full grid-cols-[minmax(0,1fr)_28px_minmax(0,1.2fr)_auto] items-center gap-4 px-5 py-3.5 text-left">
         <div className="min-w-0">
           <div className="truncate font-mono text-[15px] font-semibold">{h.name}</div>

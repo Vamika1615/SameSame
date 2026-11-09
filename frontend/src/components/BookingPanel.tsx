@@ -51,18 +51,18 @@ export function BookingPanel({ offers, active }: { offers: Offer[]; active: bool
   const failover = done ? resp!.results.find((r) => r.via_failover && r.status === "confirmed") : undefined;
 
   return (
-    <section ref={panel} className={cn("mt-10 scroll-mt-4 rounded-2xl border-2 bg-paper p-6", active ? "border-accent-600" : "border-paper-line")}>
+    <section ref={panel} className={cn("mt-6 scroll-mt-36 rounded-2xl border bg-paper p-5", active ? "border-accent-500" : "border-paper-line")}>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-[28px] font-semibold text-accent-700">Supplier sandbox</h2>
-          <p className="text-ink-mute">Outcomes are drawn from each supplier's behaviour profile at this lead time. Failover goes to SAME twins only, never a VARIANT.</p>
+          <h3 className="text-[16px] font-semibold text-ink">Try booking the top two offers (sandbox)</h3>
+          <p className="max-w-[640px] text-sm text-ink-mute">Outcomes follow each supplier's record at this lead time. If a booking fails, it moves only to the identical room from another supplier, never a different one.</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => run(demoSeed)} disabled={!chosen.length}
-            className="rounded-xl bg-accent-600 px-6 py-3 text-lg font-bold text-white shadow hover:bg-accent-700 disabled:opacity-50">Book both</button>
+            className="rounded-full bg-accent-700 px-4 py-2 text-sm font-semibold text-white hover:bg-accent-900 disabled:opacity-50">Book both</button>
           <button onClick={() => run(Math.floor(Math.random() * 1e6))} title="Rerun with a fresh random seed"
-            className="flex items-center gap-1.5 rounded-xl border border-paper-line px-4 py-3 font-semibold text-ink-soft hover:bg-paper-warm"><Dice5 className="h-5 w-5" />Fresh seed</button>
-          <button onClick={loadStats} className="flex items-center gap-1.5 rounded-xl border border-paper-line px-4 py-3 font-semibold text-ink-soft hover:bg-paper-warm"><BarChart3 className="h-5 w-5" />Run 1,000×</button>
+            className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-ink-soft hover:bg-paper-warm"><Dice5 className="h-4 w-4" />Fresh seed</button>
+          <button onClick={loadStats} className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-ink-soft hover:bg-paper-warm"><BarChart3 className="h-4 w-4" />Run 1,000×</button>
         </div>
       </div>
       <div className="mt-2 text-sm text-ink-mute">
@@ -73,7 +73,7 @@ export function BookingPanel({ offers, active }: { offers: Offer[]; active: bool
       <AnimatePresence>
         {failover && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="mt-4 flex items-center gap-3 rounded-xl bg-ok-500 px-5 py-3 text-lg font-bold text-white">
+            className="mt-4 flex items-center gap-3 rounded-xl bg-ok-500 px-4 py-2.5 text-[15px] font-semibold text-white">
             <ShieldCheck className="h-6 w-6" />
             Rebooked SAME twin via {failover.final_supplier}, confirmed at {inr(failover.final_price ?? 0)}. The client never saw the failure.
           </motion.div>

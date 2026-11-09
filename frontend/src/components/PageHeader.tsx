@@ -1,21 +1,19 @@
 import type { ReactNode } from "react";
-import { Skyline } from "@/components/Skyline";
 
-/** The coastal header band every page opens with: eyebrow, serif title, one line of context, optional controls. */
-export function PageHeader({ eyebrow, title, subtitle, right, children }:
-  { eyebrow: string; title: ReactNode; subtitle?: ReactNode; right?: ReactNode; children?: ReactNode }) {
+/** A quiet page header: one title, one line of context, optional actions on the right.
+ *  (The section and sub-tab already say where you are, so there is no eyebrow or banner.) */
+export function PageHeader({ title, subtitle, right, children }:
+  { eyebrow?: string; title: ReactNode; subtitle?: ReactNode; right?: ReactNode; children?: ReactNode }) {
   return (
-    <section className="hero-sky relative overflow-hidden rounded-4xl px-10 pb-7 pt-7">
-      <Skyline className="pointer-events-none absolute bottom-0 right-0 h-[90%] w-[42%] opacity-25" />
-      <div className="relative flex flex-wrap items-end justify-between gap-6">
-        <div className="min-w-0 max-w-[900px]">
-          <div className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-700/80">{eyebrow}</div>
-          <h1 className="mt-2 text-[40px] leading-[1.08] text-accent-700">{title}</h1>
-          {subtitle && <div className="mt-2 text-[17px] text-ink-soft">{subtitle}</div>}
+    <section className="pb-2 pt-2">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0 max-w-[820px]">
+          <h1 className="text-[30px] leading-tight text-ink">{title}</h1>
+          {subtitle && <div className="mt-1.5 text-[16px] leading-relaxed text-ink-mute">{subtitle}</div>}
         </div>
-        {right && <div className="relative">{right}</div>}
+        {right && <div className="shrink-0">{right}</div>}
       </div>
-      {children && <div className="relative mt-5">{children}</div>}
+      {children && <div className="mt-4">{children}</div>}
     </section>
   );
 }
