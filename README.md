@@ -59,6 +59,8 @@ flowchart TB
   - The package is cheaper in 7, and they're listed.
   - **18** gap Remixes pass, out of 78 combinations agents searched for that nobody sells.
 
+- **Supplier naming:** suppliers write one hotel as "Hilton Garden Inn" or "HGI", and one room as "HP SUP KG CV" or just "Hyatt Place Room". Twin Finder writes short codes out before comparing names, and the room parser removes the hotel's own name before reading the room. The **Supplier Sheets** page (`/sheets`) takes a supplier's CSV or Excel rate sheet and resolves every row to one catalogue hotel and room, marks it new to TBO, or sends it to a person. On Weaver's synthetic 136-row sheet, 27/27 automatic hotel matches and 63/63 automatic room mappings are right.
+
 Docs: [DEMO.md](DEMO.md) (4-minute script) · [QA.md](QA.md) · [METRICS.md](METRICS.md) · [DATA.md](DATA.md) · [PROGRESS.md](PROGRESS.md) · [REMIX_PLAN.md](REMIX_PLAN.md). The Python package keeps its original name, `samesame`.
 
 ## Run it

@@ -18,26 +18,26 @@ We call this set **held-out**, not blind: the model never trained on these famil
 
 | Entity | Slice | Precision | Recall | True pairs | False merges | Missed |
 |---|---|---|---|---|---|---|
-| hotel | all | 0.997 | 0.963 | 2061 | 6 | 77 |
-| hotel | held out | 1.000 | 0.963 | 214 | 0 | 8 |
-| hotel | trained on | 0.997 | 0.963 | 1847 | 6 | 69 |
-| room | all | 1.000 | 0.960 | 5148 | 0 | 205 |
-| room | held out | 1.000 | 0.956 | 526 | 0 | 23 |
+| hotel | all | 1.000 | 0.967 | 2241 | 0 | 75 |
+| hotel | held out | 1.000 | 0.982 | 218 | 0 | 4 |
+| hotel | trained on | 1.000 | 0.965 | 2023 | 0 | 71 |
+| room | all | 1.000 | 0.959 | 5530 | 0 | 225 |
+| room | held out | 1.000 | 0.962 | 530 | 0 | 20 |
 | activity | all | 1.000 | 0.977 | 132 | 0 | 3 |
 
-- Hotels: 1218 listings → 320 clusters (truth: 300 hotels; 35 in held-out families).
-- Hard negatives (real same-brand hotels < 3 km apart): 1 of 42 wrongly merged. Only 0 of those pairs are held out (0 merged); the other 42 were scored out-of-fold, so the model never saw their labels.
-- Rooms: 4469 supplier room names; 0.7% mapped with confidence under 0.8.
+- Hotels: 1267 listings → 319 clusters (truth: 300 hotels; 35 in held-out families).
+- Hard negatives (real same-brand hotels < 3 km apart): 0 of 42 wrongly merged. Only 0 of those pairs are held out (0 merged); the other 42 were scored out-of-fold, so the model never saw their labels.
+- Rooms: 4610 supplier room names; 0.9% mapped with confidence under 0.8.
 - Sightseeing: 168 listings → 70 variants (truth 68); attraction assignment 100.0%; 1 listing(s) kept apart for review because they don't say which option they sell.
 
 ## Routing
 
-- Candidate hotel pairs after blocking: 10,968; 2,107 scored above the gray-zone floor.
-- Auto-merged: 1,941 pairs. 166 pairs (7.9%) fell in the gray zone or were blocked; after grouping they become **28 review items** (one per pair of clusters, skipping pairs joined through stronger links).
-- Never compared: 16 of 2,061 true twin pairs were dropped by blocking before scoring (counted as missed above).
-- LLM: off (every uncertain pair goes to the human queue). Share to LLM: 0.000; to humans: 0.079.
+- Candidate hotel pairs after blocking: 11,498; 2,281 scored above the gray-zone floor.
+- Auto-merged: 2,118 pairs. 162 pairs (7.1%) fell in the gray zone or were blocked; after grouping they become **31 review items** (one per pair of clusters, skipping pairs joined through stronger links).
+- Never compared: 17 of 2,241 true twin pairs were dropped by blocking before scoring (counted as missed above).
+- LLM: off (every uncertain pair goes to the human queue). Share to LLM: 0.000; to humans: 0.071.
 - Scores are out-of-fold, 5 folds grouped by hotel: every hotel's pairs were scored by a model that never saw that hotel's labels.
-- Thresholds: auto-merge p ≥ 0.9907, review p ≥ 0.3. The out-of-fold scores of trainable families (never held-out data) alone would have chosen 0.9907 and 0.6053; the policy floors (auto ≥ 0.90, review from 0.30) win when stricter. Validation precision at auto-merge 0.995, recall 0.951 (n = 8,669 out-of-fold pairs).
+- Thresholds: auto-merge p ≥ 0.9794, review p ≥ 0.3. The out-of-fold scores of trainable families (never held-out data) alone would have chosen 0.9794 and 0.6398; the policy floors (auto ≥ 0.90, review from 0.30) win when stricter. Validation precision at auto-merge 0.995, recall 0.958 (n = 9,146 out-of-fold pairs).
 
 ## Promise model (booking reliability)
 
@@ -131,8 +131,24 @@ Sandbox outcomes over seeds 1–1,000 (same draws), Remix vs its best package:
 
 **Connected Trip** (golden-case hotel + DXB cars + best tour Remix): blocked; agent saves 8.3%, TBO margin 9.1%, Trip Promise 92.9%. Trip Promise 92.9%, below the 95% guardrail.
 
+
+## Supplier naming: short codes and rate sheets (data/naming.py, synthetic)
+
+Suppliers write one hotel as "Hilton Garden Inn Dubai Deira" and "HGI Dubai Deira", and rooms as "HP SUP KG CV" or just "Hyatt Place Room". The short-code listings are extra rows with no photos; the frozen held-out set predates them and does not contain them.
+
+| Slice | Items | Precision | Recall | False merges | Missed pairs | Left on their own |
+|---|---|---|---|---|---|---|
+| short-code listings, all | 49 | 1.000 | 0.961 | 0 | 7 | 0 |
+| short-code listings, held out | 1 | 1.000 | 1.000 | 0 | 0 | 0 |
+| room names carrying the hotel's name | 93 | 1.000 | 0.975 | 0 | 6 | — |
+
+- Room names that are only the hotel ("Hyatt Place Room"): 14; 14 sent to a person as unmapped, never pooled with another room.
+- **Weaver's sample sheet** (a fictional 7th supplier, not in the catalogue): 136 rows → 33 hotel names → 30 hotels. 27 matched automatically, 4 new to TBO, 2 to a person, 3 listed twice under two names. Rooms: 87 names → 63 mapped, 16 to a person, 8 new.
+- Against Weaver's answer key: hotels 27/27 automatic matches right, 4/4 new-hotel calls right; rooms 63/63 automatic mappings right. We wrote the generator, the matcher and this sheet, so treat these as an upper bound.
+
 ## Caveats (read before quoting any number above)
 
 - **We wrote both the generator and the matcher.** Feature design, the room parser and the Variant DNA rules were written knowing how the generator corrupts names, so even held-out numbers are an upper bound on real-world performance.
 - **Room and sightseeing rules were fixed while looking at errors across the whole catalogue**, held-out attractions included. Their numbers are not blind; only C's human labels on the held-out pairs are an independent check.
 - The hotel model never trained or chose thresholds on held-out families, and held-out listings carry a corruption family (alternative transliterations, e.g. Jumeira, Dayra, Dubayy) that never appears in training.
+- **Short codes were designed knowing the generator's rule** (initials of the leading words). The matcher's reading of them is general (any 2-4 letter word that spells the initials of words in the other name), but the brand rule was changed to read written-out names after we saw it blocking short-code listings across the whole catalogue, held-out families included.

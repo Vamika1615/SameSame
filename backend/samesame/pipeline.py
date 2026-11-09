@@ -3,7 +3,7 @@
     python -m samesame.pipeline
 
 Stages: base (OSM curation) -> feeds (6 supplier hotel feeds) -> activities -> booking log -> images
--> Remix components -> Promise model (fitted on the booking log) -> matcher (hotels, rooms, Variant DNA) -> evaluation report.
+-> short-code listings + Weaver's rate sheet (data/naming.py) -> Remix components -> Promise model (fitted on the booking log) -> matcher (hotels, rooms, Variant DNA) -> evaluation report.
 Tables are written as parquet and registered as views in samesame.duckdb. Truth tables (*_truth, rooms,
 hard_negatives) are for evaluation and the data card only; the matcher (M3) must never read them.
 """
@@ -15,7 +15,7 @@ import numpy as np
 import polars as pl
 
 from samesame import config
-from samesame.data import activities, booking_log, components, feeds, images_gen, osm_base, search_log
+from samesame.data import activities, booking_log, components, feeds, images_gen, naming, osm_base, search_log
 from samesame.pricing import promise
 
 TABLES = ["base_hotels", "osm_duplicates", "hard_negatives", "hotel_listings", "hotel_truth", "rooms", "supplier_rooms",
@@ -44,6 +44,13 @@ def main(skip_images: bool = False):
     airport_mp, airport_parts = components.airport(_rng("airport"))      # after the log: adds no draws to it
     meeting_points, parts = meeting_points + [airport_mp], parts + airport_parts
     imgs = [] if skip_images else images_gen.generate(hotels, listings, truth, attractions, act_listings, act_truth, hard, _rng("images"))
+    # short-code listings: extra rows from their own stream, after the log and images, so nothing above changes
+    extra = naming.short_code_listings(hotels, listings, truth, rooms, sup_rooms, room_truth, offers, _rng("naming"))
+    listings, truth, sup_rooms = listings + extra["listings"], truth + extra["truth"], sup_rooms + extra["sup_rooms"]
+    room_truth, offers = room_truth + extra["room_truth"], offers + extra["offers"]
+    sheet, sheet_key = naming.weaver_sheet(hotels, rooms, osm_base.reference(), dups, _rng("weaver"))
+    naming.write_sheet(sheet)
+    _write("weaver_truth", sheet_key)
     data = dict(osm_reference=osm_base.reference(), base_hotels=hotels, osm_duplicates=dups, hard_negatives=hard, hotel_listings=listings, hotel_truth=truth,
                 rooms=rooms, supplier_rooms=sup_rooms, room_truth=room_truth, offers=offers, attractions=attractions, activity_variants=variants,
                 activity_listings=act_listings, activity_truth=act_truth, booking_log=log, images=imgs,
@@ -63,7 +70,7 @@ def main(skip_images: bool = False):
     from samesame.matching import run as matcher
     matcher.main()
     counts = {k: len(v) for k, v in data.items()}
-    manifest = {"built_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "seed": config.SEED, "stages": ["m0", "m2", "m3", "m4", "r1"],
+    manifest = {"built_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "seed": config.SEED, "stages": ["m0", "m2", "m3", "m4", "r1", "n1"],
                 "counts": counts, "seconds": None}
     (config.BUILD / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")   # the report reads the app's store
     from samesame.eval import report

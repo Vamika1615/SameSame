@@ -2,7 +2,39 @@
 
 _Update after every milestone. Newest first._
 
-## Status: Remix pivot, R1–R5 done (branch `remix`, not merged)
+## Status: Remix done and merged; N1 (supplier naming + Supplier Sheets) done
+
+### Done: N1, supplier naming and the Supplier Sheets page (2026-11-09)
+Prompted by TBO's CTO: suppliers send spreadsheets where one hotel is "Radisson Plaza Room", "Radisson Room" or "RP Room".
+- **Generator (`data/naming.py`, synthetic, disclosed in DATA.md):**
+  - 49 *short-code listings*: a supplier re-loads a hotel under its initials ("HGI Dubai Deira", "HP Dubai Al Rigga"), with no photos.
+  - Their room names carry the hotel's name ("Hyatt Place Superior King", "HP SUP KG CV") or are only the hotel ("Hyatt Place Room").
+  - They are extra rows from their own random stream, added after the booking log and images. **Nothing that existed before changed:** Remix and Promise metrics are byte-identical, and the frozen held-out set has 0 stale pairs.
+  - Weaver, a fictional 7th supplier, sends a 136-row rate sheet (CSV + XLSX) that is not in the catalogue. Its answer key is read only by `eval/sheet_check.py`.
+- **Matcher (`matching/hotels.py`):** a 2–4 letter word that spells the initials of consecutive words in the other name is written out before the name features are computed. There is a new `short_code` feature and a blocking rule for it.
+- **Room parser (`matching/rooms.py`):** the hotel's name, as any listing in its cluster writes it, is removed from the start or end of the room name before parsing. A name that is only the hotel goes to a person as its own "unmapped" room and is never pooled with another room. This also fixed a latent bug: "Hilton Garden Inn Superior King" used to read as a *Garden view* room.
+- **Supplier Sheets page (`/sheets`, `ingest/sheet.py`):**
+  - Drop in a CSV or XLSX; columns are found by their usual spellings.
+  - Each hotel as the sheet writes it goes through the same trained model and thresholds as the catalogue, and is matched, sent to a person, or marked new to TBO. Rooms are mapped to the hotel's catalogue rooms.
+  - Hotels listed twice in one sheet are flagged.
+  - A person's decisions are made inline and included in "Download cleaned sheet". They are kept on the page only; they are not written to the Ops queue or used for training.
+
+**Before and after, measured once with the new data (disclosed):**
+
+| | Old matcher + new data | Short-code reading | + brand rule on written-out names |
+|---|---|---|---|
+| Short-code listings: pair recall / left on their own | 0.900 / 5 | 0.900 / 3 | **0.961 / 0** |
+| Rooms carrying the hotel's name: pair recall | 0.934 | 0.938 | **0.975** |
+| Whole catalogue hotels: precision / false merges | 0.985 / 33 | 1.000 / 0 | **1.000 / 0** |
+| Held-out hotels: recall | 0.963 | 0.982 | **0.982** |
+
+- The 33 false merges with the old matcher were almost all one cluster: Andaz Dubai The Palm and Andaz Dubai The Palm Apartments. More training rows had moved the threshold. We did not tune for it; the new feature removed it.
+- **Disclosure:** the brand rule ("different brand family never merges") was changed to read written-out names *after* we saw it blocking "FP by Sheraton" against "Four Points by Sheraton" across the whole catalogue, held-out families included. Only 1 short-code listing is in a held-out family, so held-out evidence for short codes is thin.
+- **Weaver's sheet:** 136 rows → 33 names → 30 hotels. 27 matched automatically (27/27 right), 4 new (4/4 right), 2 to a person, 3 listed twice. Rooms: 63 mapped (63/63 right), 16 to a person, 8 new. This is an upper bound, because we wrote the generator, the matcher and the sheet.
+- The demo hotel search is now **86 listings → 20 hotels**: two short-code listings were added, and two clusters of one hotel are now joined.
+
+**Tests: 90 passing** (19 new: `test_naming.py`, `test_sheets.py`). One of them checks that an uploaded sheet never reads a truth table.
+
 
 ### Done: R5, Connected Trip, metrics, simulator, docs (2026-11-07)
 - **Connected Trip (`remix/trip.py`; hotel page, key 6):** the golden-case hotel's #1 True Price offer + private DXB cars both ways + the best sightseeing Remix from that zone, as one product with one price, one Promise and one cancellation rule.
@@ -228,7 +260,7 @@ The headline moves from SameSame to **Remix**: TBO products assembled from parts
 ### Computed numbers right now (Dubai)
 | Thing | Value |
 |---|---|
-| Demo search | 84 listings → 21 hotels, 63 duplicates collapsed |
+| Demo search | 84 listings → 21 hotels, 63 duplicates collapsed (86 → 20 since N1) |
 | Look-alike trap | Flora Hotel Apts. ↔ Flora Al Souq Hotel, 198 m |
 | Offer A: Kestrel ₹18,600 | True Price **₹24,175** (sticker #1 → True #4) |
 | Offer B: Mynah ₹20,100 | True Price **₹20,773** (sticker #4 → True #1) |

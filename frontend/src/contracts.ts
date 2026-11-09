@@ -150,3 +150,25 @@ export interface ConnectedTrip {
   cancellation: { rules: { part: string; rule: string }[]; strictest: string; summary: string };
 }
 export interface TripBooking { seed: number; outcome: string; summary: string; legs: { leg: string; label: string; status: string; outcome: string; summary: string; steps: BookingStep[] }[] }
+
+// ---------------------------------------------------------------- Supplier Sheets
+export interface SheetCandidate { cluster_id: string; name: string; p: number | null; reasons: string[]; listing?: string; supplier?: string }
+export interface SheetRoom {
+  raw: string; hotel_words: string | null; parsed: string | null; status: "mapped" | "person" | "new"; why: string;
+  room_id: string | null; room: string | null; confidence: number; rows: number[]; prices: { meal: string | null; price: number; cancel: string | null }[];
+}
+export interface SheetHotel {
+  sheet_id: string; name: string; address: string | null; phone: string | null; lat: number | null; lng: number | null; star: number | null;
+  rows: number[]; decision: "matched" | "review" | "new"; why: string; candidates: SheetCandidate[];
+  options: { room_id: string; name: string }[]; rooms: SheetRoom[]; also_as?: string[];
+}
+export interface SheetResult {
+  file: string;
+  sheet: { columns: Record<string, string>; unused_columns: string[]; rows: number; truncated: boolean };
+  summary: { rows: number; names: number; hotels: number; matched: number; new: number; review: number; listed_twice: number;
+    room_names: number; rooms_mapped: number; rooms_person: number; rooms_new: number; short_codes: number };
+  hotels: SheetHotel[]; listed_twice: { cluster_id: string; name: string; as: string[] }[];
+  thresholds: { auto_merge: number; review_floor: number };
+  check: null | { hotels: Record<string, number>; rooms: Record<string, number>; note: string };
+}
+export interface SheetSample { supplier: string; synthetic: boolean; rows: number; files: Record<string, string> }

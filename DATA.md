@@ -103,6 +103,20 @@ Four more are a short list in `city.py`, checked by hand. Each pair was mapped t
 
 Only the gap finder reads them. The demand behind each gap Remix is a count of these events, so it is synthetic.
 
+## Supplier naming and Weaver's rate sheet (synthetic, N1)
+`backend/samesame/data/naming.py`. These parameters were set before measuring.
+- **Short-code listings:** for 30% of hotels whose name starts with 2–3 distinctive words, one supplier that already lists the hotel loads it again under the initials ("Hilton Garden Inn Dubai Deira" → "HGI Dubai Deira"; never ending on Al/Le/El). The listing copies the source's address, keeps its phone 70% of the time, moves the pin ~25 m, and has **no photos**. The golden-case hotel is skipped.
+- **Their room names:** 40% "<hotel> <room>" ("Hyatt Place Superior King"), 30% "<CODE> <abbreviations>" ("HP SUP KG CV"), the rest as the supplier normally writes them. The entry room is only the hotel ("Hyatt Place Room" / "HP Room") 35% of the time.
+- **Prices:** copied from the source listing's rates with ±3% noise. These listings have no booking-log history, but the Promise model is per supplier, so they are still priced.
+- They are added after the booking log and images, from their own random stream, so nothing generated before them changes.
+- **Weaver's rate sheet** (`data/build/sheets/weaver_rates.csv|xlsx`): a fictional 7th supplier, not part of the catalogue.
+  - Covers the 26 hotels nearest the demo point (golden case included, always in short code), plus 4 real OpenStreetMap hotels that are not in the catalogue (more than 300 m from any catalogue hotel).
+  - 3 hotels appear twice under their two names.
+  - Short code used 55% of the time.
+  - Pins moved ~40 m; 4% of hotels have no coordinates.
+  - 2–4 rooms per hotel, in the same naming styles; Room Only, plus Bed & Breakfast 60% of the time.
+  - The answer key (`weaver_truth.parquet`) is read only by `eval/sheet_check.py`.
+
 ## Held-out partition
 `config.is_holdout()` holds out about 15% of brand families. In Dubai none of the 42 look-alike pairs fall in a held-out family, so that number is scored out-of-fold only. The held-out evaluation set has 128 pairs: 58 hotel, 40 room, 30 activity.
 
