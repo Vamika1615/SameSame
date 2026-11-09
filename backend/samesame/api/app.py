@@ -2,12 +2,13 @@
 import json
 from functools import lru_cache
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from samesame import city, config, images, placeholders, review, service, store
+from samesame.ingest import sheet as sheets
 from samesame.labelling.api import router as labelling_router
 from samesame.remix import approvals as remix_approvals
 from samesame.remix import book as remix_book
@@ -30,6 +31,7 @@ def _warm_remix():
         remix_gaps.find()
         remix_trip.build()
         remix_trip.demo_seed()
+        sheets.warm()
 
 
 @lru_cache
@@ -159,6 +161,38 @@ def remix_book_stats(variant_id: str, runs: int = 1000):
     if r is None or not r.get("parts") or not r.get("packaged"):
         raise HTTPException(404, f"no Remix with a package to compare for {variant_id}")
     return remix_book.stats(r, min(runs, 2000))
+
+
+# ------------------------------------------------------------------ Supplier Sheets
+@app.get("/api/sheets/sample")
+def sheets_sample():
+    if not sheets.sample_path("csv").exists():
+        raise HTTPException(404, "Weaver's sample sheet isn't built yet: run python start.py --rebuild")
+    return {"supplier": "Weaver", "synthetic": True, "rows": sum(1 for _ in sheets.sample_path("csv").open(encoding="utf-8")) - 1,
+            "files": {f: f"/api/sheets/sample/{f}" for f in ("csv", "xlsx") if sheets.sample_path(f).exists()}}
+
+
+@app.get("/api/sheets/sample/{fmt}")
+def sheets_sample_file(fmt: str):
+    if fmt not in ("csv", "xlsx") or not sheets.sample_path(fmt).exists():
+        raise HTTPException(404, "no such sample")
+    return FileResponse(sheets.sample_path(fmt), filename=f"weaver_rates_SYNTHETIC.{fmt}")
+
+
+@app.post("/api/sheets/sample/ingest")
+def sheets_ingest_sample():
+    return sheets.ingest_sample()
+
+
+@app.post("/api/sheets/ingest")
+async def sheets_ingest(file: UploadFile = File(...)):
+    data = await file.read()
+    if len(data) > 10_000_000:
+        raise HTTPException(413, "Sheets up to 10 MB, please.")
+    try:
+        return sheets.ingest(data, file.filename or "sheet.csv")
+    except sheets.SheetError as e:
+        raise HTTPException(400, str(e))
 
 
 @app.get("/api/hotels/search", response_model=HotelSearch)

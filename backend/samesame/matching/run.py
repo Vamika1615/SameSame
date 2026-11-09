@@ -52,7 +52,10 @@ def main():
     by_cluster: dict = {}
     for r in _rows("supplier_rooms"):
         by_cluster.setdefault(cluster_of[r["listing_id"]], []).append(r)
-    pl.DataFrame(rm.map_rooms(by_cluster), infer_schema_length=None).write_parquet(config.BUILD / "room_map.parquet")
+    names: dict = {}
+    for l in listings:
+        names.setdefault(cluster_of[l["listing_id"]], []).append(l["name"])
+    pl.DataFrame(rm.map_rooms(by_cluster, names), infer_schema_length=None).write_parquet(config.BUILD / "room_map.parquet")
 
     # sightseeing Variant DNA
     atts = _rows("attractions")

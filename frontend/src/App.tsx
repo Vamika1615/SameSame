@@ -1,4 +1,4 @@
-import { BarChart3, Building2, ClipboardCheck, Ship, SlidersHorizontal, Sparkles } from "lucide-react";
+import { BarChart3, Building2, ClipboardCheck, FileSpreadsheet, Ship, SlidersHorizontal, Sparkles } from "lucide-react";
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { useApi } from "@/lib/api";
 import { Presenter } from "@/lib/presenter";
@@ -13,6 +13,7 @@ import SuppliersPage from "@/pages/SuppliersPage";
 import LabelPage from "@/pages/LabelPage";
 import RemixStudioPage from "@/pages/RemixStudioPage";
 import GapsPage from "@/pages/GapsPage";
+import SheetsPage from "@/pages/SheetsPage";
 import { Empty } from "@/components/States";
 
 const NAV = [
@@ -20,6 +21,7 @@ const NAV = [
   { to: "/remix/gaps", label: "Gap Finder", icon: Ship },
   { to: "/sightseeing", label: "Sightseeing", icon: Ship },
   { to: "/hotels", label: "Hotels", icon: Building2 },
+  { to: "/sheets", label: "Supplier Sheets", icon: FileSpreadsheet },
   { to: "/ops", label: "Ops Queue", icon: ClipboardCheck },
   { to: "/suppliers", label: "Suppliers", icon: BarChart3 },
   { to: "/simulator", label: "Simulator", icon: SlidersHorizontal },
@@ -85,6 +87,7 @@ export default function App() {
           <Route path="/remix/gaps" element={<GapsPage />} />
           <Route path="/hotels" element={<HotelsPage />} />
           <Route path="/hotels/:id" element={<HotelDetailPage />} />
+          <Route path="/sheets" element={<SheetsPage />} />
           <Route path="/sightseeing" element={<SightseeingPage />} />
           <Route path="/ops" element={<OpsPage />} />
           <Route path="/suppliers" element={<SuppliersPage />} />

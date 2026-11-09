@@ -65,4 +65,5 @@ Run `python3 start.py --demo` and open http://localhost:8000.
 - **Book Remix shows a different story:** the seed on screen is the scenario. Press **Book Remix** again for seed 22, or say "fresh seed, fresh draw: that's the point".
 - **Someone changed a guardrail:** the "Reset to defaults" link is under the sliders.
 - **Approvals already decided from a rehearsal:** undo from the decision log, or delete `data/build/remix_approvals.jsonl` before going on stage.
+- **Asked about supplier naming ("RP Room", "Radisson Room"):** open **Supplier Sheets** and press **Try Weaver's sheet** (or Space). "HP Dubai Baniyas Square" resolves to Hyatt Place Dubai Baniyas Square ("HP read as Hyatt Place"), with the hotel's name struck out of each room name. Filter **Needs a person** to show what isn't guessed.
 - **Asked where the old hotel beats went:** the True Price flip and "Book both" on the hotel page still work at `/hotels/demo?tp=1&book=1`.

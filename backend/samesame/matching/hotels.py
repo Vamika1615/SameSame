@@ -28,6 +28,45 @@ def norm(s: str | None) -> str:
     return " ".join(ABBR.get(t, t) for t in toks)
 
 
+# short words that are names in their own right, never read as a short code ("Al Rigga" is not "Arabian Lodge")
+NOT_CODES = {"al", "el", "le", "la", "de", "du", "inn", "spa", "bay", "sea", "sun", "new", "one", "two", "top", "city", "park",
+             "palm", "view", "gold", "star", "blue", "red", "the", "and", "by", "of", "at", "an"}
+
+
+def initial_runs(n: str) -> dict[str, list[str]]:
+    """Every way a short code could abbreviate this name: initials of 2-4 consecutive words -> those words."""
+    toks = n.split()
+    out: dict[str, list[str]] = {}
+    for i in range(len(toks)):
+        for k in (2, 3, 4):
+            run = toks[i:i + k]
+            if len(run) < k or not all(t.isalpha() for t in run):
+                break
+            out.setdefault("".join(t[0] for t in run), run)
+    return out
+
+
+def short_code(a: dict, b: dict) -> tuple[str, list[str]] | None:
+    """('hgi', ['hilton', 'garden', 'inn']) if a word of a's name spells the initials of consecutive words in b's."""
+    words_b = set(b["_n"].split())
+    for t in a["_n"].split():
+        if 2 <= len(t) <= 4 and t.isalpha() and t not in NOT_CODES and t not in words_b and t in b["_runs"]:
+            return t, b["_runs"][t]
+    return None
+
+
+def expand(a: dict, b: dict) -> tuple[str, str, str | None]:
+    """Both names with a short code written out in full (taken from the other name), and what was expanded."""
+    for x, y in ((a, b), (b, a)):
+        hit = short_code(x, y)
+        if hit:
+            code, words = hit
+            full = " ".join(" ".join(words) if t == code else t for t in x["_n"].split())
+            note = f"{code.upper()} = {' '.join(w.title() for w in words)}"
+            return (full, b["_n"], note) if x is a else (a["_n"], full, note)
+    return a["_n"], b["_n"], None
+
+
 def core(n: str) -> set[str]:
     return {t for t in n.split() if t not in STOP}
 
@@ -58,7 +97,7 @@ def prep(listings: list[dict]) -> list[dict]:
     out = []
     for l in listings:
         n = norm(l["name"])
-        out.append({**l, "_n": n, "_core": core(n), "_num": numbers(n), "_fam": brand_family(n, None),
+        out.append({**l, "_n": n, "_core": core(n), "_num": numbers(n), "_fam": brand_family(n, None), "_runs": initial_runs(n),
                     "_phone": digits(l["phone"]), "_addr": norm(l["address"]), "_amen": set(l["amenities"] or [])})
     # suppliers list a chain's central number for every branch: such a phone says nothing about which building it is
     at: dict = {}
@@ -72,7 +111,8 @@ def prep(listings: list[dict]) -> list[dict]:
 
 
 def block(P: list[dict]) -> list[tuple[int, int]]:
-    """Candidate pairs: within 2 km AND (a shared distinctive name token, the same brand family, or within 100 m)."""
+    """Candidate pairs: within 2 km AND (a shared distinctive name token, the same brand family, a short code that spells
+    the other's initials, or within 100 m)."""
     lat = np.array([p["lat"] for p in P]); lng = np.array([p["lng"] for p in P])
     pairs = []
     for i in range(len(P)):
@@ -80,7 +120,7 @@ def block(P: list[dict]) -> list[tuple[int, int]]:
         for k in np.nonzero(d <= BLOCK_RADIUS_M)[0]:
             j = i + 1 + int(k)
             a, b = P[i], P[j]
-            if (a["_core"] & b["_core"]) or (a["_fam"] and a["_fam"] == b["_fam"]) or d[k] <= 100:
+            if (a["_core"] & b["_core"]) or (a["_fam"] and a["_fam"] == b["_fam"]) or d[k] <= 100 or short_code(a, b) or short_code(b, a):
                 pairs.append((i, j))
     return pairs
 
@@ -94,7 +134,7 @@ def haversine_vec(lat1, lng1, lat2, lng2):
 
 FEATURES = ["name_set", "name_sort", "name_partial", "core_jaccard", "num_match", "family_match", "dist_log", "phone_match",
             "star_delta", "addr_sort", "postcode_match", "emb_cos", "img_min_ham", "img_close", "same_supplier", "amen_jaccard",
-            "checkin_eq"]
+            "checkin_eq", "short_code"]
 
 
 def _tri(a, b):
@@ -105,14 +145,17 @@ def _tri(a, b):
 
 
 def pair_features(a: dict, b: dict, emb_cos: float, img: tuple[float, int]) -> dict:
-    na, nb = " ".join(sorted(a["_core"])), " ".join(sorted(b["_core"]))
-    u = a["_core"] | b["_core"]
+    """Name features are computed with short codes written out ("HGI Dubai Deira" vs "Hilton Garden Inn Dubai Deira")."""
+    fa, fb, code = expand(a, b)
+    ca, cb = core(fa), core(fb)
+    na, nb = " ".join(sorted(ca)), " ".join(sorted(cb))
+    u = ca | cb
     num = 0 if not (a["_num"] and b["_num"]) else (1 if a["_num"] == b["_num"] else -1)
     fam = 0 if not (a["_fam"] and b["_fam"]) else (1 if a["_fam"] == b["_fam"] else -1)
     am = a["_amen"] | b["_amen"]
     return {
-        "name_set": fuzz.token_set_ratio(na, nb) / 100, "name_sort": fuzz.token_sort_ratio(a["_n"], b["_n"]) / 100,
-        "name_partial": fuzz.partial_ratio(na, nb) / 100, "core_jaccard": len(a["_core"] & b["_core"]) / len(u) if u else 0.0,
+        "name_set": fuzz.token_set_ratio(na, nb) / 100, "name_sort": fuzz.token_sort_ratio(fa, fb) / 100,
+        "name_partial": fuzz.partial_ratio(na, nb) / 100, "core_jaccard": len(ca & cb) / len(u) if u else 0.0,
         "num_match": num, "family_match": fam,
         "dist_log": float(np.log1p(haversine_m(a["lat"], a["lng"], b["lat"], b["lng"]))),
         "phone_match": 0 if a["_chain_phone"] or b["_chain_phone"] else _tri(a["_phone"], b["_phone"]),
@@ -122,6 +165,7 @@ def pair_features(a: dict, b: dict, emb_cos: float, img: tuple[float, int]) -> d
         "same_supplier": float(a["supplier_id"] == b["supplier_id"]),
         "amen_jaccard": len(a["_amen"] & b["_amen"]) / len(am) if am else np.nan,
         "checkin_eq": float(a["checkin_time"] == b["checkin_time"]),
+        "short_code": float(code is not None),
     }
 
 
@@ -179,8 +223,12 @@ def img_sim(ha: list, hb: list) -> tuple[float, int]:
 # ------------------------------------------------------------------ never-merge constraints
 def conflict(a: dict, b: dict) -> str | None:
     """A reason two listings can never be the same hotel, or None."""
-    if a["_fam"] and b["_fam"] and a["_fam"] != b["_fam"]:
-        return f"different brand family ({a['_fam']} vs {b['_fam']})"
+    fam_a, fam_b = a["_fam"], b["_fam"]
+    fa, fb, code = expand(a, b)
+    if code:                                     # "FP by Sheraton" is Four Points once the code is written out
+        fam_a, fam_b = brand_family(fa, None), brand_family(fb, None)
+    if fam_a and fam_b and fam_a != fam_b:
+        return f"different brand family ({fam_a} vs {fam_b})"
     if a["_num"] and b["_num"] and not (a["_num"] & b["_num"]):
         return f"different branch number ({'/'.join(sorted(a['_num']))} vs {'/'.join(sorted(b['_num']))})"
     d = haversine_m(a["lat"], a["lng"], b["lat"], b["lng"])

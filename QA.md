@@ -59,6 +59,19 @@ Everything else is synthetic and labelled:
 
 The engines learn only from the logs, never from the generator's behaviour table (a test enforces it).
 
+## Supplier naming
+
+**Suppliers send spreadsheets where one hotel is "Radisson Plaza Room", "Radisson Room" or "RP Room". Do you handle that?**
+Yes, on the **Supplier Sheets** page. Drop in the sheet (CSV or Excel):
+- **Hotel names:** a short code like "RP" is written out from the candidate's name ("RP read as Radisson Plaza") before names are compared. It then goes through the same trained Twin Finder as the catalogue, with distance, phone, stars and address. Above the auto-merge bar it is matched; between the bars a person picks; below it, "new to TBO".
+- **Room names:** the hotel's name is removed first ("~~Hyatt Place~~ Superior King"), then the room is read as tier + bed + view and mapped to the hotel's catalogue room. A name that is only the hotel ("Radisson Room") can't be mapped by any rule, so a person picks from a dropdown. It is never guessed.
+- **Duplicates inside the sheet:** the same hotel under two names is flagged ("also in this sheet as ...").
+
+On Weaver's synthetic 136-row sheet, 27/27 automatic hotel matches, 4/4 new-hotel calls and 63/63 automatic room mappings are right (METRICS.md). It is synthetic, and we wrote both sides, so that is an upper bound. Real TBO sheets would need the hand-labelling loop the Ops queue already has.
+
+**What if a sheet has no coordinates?**
+The model needs distance, so it doesn't guess. The page suggests catalogue hotels by name and sends the hotel to a person.
+
 ## Matching and pricing (still apply)
 
 **Your precision is 99.7%: aren't you grading your own homework?**

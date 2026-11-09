@@ -106,7 +106,7 @@ def compute() -> dict:
                "validation": {"precision_at_auto": m["val_precision_at_auto"], "recall_at_auto": m["val_recall_at_auto"],
                               "n_val": m["n_val"], "scoring": m.get("scoring", "")}}
     return {"generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "hotels": hotels, "hard_negatives": hard, "rooms": rooms,
-            "activities": acts, "routing": routing, "blind": blind_metrics(cl, rm, am), "promise": promise_metrics(), "remix": remix_metrics(), "matcher": {k: m[k] for k in (
+            "activities": acts, "routing": routing, "blind": blind_metrics(cl, rm, am), "promise": promise_metrics(), "remix": remix_metrics(), "naming": naming_metrics(hold), "matcher": {k: m[k] for k in (
                 "n_train", "train_pos", "excluded_holdout", "embeddings", "importance", "seconds")}}
 
 
@@ -153,6 +153,68 @@ def blind_metrics(cl, rm, am) -> dict:
                    "human_labelled": sum(1 for _, _, h in rows if h), "vs_human": score(lambda p, h: h)}
     return {"pairs": len(pairs), "stale": stale, "by_type": out, "disagreements": disagreements,
             "human_labelled": len(human)}
+
+
+def naming_metrics(hold: set) -> dict:
+    """Short-code listings, room names that carry the hotel's name, and Weaver's sample sheet (data/naming.py)."""
+    truth = {t["listing_id"]: t for t in _rows("hotel_truth")}
+    cl = dict(pl.read_parquet(config.BUILD / "hotel_clusters.parquet").iter_rows())
+    short = {l for l, t in truth.items() if "short_code_name" in t["corruptions"]}
+
+    def pairs(ids):
+        tp = fp = fn = 0
+        for a in ids:
+            for b in truth:
+                if a == b or (b in ids and b < a):
+                    continue
+                t, p = truth[a]["hotel_id"] == truth[b]["hotel_id"], cl[a] == cl[b]
+                tp += t and p; fp += p and not t; fn += t and not p
+        return {"listings": len(ids), "precision": round(tp / (tp + fp), 4) if tp + fp else None,
+                "recall": round(tp / (tp + fn), 4) if tp + fn else None, "false_merges": fp, "missed": fn,
+                "alone": sum(all(cl[a] != cl[b] for b in truth if b != a and truth[b]["hotel_id"] == truth[a]["hotel_id"]) for a in ids)}
+    rt = {r["supplier_room_id"]: r for r in _rows("room_truth")}
+    rm = {r["supplier_room_id"]: r for r in _rows("room_map")}
+    by: dict = {}
+    for r in _rows("supplier_rooms"):
+        by.setdefault(truth[r["listing_id"]]["hotel_id"], []).append(r["supplier_room_id"])
+    prefixed = {k for k, r in rt.items() if "hotel_in_room_name" in r["corruptions"]}
+    tp = fp = fn = 0
+    for rs in by.values():
+        for a, b in itertools.combinations(rs, 2):
+            if a in prefixed or b in prefixed:
+                t, p = rt[a]["room_id"] == rt[b]["room_id"], rm[a]["room_id"] == rm[b]["room_id"]
+                tp += t and p; fp += p and not t; fn += t and not p
+    only = [k for k, r in rt.items() if "room_names_only_hotel" in r["corruptions"]]
+    from samesame.ingest import sheet
+    w = sheet.ingest_sample()
+    return {"short_code": {"all": pairs(short), "held_out": pairs({l for l in short if truth[l]["hotel_id"] in hold})},
+            "rooms_with_hotel_name": {"rooms": len(prefixed), "precision": round(tp / (tp + fp), 4) if tp + fp else None,
+                                      "recall": round(tp / (tp + fn), 4) if tp + fn else None, "false_merges": fp, "missed": fn},
+            "rooms_only_hotel": {"rooms": len(only), "to_person": sum("unmapped" in rm[k]["room_id"] for k in only)},
+            "weaver": {"summary": w["summary"], "check": w["check"]}}
+
+
+def _render_naming(n: dict) -> list[str]:
+    sc, ra, ro, w = n["short_code"], n["rooms_with_hotel_name"], n["rooms_only_hotel"], n["weaver"]
+    ws, ck = w["summary"], w["check"]
+    return [
+        "", "## Supplier naming: short codes and rate sheets (data/naming.py, synthetic)", "",
+        "Suppliers write one hotel as \"Hilton Garden Inn Dubai Deira\" and \"HGI Dubai Deira\", and rooms as \"HP SUP KG CV\" or just \"Hyatt Place Room\". "
+        "The short-code listings are extra rows with no photos; the frozen held-out set predates them and does not contain them.", "",
+        "| Slice | Items | Precision | Recall | False merges | Missed pairs | Left on their own |", "|---|---|---|---|---|---|---|",
+        *[f"| short-code listings, {k.replace('_', ' ')} | {sc[k]['listings']} | {_f(sc[k]['precision'])} | {_f(sc[k]['recall'])} | {sc[k]['false_merges']} | {sc[k]['missed']} | {sc[k]['alone']} |"
+          for k in ("all", "held_out")],
+        f"| room names carrying the hotel's name | {ra['rooms']} | {_f(ra['precision'])} | {_f(ra['recall'])} | {ra['false_merges']} | {ra['missed']} | — |",
+        "",
+        f"- Room names that are only the hotel (\"Hyatt Place Room\"): {ro['rooms']}; {ro['to_person']} sent to a person as unmapped, never pooled with another room.",
+        f"- **Weaver's sample sheet** (a fictional 7th supplier, not in the catalogue): {ws['rows']} rows → {ws['names']} hotel names → {ws['hotels']} hotels. "
+        f"{ws['matched']} matched automatically, {ws['new']} new to TBO, {ws['review']} to a person, {ws['listed_twice']} listed twice under two names. "
+        f"Rooms: {ws['room_names']} names → {ws['rooms_mapped']} mapped, {ws['rooms_person']} to a person, {ws['rooms_new']} new.",
+        f"- Against Weaver's answer key: hotels {ck['hotels']['matched_right']}/{ck['hotels']['matched_right'] + ck['hotels']['matched_wrong']} automatic matches right, "
+        f"{ck['hotels']['new_right']}/{ck['hotels']['new_right'] + ck['hotels']['new_wrong']} new-hotel calls right; rooms "
+        f"{ck['rooms']['mapped_right']}/{ck['rooms']['mapped_right'] + ck['rooms']['mapped_wrong']} automatic mappings right. "
+        "We wrote the generator, the matcher and this sheet, so treat these as an upper bound." if ck else "- Weaver's answer key not available.",
+    ]
 
 
 def _f(x):
@@ -335,6 +397,8 @@ def render(r: dict) -> str:
         "not that real suppliers behave this way.",
         "",
         *_render_remix(r["remix"]),
+        *_render_naming(r["naming"]),
+        "",
         "## Caveats (read before quoting any number above)",
         "",
         "- **We wrote both the generator and the matcher.** Feature design, the room parser and the Variant DNA rules were written knowing how the "
@@ -343,6 +407,9 @@ def render(r: dict) -> str:
         "Their numbers are not blind; only C's human labels on the held-out pairs are an independent check.",
         "- The hotel model never trained or chose thresholds on held-out families, and held-out listings carry a corruption family "
         "(alternative transliterations, e.g. Jumeira, Dayra, Dubayy) that never appears in training.",
+        "- **Short codes were designed knowing the generator's rule** (initials of the leading words). The matcher's reading of them is general "
+        "(any 2-4 letter word that spells the initials of words in the other name), but the brand rule was changed to read written-out names "
+        "after we saw it blocking short-code listings across the whole catalogue, held-out families included.",
     ]
     return "\n".join(lines) + "\n"
 

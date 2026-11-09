@@ -159,4 +159,4 @@ def world_relation(entity_type: str, a: str, b: str) -> str:
 
 def ready() -> bool:
     m = config.BUILD / "manifest.json"
-    return m.exists() and "r1" in json.loads(m.read_text(encoding="utf-8")).get("stages", [])
+    return m.exists() and "n1" in json.loads(m.read_text(encoding="utf-8")).get("stages", [])
