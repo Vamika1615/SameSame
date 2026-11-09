@@ -19,74 +19,80 @@ export default function HotelDetailPage() {
   return <Detail d={res.data} demo={id === "demo"} />;
 }
 
+type Tab = "offers" | "about" | "rooms" | "trip";
+
 function Detail({ d, demo }: { d: HotelDetail; demo: boolean }) {
   const [params, setParams] = useSearchParams();
   const tpOn = params.get("tp") === "1";
   const booking = params.get("book") === "1";
   const trip = params.get("trip") === "1";
+  const tab: Tab = trip ? "trip" : ((params.get("tab") as Tab) ?? "offers");
   const enrich = params.get("enrich") === "before" ? "before" : "after";
   const bookRef = useRef<HTMLDivElement>(null);
-  const offersRef = useRef<HTMLElement>(null);
   const set = useCallback((k: string, v: string) => { const n = new URLSearchParams(params); n.set(k, v); setParams(n, { replace: true }); }, [params, setParams]);
+  const setTab = (t: Tab) => { const n = new URLSearchParams(params); n.set("tab", t); n.delete("trip"); if (t === "trip") n.set("trip", "1"); setParams(n, { replace: true }); };
 
   useEffect(() => { if (booking) setTimeout(() => bookRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 450); }, [booking]);
-  useEffect(() => { if (tpOn && !booking) offersRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }, [tpOn, booking]);
-  // Beat 3: Space flips True Price. Beat 4's Space is handled by the booking panel.
+  // Space flips True Price. The booking panel and the trip card handle their own Space.
   usePresenterAction(useCallback(() => { if (!booking && !trip) set("tp", tpOn ? "0" : "1"); }, [booking, trip, tpOn, set]));
 
   const fact = (k: string) => d.facts.find((f) => f.key === k);
   const p = d.params;
+  const tabs: [Tab, string][] = [["offers", `Offers · ${d.offers.length}`], ["about", "About the hotel"], ["rooms", `Rooms · ${d.rooms.length}`], ...(demo ? [["trip", "Trip package"] as [Tab, string]] : [])];
   return (
-    <div className="mx-auto max-w-[1500px] px-8 pb-[50vh] pt-6">
-      <Link to="/hotels?view=samesame" className="inline-flex items-center gap-1 text-ink-mute hover:text-ink"><ArrowLeft className="h-4 w-4" />Back to results</Link>
+    <div className="mx-auto max-w-[1400px] px-8 pb-24 pt-6">
+      <Link to="/hotels" className="inline-flex items-center gap-1 text-sm text-ink-mute hover:text-ink"><ArrowLeft className="h-4 w-4" />All hotels</Link>
       <div className="mt-3">
-        <PageHeader eyebrow={`Hotel · ${d.params.city}`} title={d.name}
-          subtitle={<span className="flex flex-wrap items-center gap-3">
-            {fact("star") && <FactValue f={fact("star")!} />}·{fact("address") && <FactValue f={fact("address")!} />}
-            <span className="rounded-full bg-accent-700 px-3 py-0.5 text-sm font-semibold text-white">{new Set(d.offers.map((o) => o.supplier)).size} suppliers · {d.offers.length} offers</span>
-          </span>}
-          right={d.lookalike && (
-            <div className="flex items-center gap-2 rounded-2xl bg-danger-50 px-4 py-2.5 text-danger-700 shadow-card">
-              <AlertTriangle className="h-4 w-4" />Not the same as <b>{d.lookalike.other_name}</b> ({Math.round(d.lookalike.distance_m)} m away)
-            </div>
-          )} />
-      </div>
-
-      {trip && <ConnectedTripCard active={trip} />}
-
-      <EnrichmentSection d={d} mode={enrich} onMode={(m) => set("enrich", m)} />
-
-      <section ref={offersRef} className="mt-10 scroll-mt-4">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h2 className="text-[28px] font-semibold text-accent-700">Compare offers</h2>
-            <div className="mt-1 text-ink-mute">
-              {p.adults} adults · {p.nights} nights · travel {new Date(p.checkin).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · client wants {p.needs.join(", ") || "nothing extra"}
-            </div>
+        <PageHeader title={d.name}
+          subtitle={<span className="flex flex-wrap items-center gap-x-2">
+            {fact("star") && <FactValue f={fact("star")!} />}<span>·</span>{fact("address") && <FactValue f={fact("address")!} />}
+            <span>· sold by {new Set(d.offers.map((o) => o.supplier)).size} suppliers</span>
+          </span>} />
+        {d.lookalike && (
+          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-danger-50 px-3 py-1 text-sm text-danger-700">
+            <AlertTriangle className="h-4 w-4" />Not the same hotel as {d.lookalike.other_name}, {Math.round(d.lookalike.distance_m)} m away
           </div>
-          <button onClick={() => set("tp", tpOn ? "0" : "1")}
-            className={cn("flex items-center gap-3 rounded-xl border-2 px-5 py-3 text-lg font-semibold transition-colors",
-              tpOn ? "border-accent-600 bg-accent-600 text-white" : "border-ink bg-paper text-ink hover:bg-paper-warm")}>
-            <span className={cn("relative h-6 w-11 rounded-full transition-colors", tpOn ? "bg-white/30" : "bg-paper-line")}>
-              <motion.span layout className="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow" style={{ left: tpOn ? 22 : 2 }} />
-            </span>
-            True Price
-          </button>
-        </div>
-        <OffersTable offers={d.offers} tpOn={tpOn} />
-        <p className="mt-3 text-sm text-ink-mute">
-          True Price = sticker + missing needs + cancellation risk + price-change risk + booking-failure risk − pay-later value. Hover any term for its assumption.
-          The sticker stays the big number; True Price can be switched off.
-        </p>
-      </section>
-
-      {d.reference && <section className="mt-10"><ReferenceSection r={d.reference} /></section>}
-      <section className="mt-10"><RoomsSection d={d} /></section>
-
-      <div ref={bookRef} className="scroll-mt-6">
-        <BookingPanel offers={d.offers} active={booking} />
+        )}
       </div>
-      {demo && !trip && <ConnectedTripCard active={false} />}
+
+      <div className="mt-6 flex gap-1 border-b border-paper-line">
+        {tabs.map(([k, label]) => (
+          <button key={k} onClick={() => setTab(k)} className={cn("relative px-4 py-2.5 text-[15px] font-medium transition-colors", tab === k ? "text-ink" : "text-ink-mute hover:text-ink")}>
+            {label}{tab === k && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-accent-700" />}
+          </button>
+        ))}
+      </div>
+
+      {tab === "offers" && (
+        <>
+          <section className="mt-6">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div className="text-ink-mute">
+                {p.adults} adults · {p.nights} nights from {new Date(p.checkin).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · client wants {p.needs.join(", ") || "nothing extra"}
+              </div>
+              <button onClick={() => set("tp", tpOn ? "0" : "1")} className="flex items-center gap-3 rounded-full border border-paper-line bg-paper px-4 py-2 text-sm font-medium text-ink-soft hover:border-accent-500">
+                <span className={cn("relative h-5 w-9 rounded-full transition-colors", tpOn ? "bg-accent-700" : "bg-paper-line")}>
+                  <motion.span layout className="absolute top-0.5 h-4 w-4 rounded-full bg-white shadow" style={{ left: tpOn ? 18 : 2 }} />
+                </span>
+                Rank by True Price
+              </button>
+            </div>
+            <OffersTable offers={d.offers} tpOn={tpOn} />
+            <p className="mt-3 text-sm text-ink-mute">
+              True Price = listed price + extras the client needs + the expected cost of cancellation, price changes and failed bookings − the value of paying later. Hover any term for its assumption.
+            </p>
+          </section>
+          <div ref={bookRef} className="scroll-mt-36"><BookingPanel offers={d.offers} active={booking} /></div>
+        </>
+      )}
+      {tab === "about" && (
+        <>
+          <EnrichmentSection d={d} mode={enrich} onMode={(m) => set("enrich", m)} />
+          {d.reference && <section className="mt-6"><ReferenceSection r={d.reference} /></section>}
+        </>
+      )}
+      {tab === "rooms" && <section className="mt-6"><RoomsSection d={d} /></section>}
+      {tab === "trip" && demo && <ConnectedTripCard active={trip} />}
     </div>
   );
 }
@@ -112,7 +118,7 @@ function EnrichmentSection({ d, mode, onMode }: { d: HotelDetail; mode: "before"
   const images = before ? e.before_images : d.images;
   const facts = before ? e.before_facts : d.facts;
   return (
-    <section className="mt-6 rounded-3xl border border-paper-line bg-paper shadow-card p-5">
+    <section className="mt-6 rounded-2xl border border-paper-line bg-paper p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Segmented size="md" value={mode} onChange={onMode}
@@ -179,8 +185,8 @@ const TERM_SHORT: Record<string, string> = { fill_needs: "needs", cancel_risk: "
 function OffersTable({ offers, tpOn }: { offers: Offer[]; tpOn: boolean }) {
   const rows = [...offers].sort((a, b) => tpOn ? a.true_rank - b.true_rank : a.sticker_rank - b.sticker_rank);
   return (
-    <div className="mt-4 overflow-visible rounded-3xl border border-paper-line bg-paper shadow-card">
-      <div className="grid grid-cols-[48px_1.25fr_1.2fr_1.5fr_0.9fr_1.2fr_1fr_0.9fr] gap-3 border-b border-paper-line px-4 py-3 text-sm font-semibold uppercase tracking-wide text-ink-mute">
+    <div className="mt-4 overflow-visible rounded-2xl border border-paper-line bg-paper">
+      <div className="grid grid-cols-[48px_1.25fr_1.2fr_1.5fr_0.9fr_1.2fr_1fr_0.9fr] gap-3 border-b border-paper-line px-4 py-3 text-xs font-medium text-ink-mute">
         <div>#</div><div>Supplier</div><div>Room · board</div><div>Price</div><div>Availability</div><div>Cancellation</div><div>Payment</div><div className="text-center">Reliability</div>
       </div>
       <LayoutGroup>
@@ -202,8 +208,8 @@ function OffersTable({ offers, tpOn }: { offers: Offer[]; tpOn: boolean }) {
               <div><div className="font-medium">{o.room_name}</div><div className={cn("text-sm", o.board === "Room only" ? "text-ink-mute" : "font-semibold text-ok-700")}>{o.board}</div></div>
               <div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-2xl font-bold tabular-nums">{inr(o.price)}</span>
-                  <FlipBoard text={tpOn ? inr(o.true_price.total).padStart(8, " ") : "  TRUE  "} className="text-[21px]" tone={tpOn && i === 0 ? "accent" : "dark"} />
+                  <span className={cn("text-xl font-semibold tabular-nums", tpOn && "text-ink-mute")}>{inr(o.price)}</span>
+                  {tpOn && <FlipBoard text={inr(o.true_price.total).padStart(8, " ")} className="text-[18px]" tone={i === 0 ? "accent" : "dark"} />}
                 </div>
                 {tpOn && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-1 flex flex-wrap gap-x-1.5 text-[13px] text-ink-mute">
@@ -232,8 +238,8 @@ function OffersTable({ offers, tpOn }: { offers: Offer[]; tpOn: boolean }) {
 /** Real public data for the matched property: shown beside the supplier vote, never mixed into it. */
 function ReferenceSection({ r }: { r: Reference }) {
   return (
-    <div className="rounded-3xl border border-paper-line bg-paper shadow-card p-5">
-      <h2 className="text-[28px] font-semibold text-accent-700">Reference data</h2>
+    <div className="rounded-2xl border border-paper-line bg-paper p-5">
+      <h2 className="text-xl text-ink">Public reference data</h2>
       <p className="mt-1 text-ink-mute">Matched to <a className="underline" href={r.url} target="_blank" rel="noreferrer">OpenStreetMap {r.osm_id}</a> ({r.match}). Real, public data, not from any supplier.</p>
       <dl className="mt-3 grid grid-cols-[120px_1fr] gap-y-1.5">
         {([["Name", r.name], ["Address", r.address], ["Phone", r.phone], ["Website", r.website], ["Stars", r.stars && `${r.stars}★`]] as const)
@@ -253,11 +259,10 @@ function ReferenceSection({ r }: { r: Reference }) {
 function RoomsSection({ d }: { d: HotelDetail }) {
   return (
     <>
-      <h2 className="text-[28px] font-semibold text-accent-700">Room types, mapped</h2>
-      <p className="mt-1 text-ink-mute">Every supplier names rooms differently. Twin Finder maps them to one canonical room.</p>
+      <p className="text-ink-mute">Every supplier names rooms differently. Each card is one real room type, with the names suppliers use for it.</p>
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         {d.rooms.map((r) => (
-          <div key={r.room_id} className="rounded-2xl border border-paper-line bg-paper shadow-card p-4">
+          <div key={r.room_id} className="rounded-2xl border border-paper-line bg-paper p-4">
             <div className="text-lg font-bold">{r.name}</div>
             <div className="mt-1 flex flex-wrap gap-1.5 text-xs">{Object.entries(r.attrs).map(([k, v]) => <span key={k} className="rounded bg-accent-50 px-1.5 py-0.5 text-accent-700">{k.replace("_", " ")}: {v}</span>)}</div>
             <ul className="mt-3 space-y-1.5">

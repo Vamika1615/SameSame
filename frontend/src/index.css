@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 html, body, #root { height: 100%; }
-body { @apply bg-paper-warm text-ink antialiased; font-feature-settings: "tnum" 1; }
+body { @apply text-ink antialiased; background: #f8f6f2; font-feature-settings: "tnum" 1; }
 h1, h2, .font-display { font-family: theme("fontFamily.display"); letter-spacing: -0.01em; }
 h1 { font-weight: 600; }
 h2 { font-weight: 600; }

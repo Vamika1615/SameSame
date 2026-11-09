@@ -10,14 +10,14 @@ export default function SuppliersPage() {
   if (res.status === "error") return <ErrorState error={res.error} onRetry={res.reload} />;
   if (!res.data.length) return <Empty title="No suppliers yet" />;
   return (
-    <div className="mx-auto max-w-[1200px] px-8 pb-20 pt-6">
-      <PageHeader eyebrow="Suppliers" title={<>Who keeps <span className="italic">their promise.</span></>}
-        subtitle="Honour rate at 15–45 days lead, fitted on our own booking attempts: thin data borrows from the supplier’s other lead times and the market, so a new supplier starts near average and earns its rate. Fictional suppliers, synthetic logs." />
-      <table className="mt-6 w-full overflow-hidden rounded-3xl border border-paper-line bg-paper shadow-card">
-        <thead className="text-left text-sm uppercase tracking-wide text-ink-mute">
+    <div className="mx-auto max-w-[1400px] px-8 pb-20 pt-8">
+      <PageHeader title="Which suppliers keep their promise"
+        subtitle="How often each supplier confirms a booking at the quoted price, 15–45 days out, learned from past booking attempts. A supplier with little history starts near the market average until it earns its own rate. Fictional suppliers, synthetic history." />
+      <table className="mt-6 w-full overflow-hidden rounded-2xl border border-paper-line bg-paper">
+        <thead className="text-left text-xs text-ink-mute">
           <tr className="border-b border-paper-line">
-            <th className="px-4 py-3">Supplier</th><th className="px-4 py-3 text-center">Hotels</th><th className="px-4 py-3 text-center">Activities</th>
-            <th className="px-4 py-3 text-right">Attempts</th><th className="px-4 py-3 text-right">Duplicate share</th><th className="px-4 py-3 text-right">Price spread</th>
+            <th className="px-4 py-3 font-medium">Supplier</th><th className="px-4 py-3 text-center font-medium">Hotels: confirmed</th><th className="px-4 py-3 text-center font-medium">Tours: confirmed</th>
+            <th className="px-4 py-3 text-right font-medium">Booking attempts</th><th className="px-4 py-3 text-right font-medium">Listings that duplicate another</th><th className="px-4 py-3 text-right font-medium">Price spread</th>
           </tr>
         </thead>
         <tbody>

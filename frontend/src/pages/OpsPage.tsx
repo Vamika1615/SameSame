@@ -7,7 +7,6 @@ import { Empty, ErrorState, Loading } from "@/components/States";
 import { Illustrative, SupplierBadge, cn } from "@/components/ui";
 import { PageHeader } from "@/components/PageHeader";
 import { RemixApprovals } from "@/components/RemixApprovals";
-import { Segmented } from "@/components/ui";
 import { useSearchParams } from "react-router-dom";
 
 type Audit = { audit_id: string; pair_id: string; label: string; reviewer: string; truth: string; correct: boolean; undone?: boolean };
@@ -66,23 +65,19 @@ function TwinQueue() {
   const item = ack?.item ?? current;
 
   return (
-    <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-6 px-8 pb-20 pt-6 xl:grid-cols-[1fr_340px]">
+    <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-8 px-8 pb-20 pt-8 xl:grid-cols-[1fr_320px]">
       <div>
-        <PageHeader eyebrow="Ops queue" title={<>Spot the <span className="italic">Twin.</span></>}
-          subtitle={<>Pairs the Twin Finder wasn't sure enough to merge, or a never-merge rule blocked. Nothing here was auto-merged. <a href="/label" className="font-semibold text-accent-700 underline">Held-out labelling →</a></>}
-          right={<div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 rounded-full bg-sun-50 px-4 py-2 font-bold text-sun-700 shadow-card"><Flame className="h-5 w-5" />streak {streak}</div>
-            <div className="rounded-full bg-paper px-4 py-2 font-semibold text-ink-soft shadow-card">{queue.length} in queue</div>
-          </div>} />
+        <PageHeader title="Are these the same?"
+          subtitle={<>The matcher wasn't sure enough to merge these, so a person decides. Your answer is used by the next build. Keys: S same · V variant · D different · U undo.</>}
+          right={<div className="text-sm text-ink-mute"><b className="text-ink">{queue.length}</b> waiting{streak > 1 && <> · <Flame className="inline h-4 w-4 text-sun-500" />{streak} in a row</>}</div>} />
 
         {!item ? (
           <Empty title="Queue is empty">Every uncertain pair has a human label. Press U to undo the last one.</Empty>
         ) : (
           <div className="mt-5">
-            <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-paper-line bg-paper shadow-card px-4 py-3">
-              <span className="rounded-full bg-accent-700 px-3 py-0.5 text-sm font-semibold uppercase tracking-wide text-white">{item.entity_type}</span>
-              <span className="text-lg">Model says <b>{item.model_relation}</b> at <b className="tabular-nums">{item.model_p.toFixed(2)}</b></span>
-              <span className="text-ink-mute">· {ROUTE[item.routed_by]}</span>
+            <div className="flex flex-wrap items-center gap-2 text-[15px] text-ink-soft">
+              <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-semibold capitalize text-accent-700">{item.entity_type}</span>
+              The model leans <b>{item.model_relation}</b> (p {item.model_p.toFixed(2)}) <span className="text-ink-mute">· {ROUTE[item.routed_by]}</span>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-4">
               <Side s={item.left} other={item.right} />
@@ -109,7 +104,7 @@ function TwinQueue() {
                 <motion.div key="keys" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mt-5 grid grid-cols-3 gap-3">
                   {(["S", "V", "D"] as const).map((k) => (
                     <button key={k} onClick={() => label(k)} disabled={busy}
-                      className={cn("rounded-xl border-2 py-4 text-xl font-bold transition-colors",
+                      className={cn("rounded-xl border-2 bg-paper py-3 text-lg font-semibold transition-colors",
                         k === "S" ? "border-ok-500 text-ok-700 hover:bg-ok-50" : k === "V" ? "border-sun-500 text-sun-700 hover:bg-sun-50" : "border-danger-500 text-danger-700 hover:bg-danger-50")}>
                       <kbd className="mr-2 rounded bg-paper-warm px-2 font-mono">{k}</kbd>{LABEL[k]}
                     </button>
@@ -121,12 +116,13 @@ function TwinQueue() {
         )}
       </div>
 
-      <aside className="rounded-3xl border border-paper-line bg-paper shadow-card p-4">
+      <aside className="h-fit rounded-2xl border border-paper-line bg-paper p-4 xl:mt-20">
         <div className="flex items-center justify-between">
-          <h2 className="font-bold">Audit log</h2>
+          <h2 className="font-sans text-[15px] font-semibold">Your decisions</h2>
           <button onClick={undo} className="flex items-center gap-1 text-sm font-semibold text-ink-soft hover:text-ink"><Undo2 className="h-4 w-4" />Undo (U)</button>
         </div>
         {audit.length === 0 && <div className="mt-3 text-sm text-ink-mute">No labels yet.</div>}
+        <a href="/label" className="mt-3 block text-xs text-ink-mute hover:text-ink">Held-out labelling (independent check) →</a>
         <ul className="mt-3 space-y-2 text-sm">
           {audit.map((a) => (
             <li key={a.audit_id} className={cn("rounded-lg border border-paper-line px-3 py-2", a.undone && "opacity-40 line-through")}>
@@ -142,12 +138,12 @@ function TwinQueue() {
 
 function Side({ s, other }: { s: ReviewSide; other: ReviewSide }) {
   return (
-    <div className="rounded-2xl border border-paper-line bg-paper shadow-card p-4">
+    <div className="rounded-2xl border border-paper-line bg-paper p-4">
       <div className="flex items-start gap-3">
         {s.image && <Illustrative img={s.image} className="h-20 w-28 shrink-0 rounded-lg" label={false} />}
         <div className="min-w-0">
           <SupplierBadge name={s.supplier} small />
-          <div className="mt-1 font-display text-[22px] font-semibold leading-tight text-accent-700">{s.title}</div>
+          <div className="mt-1 text-[18px] font-semibold leading-tight text-ink">{s.title}</div>
         </div>
       </div>
       <dl className="mt-3 grid grid-cols-[110px_1fr] gap-y-1.5">
@@ -165,18 +161,14 @@ function Side({ s, other }: { s: ReviewSide; other: ReviewSide }) {
   );
 }
 
-/** Ops: Spot the Twin (matcher review) and Remix approvals (product team), side by side. */
+/** Review: Remix approvals (product team) and uncertain matches (ops). The section sub-tabs switch between them. */
 export default function OpsPage() {
-  const [params, setParams] = useSearchParams();
-  const tab = params.get("tab") === "remix" ? "remix" : "twin";
-  const tabs = <Segmented size="md" value={tab} onChange={(v) => setParams({ tab: v }, { replace: true })}
-    options={[{ value: "twin", label: "Spot the Twin" }, { value: "remix", label: "Remix approvals" }]} />;
-  if (tab === "twin") return <><div className="mx-auto max-w-[1600px] px-8 pt-5">{tabs}</div><TwinQueue /></>;
+  const [params] = useSearchParams();
+  if (params.get("tab") === "twin") return <TwinQueue />;
   return (
-    <div className="mx-auto max-w-[1600px] px-8 pb-20 pt-5">
-      {tabs}
-      <div className="mt-4"><PageHeader eyebrow="Ops · product team" title={<>Nothing is sold <span className="italic">until a person approves it.</span></>}
-        subtitle="Every Remix that passes its guardrails waits here: recipe, suppliers, margin, Promise and terms. Approvals are logged and reversible; the matcher's held-out quality is below." /></div>
+    <div className="mx-auto max-w-[1400px] px-8 pb-20 pt-8">
+      <PageHeader title="Approve Remixes before they're sold"
+        subtitle="Every Remix that passes the publish rules waits here. Approve or reject it (A / R for the top one). Every decision is logged and can be undone." />
       <RemixApprovals />
     </div>
   );

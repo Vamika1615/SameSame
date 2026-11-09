@@ -34,12 +34,11 @@ export const ConnectedTripCard = forwardRef<HTMLElement, { active: boolean }>(fu
     { icon: PlaneTakeoff, label: "Airport departure", what: d.departure.title, sup: d.departure.supplier_id, price: d.departure.price, p: d.departure.p_secure },
   ];
   return (
-    <section ref={ref} className={cn("relative mt-8 scroll-mt-20 rounded-3xl border-2 bg-paper p-6 shadow-card", active ? "border-accent-700" : ok ? "border-sun-500" : "border-paper-line")}>
-      <span className="absolute -top-3 left-6 flex items-center gap-1.5 rounded-full bg-sun-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white shadow-card"><Sparkles className="h-3.5 w-3.5" />Connected Trip Remix</span>
+    <section ref={ref} className="mt-6 scroll-mt-36 rounded-2xl border border-paper-line bg-paper p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-[28px] font-semibold text-accent-700">Hotel, airport cars and the best tour Remix, as one product</h2>
-          <p className="text-ink-soft">One price, one Promise, one cancellation rule. TBO runs the failover for every part.</p>
+          <h2 className="text-[22px] text-ink">This hotel + airport cars + a tour, as one product</h2>
+          <p className="text-ink-mute">One price, one cancellation rule, and TBO handles any failed part.</p>
         </div>
         <div className="text-right">
           <div className="text-xs uppercase text-ink-mute">One price for 2</div>
@@ -73,8 +72,8 @@ export const ConnectedTripCard = forwardRef<HTMLElement, { active: boolean }>(fu
         <span className="text-ink-mute"> Parts: {d.cancellation.rules.map((r) => `${r.part}: ${r.rule}`).join(" · ")}.</span>
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <button onClick={() => run(seed)} disabled={busy} className="rounded-xl bg-accent-700 px-6 py-3 text-lg font-bold text-white shadow hover:bg-accent-900 disabled:opacity-50">Book the trip (sandbox)</button>
-        <button onClick={() => run(Math.floor(Math.random() * 1e6))} className="flex items-center gap-1.5 rounded-xl border border-paper-line px-4 py-3 font-semibold text-ink-soft hover:bg-paper-warm"><Dice5 className="h-5 w-5" />Fresh seed</button>
+        <button onClick={() => run(seed)} disabled={busy} className="rounded-full bg-accent-700 px-5 py-2 text-sm font-semibold text-white hover:bg-accent-900 disabled:opacity-50">Book the trip (sandbox)</button>
+        <button onClick={() => run(Math.floor(Math.random() * 1e6))} className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-ink-soft hover:bg-paper-warm"><Dice5 className="h-4 w-4" />Fresh seed</button>
         <label className="flex items-center gap-2 text-sm text-ink-soft">Promise guardrail
           <input type="range" min={0.85} max={0.99} step={0.01} value={minPromise ?? d.settings.min_promise} onChange={(e) => setMinPromise(Number(e.target.value))} className="accent-[#163a6b]" />
           <b className="tabular-nums">{pct(minPromise ?? d.settings.min_promise, 0)}</b></label>

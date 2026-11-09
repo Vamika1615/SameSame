@@ -1,9 +1,10 @@
-import { BarChart3, Building2, ClipboardCheck, FileSpreadsheet, Ship, SlidersHorizontal, Sparkles } from "lucide-react";
-import { NavLink, Navigate, Route, Routes } from "react-router-dom";
+import { Info } from "lucide-react";
+import { Link, NavLink, Route, Routes, useLocation } from "react-router-dom";
 import { useApi } from "@/lib/api";
 import { Presenter } from "@/lib/presenter";
 import type { Meta } from "@/contracts";
-import { Tip } from "@/components/ui";
+import { Tip, cn } from "@/components/ui";
+import HomePage from "@/pages/HomePage";
 import HotelsPage from "@/pages/HotelsPage";
 import HotelDetailPage from "@/pages/HotelDetailPage";
 import SightseeingPage from "@/pages/SightseeingPage";
@@ -16,16 +17,34 @@ import GapsPage from "@/pages/GapsPage";
 import SheetsPage from "@/pages/SheetsPage";
 import { Empty } from "@/components/States";
 
-const NAV = [
-  { to: "/remix", label: "Remix Studio", icon: Sparkles },
-  { to: "/remix/gaps", label: "Gap Finder", icon: Ship },
-  { to: "/sightseeing", label: "Sightseeing", icon: Ship },
-  { to: "/hotels", label: "Hotels", icon: Building2 },
-  { to: "/sheets", label: "Supplier Sheets", icon: FileSpreadsheet },
-  { to: "/ops", label: "Ops Queue", icon: ClipboardCheck },
-  { to: "/suppliers", label: "Suppliers", icon: BarChart3 },
-  { to: "/simulator", label: "Simulator", icon: SlidersHorizontal },
-];
+/** Four sections. Each groups the pages that answer one job; the sub-tabs are the pages. */
+export const SECTIONS = [
+  { key: "remix", label: "Remix", home: "/remix", tabs: [
+    { to: "/remix", label: "Rebuild packages", end: true },
+    { to: "/remix/gaps", label: "New products" },
+  ] },
+  { key: "catalogue", label: "Catalogue", home: "/hotels", tabs: [
+    { to: "/hotels", label: "Hotels" },
+    { to: "/sightseeing", label: "Tours" },
+    { to: "/sheets", label: "Supplier sheets" },
+  ] },
+  { key: "review", label: "Review", home: "/ops", tabs: [
+    { to: "/ops?tab=remix", label: "Remix approvals" },
+    { to: "/ops?tab=twin", label: "Uncertain matches" },
+  ] },
+  { key: "insights", label: "Insights", home: "/suppliers", tabs: [
+    { to: "/suppliers", label: "Supplier reliability" },
+    { to: "/simulator", label: "Business case" },
+  ] },
+] as const;
+
+function sectionOf(path: string) {
+  if (path.startsWith("/remix")) return "remix";
+  if (path.startsWith("/hotels") || path.startsWith("/sightseeing") || path.startsWith("/sheets")) return "catalogue";
+  if (path.startsWith("/ops") || path.startsWith("/label")) return "review";
+  if (path.startsWith("/suppliers") || path.startsWith("/simulator")) return "insights";
+  return null;
+}
 
 /** A small sun: the brand mark. */
 export function SunMark({ className = "h-7 w-7" }: { className?: string }) {
@@ -41,48 +60,78 @@ export function SunMark({ className = "h-7 w-7" }: { className?: string }) {
   );
 }
 
-function ModeBadge() {
+/** One quiet badge instead of three: the details are one hover away. */
+function DataBadge() {
   const meta = useApi<Meta>("/api/meta");
   if (meta.status !== "ready") return null;
-  const { llm, llm_model, data } = meta.data.mode;
+  const m = meta.data;
   return (
-    <div className="flex items-center gap-2 text-xs font-semibold">
-      <span className="rounded-full border border-paper-line bg-paper px-3 py-1.5 text-ink-soft">{meta.data.city} · {meta.data.currency}</span>
-      <Tip side="bottom" content={<ul className="space-y-1">{Object.entries(meta.data.sources ?? {}).map(([k, v]) => <li key={k}><b>{k.replace("_", " ")}:</b> {v}</li>)}</ul>}>
-        <span className="cursor-help rounded-full bg-sand-200 px-3 py-1.5 uppercase tracking-wide text-ink-soft">{data} data</span>
-      </Tip>
-      <span className={`rounded-full px-3 py-1.5 ${llm ? "bg-accent-50 text-accent-700" : "bg-sky-100 text-ink-soft"}`}>
-        {llm ? `LLM on · ${llm_model}` : "LLM off · rules + human queue"}
+    <Tip side="bottom" className="ml-auto" content={<div className="space-y-1">
+      <div><b>{m.city} · prices in {m.currency}</b></div>
+      {Object.entries(m.sources ?? {}).map(([k, v]) => <div key={k}><b className="capitalize">{k.replace("_", " ")}:</b> {v}</div>)}
+      <div><b>LLM:</b> {m.mode.llm ? `on (${m.mode.llm_model})` : "off. Rules decide; anything uncertain goes to a person."}</div>
+    </div>}>
+      <span className="flex cursor-help items-center gap-1.5 rounded-full border border-paper-line px-3 py-1 text-xs font-medium text-ink-mute">
+        <Info className="h-3.5 w-3.5" />{m.city} · synthetic suppliers
       </span>
+    </Tip>
+  );
+}
+
+function SubNav({ section }: { section: string }) {
+  const loc = useLocation();
+  const s = SECTIONS.find((x) => x.key === section);
+  if (!s) return null;
+  const here = loc.pathname + loc.search;
+  const isActive = (to: string, end?: boolean) => {
+    const [p, q] = to.split("?");
+    if (q) return loc.pathname === p && (here.includes(q) || (q === "tab=remix" && !loc.search.includes("tab=")));
+    return end ? loc.pathname === p : loc.pathname === p || loc.pathname.startsWith(p + "/");
+  };
+  return (
+    <div className="border-b border-paper-line bg-paper">
+      <div className="mx-auto flex max-w-[1400px] gap-6 px-8">
+        {s.tabs.map((t) => (
+          <Link key={t.to} to={t.to} className={cn("relative py-3 text-sm font-medium transition-colors",
+            isActive(t.to, "end" in t ? t.end : false) ? "text-accent-700" : "text-ink-mute hover:text-ink")}>
+            {t.label}
+            {isActive(t.to, "end" in t ? t.end : false) && <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-accent-700" />}
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
 
 export default function App() {
+  const loc = useLocation();
+  const section = sectionOf(loc.pathname);
   return (
     <div className="flex h-full flex-col">
-      <header className="sticky top-0 z-40 border-b border-paper-line/80 bg-paper/85 backdrop-blur-md">
-        <div className="mx-auto flex h-[68px] max-w-[1760px] items-center gap-10 px-8">
-          <NavLink to="/remix" className="flex items-center gap-2.5" title="Remix makes new products from parts suppliers already sell.">
-            <SunMark />
-            <span className="font-display text-[26px] font-semibold leading-none tracking-tight text-accent-700">
-              Re<span className="italic text-sun-500">mix</span>
-            </span>
-          </NavLink>
-          <nav className="flex h-full items-stretch gap-1">
-            {NAV.map(({ to, label }) => (
-              <NavLink key={to} to={to} end={to === "/remix"}
-                className={({ isActive }) => `relative flex items-center px-4 text-[15px] font-semibold transition-colors ${isActive ? "text-accent-700" : "text-ink-mute hover:text-ink"}`}>
-                {({ isActive }) => (<>{label}{isActive && <span className="absolute inset-x-4 bottom-0 h-[3px] rounded-t-full bg-sun-500" />}</>)}
-              </NavLink>
-            ))}
-          </nav>
-          <div className="ml-auto"><ModeBadge /></div>
+      <header className="sticky top-0 z-40 bg-paper/90 backdrop-blur-md">
+        <div className="border-b border-paper-line">
+          <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-10 px-8">
+            <NavLink to="/" className="flex items-center gap-2" title="Remix: new products from parts suppliers already sell">
+              <SunMark className="h-6 w-6" />
+              <span className="font-display text-[22px] font-semibold leading-none tracking-tight text-accent-700">Re<span className="italic text-sun-500">mix</span></span>
+            </NavLink>
+            <nav className="flex h-full items-stretch gap-1">
+              {SECTIONS.map((s) => (
+                <Link key={s.key} to={s.home} className={cn("relative flex items-center px-3 text-[15px] font-medium transition-colors",
+                  section === s.key ? "text-ink" : "text-ink-mute hover:text-ink")}>
+                  {s.label}
+                  {section === s.key && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-sun-500" />}
+                </Link>
+              ))}
+            </nav>
+            <DataBadge />
+          </div>
         </div>
+        {section && <SubNav section={section} />}
       </header>
-      <main className="min-w-0 flex-1 overflow-auto">
+      <main className="flex-1">
         <Routes>
-          <Route path="/" element={<Navigate to="/remix" replace />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/remix" element={<RemixStudioPage />} />
           <Route path="/remix/gaps" element={<GapsPage />} />
           <Route path="/hotels" element={<HotelsPage />} />
@@ -95,9 +144,8 @@ export default function App() {
           <Route path="/label" element={<LabelPage />} />
           <Route path="*" element={<Empty title="Page not found" />} />
         </Routes>
-        <footer className="mx-auto max-w-[1760px] px-8 pb-8 pt-4 text-xs leading-relaxed text-ink-mute">
-          <span className="font-semibold text-ink-soft">Remix · built for TBO · Track 2.</span> Remix makes new products from parts suppliers already sell. Suppliers are fictional and their data synthetic.
-          Photos from Wikimedia Commons (credited on hover); stock photos are labelled. Map data © OpenStreetMap contributors, ODbL.
+        <footer className="mx-auto max-w-[1400px] px-8 pb-8 pt-10 text-xs text-ink-mute">
+          Remix · built for TBO · Track 2. Fictional suppliers, synthetic data. Photos: Wikimedia Commons (credited on hover). Map data © OpenStreetMap contributors, ODbL.
         </footer>
       </main>
       <Presenter />
