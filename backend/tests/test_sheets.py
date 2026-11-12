@@ -49,9 +49,10 @@ def test_every_decision_follows_the_matcher_thresholds(sample):
     for h in sample["hotels"]:
         top = h["candidates"][0] if h["candidates"] else None
         if h["decision"] == "matched":
-            assert top["p"] >= auto
+            # with coordinates: the model's bar; without: an identical name shared by exactly one catalogue hotel
+            assert (top["p"] is not None and top["p"] >= auto) or (h["lat"] is None and "same name" in top["reasons"])
         if h["decision"] == "new":
-            assert top is None or top["p"] < gray
+            assert top is None or top["p"] is None or top["p"] < gray
         for room in h["rooms"]:
             assert (room["status"] == "mapped") == (room["room_id"] is not None)
             if room["status"] == "mapped":

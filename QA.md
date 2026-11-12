@@ -1,5 +1,32 @@
 # Q&A: grounded answers
 
+## Canon: supplier sheets into one catalogue
+
+**Our suppliers' sheets don't look like a database export. Can Canon read them?**
+It reads the three layouts we've seen:
+- **Price grids:** seasons across, weekday and occupancy sub-columns, room codes, extra-guest columns, one tab per rate plan, several hotels per sheet, merged headers.
+- **One row per rate.**
+- **Rotated grids.**
+
+Footnotes become terms (discount tiers, mark-up, minimum-stay fee, booking window). We tested it locally on TBO's sample sheets: AVA Cancún, Hard Rock (5 hotels, about 5,100 rates) and UNICO. A contract workbook that mixes rack, net and promo columns is refused with a clear message, not guessed.
+
+**The sheet has no address or coordinates. How do you match the hotel?**
+By name, carefully:
+- A short code is written out only when it is in the sheet ("WF" → White Fort).
+- It auto-matches only when the name is identical to exactly one catalogue hotel.
+- A close name goes to a person.
+- With coordinates, it uses Twin Finder's trained model.
+
+**Next year's sheet for the same hotel?**
+It's matched to the hotel the earlier sheet created (AVA 2027 attached to AVA 2026 in our local test), and its rooms map by code or name. No duplicate is created.
+
+**What if Canon is wrong?**
+- Nothing uncertain is merged: it waits in Catalogue → Uncertain matches.
+- Every decision is logged and can be undone.
+- An import is a draft until someone adds it, and removing it takes its hotels and rates back out.
+
+
+
 Every answer points at something on screen or in the code. Numbers come from METRICS.md, which is regenerated on every build.
 
 ## Remix

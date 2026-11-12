@@ -1,11 +1,15 @@
-"""Supplier Sheets: read a supplier's rate spreadsheet (CSV / XLSX) and resolve every row to TBO's catalogue.
+"""Import a supplier's rate sheet (CSV / XLSX, any of the layouts in ingest/layouts.py) and resolve it to the catalogue.
 
-  rows -> one listing per hotel as the sheet writes it -> Twin Finder against the catalogue (the SAME trained
-  LightGBM model, features and thresholds as the pipeline; short codes written out) -> one canonical hotel each,
-  "new to TBO", or a person decides -> room names parsed with the hotel's own name removed -> canonical room.
+  sheet -> hotels, rooms, rates and conditions (layouts.parse)
+        -> each hotel: the SAME hotel already in the catalogue, a hotel added by an earlier import, "new", or a person decides
+             with coordinates:    Twin Finder's trained LightGBM model, features and thresholds, short codes written out
+             without coordinates: names only (real grid sheets rarely give a location). Auto-matched only when the name is
+                                  identical to exactly one catalogue hotel; anything else that looks close goes to a person.
+        -> each room: the catalogue's room (by code, name, or tier + bed + view with the hotel's own name removed),
+                      a new room of the hotel, or a person decides.
 
-Reads only the uploaded sheet and the catalogue the app already serves. Never the generator's truth: the answer
-key is used only by eval/sheet_check.py, and only when the uploaded file is Weaver's sample sheet byte for byte.
+Reads only the uploaded sheet and the catalogue. Never the generator's truth: the answer key is used only by
+eval/sheet_check.py, and only when the uploaded file is Weaver's sample sheet byte for byte.
 """
 import csv
 import hashlib
@@ -19,11 +23,16 @@ import numpy as np
 from rapidfuzz import fuzz
 
 from samesame import config, store
+from samesame.ingest import layouts
+from samesame.ingest.layouts import SheetError  # noqa: F401  (re-exported for callers)
 from samesame.matching import hotels as hm
 from samesame.matching import rooms as rm
+from samesame.ranking.score import haversine_m
 
 MAX_ROWS = 5000
 SUPPLIER = "sheet"
+NAME_REVIEW = 0.85            # names this alike (once short codes are written out) go to a person when there's no location
+NEAR_IMPORTED_M = 150         # an earlier import's hotel this close, with a similar name, is the same hotel
 COLUMNS = {   # what we look for -> header spellings seen in supplier sheets (compared lower-case, units in brackets dropped)
     "name": ["hotel", "hotel name", "property", "property name", "name", "hotelname", "accommodation"],
     "address": ["address", "addr", "street address", "location"],
@@ -35,15 +44,12 @@ COLUMNS = {   # what we look for -> header spellings seen in supplier sheets (co
     "meal": ["meal", "meal plan", "board", "board basis", "boarding"],
     "price": ["price", "rate", "net", "net rate", "amount", "cost", "net price", "nightly"],
     "cancel": ["cancellation", "cancel", "cancellation policy", "refundable", "policy"],
+    "code": ["room code", "code", "opera code"],
 }
 REQUIRED = ("name", "room")
 
 
-class SheetError(ValueError):
-    pass
-
-
-# ------------------------------------------------------------------ reading
+# ------------------------------------------------------------------ the flat layout (one row per rate)
 def _header_key(h: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"\(.*?\)|[_\-./]", " ", str(h or ""))).strip().lower()
 
@@ -62,58 +68,35 @@ def map_columns(headers: list[str]) -> tuple[dict[str, int], list[str]]:
 
 
 def read_table(data: bytes, filename: str) -> list[list[str]]:
-    if filename.lower().endswith((".xlsx", ".xlsm")):
-        try:
-            import openpyxl
-        except ImportError as e:
-            raise SheetError("Reading .xlsx needs openpyxl (pip install openpyxl); or save the sheet as CSV.") from e
-        try:
-            wb = openpyxl.load_workbook(io.BytesIO(data), read_only=True, data_only=True)
-        except Exception as e:
-            raise SheetError(f"Couldn't open this Excel file: {type(e).__name__}") from e
-        ws = wb.worksheets[0]
-        rows = [["" if v is None else str(v) for v in r] for r in ws.iter_rows(values_only=True)]
-    else:
-        text = data.decode("utf-8-sig", errors="replace")
-        try:
-            dialect = csv.Sniffer().sniff(text[:4096], delimiters=",;\t|")
-        except csv.Error:
-            dialect = csv.excel
-        rows = list(csv.reader(io.StringIO(text), dialect))
-    rows = [r for r in rows if any(str(c).strip() for c in r)]
-    if not rows:
-        raise SheetError("The sheet is empty.")
-    return rows
+    """The first tab, as rows of text (kept for callers of the flat reader)."""
+    rows = layouts.read_tables(data, filename)[0][1]
+    return [r for r in rows if any(str(c).strip() for c in r)]
 
 
-def _num(v) -> float | None:
-    """'4', '4*', '4 Star', '12,500', '₹ 12500.00', '25,2048' (decimal comma) -> float."""
-    t = str(v or "").strip()
-    t = t.replace(",", "") if re.search(r"\d,\d{3}(?!\d)", t) else t.replace(",", ".")
-    m = re.search(r"-?\d+(?:\.\d+)?", t)
-    return float(m.group()) if m else None
+_num = layouts.num
 
 
 def parse_rows(data: bytes, filename: str) -> tuple[list[dict], dict]:
     table = read_table(data, filename)
-    headers, body = table[0], table[1:MAX_ROWS + 1]
+    hi = next((i for i, r in enumerate(table[:12]) if {"name", "room"} <= set(map_columns(r)[0])), 0)
+    headers, body = table[hi], table[hi + 1:hi + 1 + MAX_ROWS]
     cols, unused = map_columns(headers)
     missing = [f for f in REQUIRED if f not in cols]
     if missing:
         raise SheetError(f"Couldn't find a column for {' and '.join(missing)}. Headers seen: {', '.join(map(str, headers))}.")
     get = lambda r, f: (r[cols[f]].strip() if f in cols and cols[f] < len(r) and r[cols[f]] is not None else "")  # noqa: E731
     rows = []
-    for i, r in enumerate(body, start=1):
+    for i, r in enumerate(body, start=hi + 1):
         name = get(r, "name")
         if not name:
             continue
         lat, lng = _num(get(r, "lat")), _num(get(r, "lng"))
         rows.append({"row": i, "name": name, "address": get(r, "address") or None, "phone": get(r, "phone") or None,
                      "lat": lat if lat is not None and -90 <= lat <= 90 else None, "lng": lng if lng is not None and -180 <= lng <= 180 else None,
-                     "star": _num(get(r, "star")), "room": get(r, "room"), "meal": get(r, "meal") or None,
+                     "star": _num(get(r, "star")), "room": get(r, "room"), "code": get(r, "code") or None, "meal": get(r, "meal") or None,
                      "price": _num(get(r, "price")), "cancel": get(r, "cancel") or None})
     info = {"columns": {f: headers[i] for f, i in cols.items()}, "unused_columns": unused, "rows": len(rows),
-            "truncated": len(table) - 1 > MAX_ROWS}
+            "truncated": len(table) - 1 - hi > MAX_ROWS}
     return rows, info
 
 
@@ -161,9 +144,20 @@ def _cluster_name(cid: str) -> str:
     return service.golden(cid)["name"]
 
 
-# ------------------------------------------------------------------ resolving
-def _listings(rows: list[dict]) -> list[dict]:
-    """One listing per hotel as the sheet writes it (same name and roughly the same place)."""
+def name_score(a: str, b: str) -> float:
+    """How alike two hotel names are, 0-1. token_set alone calls 'Riviera Hotel' 100% like 'Hard Rock Hotel Riviera Maya'
+    (one name's words are a subset of the other's); averaging with token_sort charges for the words that don't match."""
+    return (fuzz.token_set_ratio(a, b) + fuzz.token_sort_ratio(a, b)) / 200
+
+
+def name_key(name: str) -> str:
+    """The distinctive words of a hotel name, order-free: 'The AVA Resort, Cancún' -> 'ava cancun resort'."""
+    return " ".join(sorted(hm.core(hm.norm(name))))
+
+
+# ------------------------------------------------------------------ hotels as the sheet writes them
+def _flat_listings(rows: list[dict], currency: str | None) -> list[dict]:
+    """One listing per hotel as a flat sheet writes it (same name and roughly the same place)."""
     groups: dict = {}
     for r in rows:
         k = (hm.norm(r["name"]), round(r["lat"], 3) if r["lat"] is not None else None, round(r["lng"], 3) if r["lng"] is not None else None)
@@ -172,12 +166,30 @@ def _listings(rows: list[dict]) -> list[dict]:
     for i, rs in enumerate(groups.values()):
         first = rs[0]
         stars = [r["star"] for r in rs if r["star"]]
+        rooms: dict = {}
+        for r in rs:
+            room = rooms.setdefault(r["room"], {"name": r["room"], "code": r["code"], "rows": [], "prices": []})
+            room["rows"].append(r["row"])
+            if r["price"] is not None:
+                room["prices"].append({"meal": r["meal"], "price": r["price"], "cancel": r["cancel"]})
         out.append({"listing_id": f"sheet:{i + 1}", "supplier_id": SUPPLIER, "name": first["name"], "address": first["address"],
                     "phone": next((r["phone"] for r in rs if r["phone"]), None), "lat": first["lat"], "lng": first["lng"],
-                    "star": stars[0] if stars else None, "amenities": [], "postcode": None, "checkin_time": None, "_rows": rs})
+                    "star": stars[0] if stars else None, "amenities": [], "postcode": None, "checkin_time": None,
+                    "rows": [r["row"] for r in rs], "rooms": list(rooms.values()), "conditions": [], "tabs": [], "name_from_file": False,
+                    "rates": [{"room": r["room"], "code": r["code"], "plan": r["meal"] or "Rate", "season_from": None, "season_to": None,
+                               "season": None, "days": None, "occupancy": None, "price": r["price"], "currency": currency,
+                               "meal": r["meal"], "cancel": r["cancel"], "row": r["row"]} for r in rs if r["price"] is not None]})
     return out
 
 
+def _grid_listings(parsed: dict) -> list[dict]:
+    return [{"listing_id": f"sheet:{i + 1}", "supplier_id": SUPPLIER, "name": h["name"], "address": h["address"], "phone": h["phone"],
+             "lat": h["lat"], "lng": h["lng"], "star": h["star"], "amenities": [], "postcode": None, "checkin_time": None,
+             "rows": [], "rooms": [{**r, "prices": []} for r in h["rooms"]], "rates": h["rates"], "conditions": h["conditions"],
+             "tabs": h["tabs"], "name_from_file": h["name_from_file"]} for i, h in enumerate(parsed["hotels"])]
+
+
+# ------------------------------------------------------------------ resolving hotels
 def _reasons(f: dict, code: str | None, d: float | None) -> list[str]:
     out = []
     if code:
@@ -194,28 +206,67 @@ def _reasons(f: dict, code: str | None, d: float | None) -> list[str]:
     return out
 
 
-def _resolve(L: list[dict]) -> list[dict]:
+def _imported_prep(imported: list[dict]) -> list[dict]:
+    return hm.prep([{"listing_id": h["id"], "name": h["name"], "phone": h.get("phone"), "address": h.get("address"), "amenities": [],
+                     "lat": h.get("lat") or 0.0, "lng": h.get("lng") or 0.0} for h in imported]) if imported else []
+
+
+def _by_name(u: dict, P: list[dict], s, imported: list[dict], IP: list[dict]) -> dict:
+    """No coordinates: compare names only, with short codes written out."""
+    best: dict = {}
+    key = name_key(u["name"])
+    for p in P:
+        # without a location, only the sheet's own short code is written out ("WF" -> White Fort). Expanding a catalogue
+        # listing's code with the sheet's words would make "SP Hotel" equal any "S... P... Hotel".
+        own = hm.short_code(u, p)
+        fa, fb, code = hm.expand(u, p) if own else (u["_n"], p["_n"], None)
+        sc = name_score(fa, fb)
+        cid = s.cluster_of[p["listing_id"]]
+        exact = bool(key) and key == name_key(p["name"])
+        if cid not in best or (exact, sc) > (best[cid]["_exact"], best[cid]["_sc"]):
+            best[cid] = {"cluster_id": cid, "kind": "inventory", "p": None, "_sc": sc, "_exact": exact,
+                         "reasons": (["same name"] if exact else [f"names {sc:.0%} alike" + (" once written out" if code else "")]) + ["no location in the sheet"]}
+    for h, p in zip(imported, IP):
+        sc = name_score(*(hm.expand(u, p)[:2] if hm.short_code(u, p) else (u["_n"], p["_n"])))
+        exact = bool(key) and key == name_key(h["name"])
+        best[h["id"]] = {"cluster_id": h["id"], "kind": "imported", "p": None, "_sc": sc, "_exact": exact, "name": h["name"],
+                         "reasons": (["same name"] if exact else [f"names {sc:.0%} alike"]) + [f"added from {h['source']}"]}
+    ranked = sorted(best.values(), key=lambda c: (-c["_exact"], -c["_sc"]))[:3]
+    exacts = [c for c in best.values() if c["_exact"]]
+    for c in ranked:
+        c.setdefault("name", _cluster_name(c["cluster_id"]) if c["kind"] == "inventory" else c.get("name"))
+    clean = [{k: v for k, v in c.items() if not k.startswith("_")} for c in ranked]
+    if len(exacts) == 1 and ranked and ranked[0]["_exact"]:
+        return {"decision": "matched", "why": "Same name as exactly one hotel in the catalogue. The sheet gives no location to double-check.",
+                "candidates": clean}
+    if ranked and ranked[0]["_sc"] >= NAME_REVIEW:
+        why = (f"{len(exacts)} catalogue hotels have this exact name" if len(exacts) > 1
+               else f"Name {ranked[0]['_sc']:.0%} alike, and the sheet gives no location to confirm it")
+        return {"decision": "review", "why": why, "candidates": clean}
+    return {"decision": "new", "why": "No hotel in the catalogue has a name like this" + (f" (closest: {clean[0]['name']}, {ranked[0]['_sc']:.0%})" if clean else ""),
+            "candidates": clean}
+
+
+def _resolve(L: list[dict], imported: list[dict] | None = None) -> list[dict]:
+    imported = imported or []
     booster, auto, gray = _model()
     P, chain, emb, lat, lng = _catalogue()
     s = store.get()
-    U = hm.prep([{k: v for k, v in l.items() if k != "_rows"} | {"lat": l["lat"] or 0.0, "lng": l["lng"] or 0.0} for l in L])
+    IP = _imported_prep(imported)
+    U = hm.prep([{k: v for k, v in l.items() if k not in ("rows", "rooms", "rates", "conditions", "tabs")}
+                 | {"lat": l["lat"] or 0.0, "lng": l["lng"] or 0.0} for l in L])
     for u in U:
         u["_chain_phone"] = u["_phone"] in chain
-    uemb = _embed([u["_n"] for u in U])
+    has_xy = [l["lat"] is not None and l["lng"] is not None for l in L]
+    uemb = _embed([u["_n"] for u, ok in zip(U, has_xy) if ok]) if any(has_xy) else None
+    k_xy = 0
     out = []
-    for k, (l, u) in enumerate(zip(L, U)):
-        if l["lat"] is None or l["lng"] is None:
-            # no coordinates: the model needs distance, so suggest by name only and leave it to a person
-            sims = sorted(((fuzz.token_set_ratio(*hm.expand(u, p)[:2]) / 100, p) for p in P), key=lambda x: -x[0])
-            seen, cands = set(), []
-            for sc, p in sims:
-                cid = s.cluster_of[p["listing_id"]]
-                if cid not in seen:
-                    seen.add(cid); cands.append({"cluster_id": cid, "name": _cluster_name(cid), "p": None, "reasons": [f"name {sc:.0%} alike", "no coordinates in the sheet"]})
-                if len(cands) == 3:
-                    break
-            out.append({"decision": "review", "why": "No coordinates in the sheet, so location can't be checked.", "candidates": cands})
+    for l, u, ok in zip(L, U, has_xy):
+        if not ok:
+            out.append(_by_name(u, P, s, imported, IP))
             continue
+        ue = uemb[k_xy] if uemb is not None else None
+        k_xy += 1
         d = hm.haversine_vec(l["lat"], l["lng"], lat, lng)
         best: dict = {}
         for j in np.nonzero(d <= hm.BLOCK_RADIUS_M)[0]:
@@ -223,7 +274,7 @@ def _resolve(L: list[dict]) -> list[dict]:
             if not ((u["_core"] & p["_core"]) or (u["_fam"] and u["_fam"] == p["_fam"]) or d[j] <= 100
                     or hm.short_code(u, p) or hm.short_code(p, u)):
                 continue
-            f = hm.pair_features(u, p, float(uemb[k] @ emb[j]) if uemb is not None and emb is not None else np.nan, (np.nan, 0))
+            f = hm.pair_features(u, p, float(ue @ emb[j]) if ue is not None and emb is not None else np.nan, (np.nan, 0))
             f["checkin_eq"] = np.nan                       # sheets don't carry a check-in time: unknown, not "different"
             x = np.array([[f[c] for c in hm.FEATURES]], dtype=float)
             prob = float(booster.predict(x)[0])
@@ -232,11 +283,21 @@ def _resolve(L: list[dict]) -> list[dict]:
             if why_not:
                 prob = 0.0
             if cid not in best or prob > best[cid]["p"]:
-                best[cid] = {"cluster_id": cid, "p": round(prob, 4), "listing": p["name"], "supplier": p["supplier_id"],
+                best[cid] = {"cluster_id": cid, "kind": "inventory", "p": round(prob, 4), "listing": p["name"], "supplier": p["supplier_id"],
                              "reasons": [why_not] if why_not else _reasons(f, hm.expand(u, p)[2], float(d[j]))}
+        # hotels added by earlier imports (not in the trained model's world): distance and name
+        for h, p in zip(imported, IP):
+            if h.get("lat") is None:
+                continue
+            dist = haversine_m(l["lat"], l["lng"], h["lat"], h["lng"])
+            sc = fuzz.token_set_ratio(*hm.expand(u, p)[:2]) / 100
+            if dist <= 500 and sc >= 0.7:
+                pp = 0.999 if dist <= NEAR_IMPORTED_M and sc >= NAME_REVIEW else 0.5
+                best[h["id"]] = {"cluster_id": h["id"], "kind": "imported", "p": pp, "name": h["name"],
+                                 "reasons": [f"{dist:,.0f} m apart", f"names {sc:.0%} alike", f"added from {h['source']}"]}
         ranked = sorted(best.values(), key=lambda c: -c["p"])[:3]
         for c in ranked:
-            c["name"] = _cluster_name(c["cluster_id"])
+            c.setdefault("name", _cluster_name(c["cluster_id"]) if c["kind"] == "inventory" else c.get("name"))
         top = ranked[0] if ranked else None
         second = ranked[1]["p"] if len(ranked) > 1 else 0.0
         if top and top["p"] >= auto and second < gray:
@@ -251,23 +312,45 @@ def _resolve(L: list[dict]) -> list[dict]:
     return out
 
 
-def _canonical(cid: str) -> list[dict]:
+# ------------------------------------------------------------------ resolving rooms
+def canonical_rooms(cid: str) -> list[dict]:
     rooms = store.get().rooms_of.get(cid, {})
     rooms = rooms.values() if isinstance(rooms, dict) else rooms
     return [r for r in rooms if r["tier"] != "Unknown" and ":unmapped-" not in r["room_id"]]
 
 
-def _room(raw: str, cid: str | None, names: list[str]) -> dict:
+def room_key(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", (name or "").lower()).strip()
+
+
+def map_room(raw: str, code: str | None, target: dict | None, names: list[str], imported: dict[str, dict]) -> dict:
+    """Where a sheet's room goes. target: {'kind': 'inventory'|'imported', 'cluster_id'} or None for a new hotel."""
+    base = {"raw": raw, "code": code, "hotel_words": None, "parsed": None}
+    if target is None:
+        a = rm.parse_in_hotel(raw, names)
+        base.update(hotel_words=a.get("hotel_words"), parsed=_parsed(a))
+        return {**base, "status": "new", "why": "new hotel: this becomes one of its rooms", "room_id": None, "room": None, "confidence": 1.0}
+    if target["kind"] == "imported":
+        h = imported.get(target["cluster_id"])
+        rooms = (h or {}).get("rooms", [])
+        if code and (r := next((r for r in rooms if r.get("code") and r["code"].upper() == code.upper()), None)):
+            return {**base, "status": "mapped", "why": f"same room code {code}", "room_id": r["id"], "room": r["name"], "confidence": 1.0}
+        k = room_key(raw)
+        if r := next((r for r in rooms if room_key(r["name"]) == k), None):
+            return {**base, "status": "mapped", "why": "same room name", "room_id": r["id"], "room": r["name"], "confidence": 1.0}
+        close = max(rooms, key=lambda r: fuzz.token_sort_ratio(room_key(r["name"]), k), default=None)
+        if close and fuzz.token_sort_ratio(room_key(close["name"]), k) >= 92:
+            return {**base, "status": "mapped", "why": f"name {fuzz.token_sort_ratio(room_key(close['name']), k):.0f}% alike",
+                    "room_id": close["id"], "room": close["name"], "confidence": 0.9}
+        return {**base, "status": "new", "why": "a room type this hotel didn't have before", "room_id": None, "room": None, "confidence": 1.0}
     a = rm.parse_in_hotel(raw, names)
-    base = {"raw": raw, "hotel_words": a.get("hotel_words"), "parsed": " ".join(x for x in (a["tier"], a["bed"], a["view"] and f"{a['view']} View") if x) or None}
+    base.update(hotel_words=a.get("hotel_words"), parsed=_parsed(a))
     if a.get("note"):
         return {**base, "status": "person", "why": a["note"], "room_id": None, "room": None, "confidence": a["confidence"]}
     if a["tier"] is None or a["bed"] is None:
         return {**base, "status": "person", "why": "couldn't read a room type and bed from this name", "room_id": None, "room": None,
                 "confidence": a["confidence"]}
-    if cid is None:
-        return {**base, "status": "new", "why": "new hotel: this becomes one of its rooms", "room_id": None, "room": None, "confidence": a["confidence"]}
-    same = [r for r in _canonical(cid) if r["tier"] == a["tier"] and r["bed"] == a["bed"]]
+    same = [r for r in canonical_rooms(target["cluster_id"]) if r["tier"] == a["tier"] and r["bed"] == a["bed"]]
     exact = [r for r in same if r["view"] == a["view"]]
     if exact:
         r = exact[0]
@@ -283,33 +366,62 @@ def _room(raw: str, cid: str | None, names: list[str]) -> dict:
             "confidence": a["confidence"]}
 
 
-def ingest(data: bytes, filename: str) -> dict:
-    rows, info = parse_rows(data, filename)
-    L = _listings(rows)
-    res = _resolve(L)
-    s = store.get()
+def _parsed(a: dict) -> str | None:
+    return " ".join(x for x in (a["tier"], a["bed"], a["view"] and f"{a['view']} View") if x) or None
+
+
+def room_options(target: dict | None, imported: dict[str, dict]) -> list[dict]:
+    if not target:
+        return []
+    if target["kind"] == "imported":
+        return [{"room_id": r["id"], "name": r["name"]} for r in (imported.get(target["cluster_id"]) or {}).get("rooms", [])]
+    return [{"room_id": c["room_id"], "name": c["name"]} for c in canonical_rooms(target["cluster_id"])]
+
+
+def target_names(target: dict | None, imported: dict[str, dict]) -> list[str]:
+    if not target:
+        return []
+    if target["kind"] == "imported":
+        return [(imported.get(target["cluster_id"]) or {}).get("name", "")]
+    return [x["name"] for x in store.get().listings_of.get(target["cluster_id"], [])]
+
+
+# ------------------------------------------------------------------ the import
+def ingest(data: bytes, filename: str, imported: list[dict] | None = None) -> dict:
+    """Read, resolve and summarise a sheet. imported: hotels earlier imports added to the catalogue
+    ([{id, name, lat, lng, phone, address, source, rooms: [{id, name, code}]}])."""
+    imported = imported or []
+    imp_by_id = {h["id"]: h for h in imported}
+    parsed = layouts.parse(data, filename)
+    if parsed["layout"] == "flat":
+        rows, info = parse_rows(data, filename)
+        L = _flat_listings(rows, parsed["currency"])
+    else:
+        L = _grid_listings(parsed)
+        info = {"columns": {}, "unused_columns": [], "rows": sum(len(l["rates"]) for l in L), "truncated": False}
+    res = _resolve(L, imported)
     hotels = []
     for l, r in zip(L, res):
         top = r["candidates"][0] if r["candidates"] else None
-        cid = top["cluster_id"] if r["decision"] == "matched" else None
-        names = [l["name"]] + ([x["name"] for x in s.listings_of.get(top["cluster_id"], [])] if top and r["decision"] != "new" else [])
-        rooms, seen = [], {}
-        for row in l["_rows"]:
-            if row["room"] not in seen:
-                seen[row["room"]] = len(rooms)
-                rooms.append({**_room(row["room"], cid if r["decision"] == "matched" else (top["cluster_id"] if top and r["decision"] == "review" else None),
-                                      names), "rows": [], "prices": []})
-                x = rooms[-1]
-                if r["decision"] == "review" and x["status"] == "mapped":   # a suggestion only, until a person confirms the hotel
-                    x.update(status="person", why=f"waiting for the hotel decision (would be {x['room']})", room_id=None, room=None)
-            x = rooms[seen[row["room"]]]
-            x["rows"].append(row["row"])
-            if row["price"] is not None:
-                x["prices"].append({"meal": row["meal"], "price": row["price"], "cancel": row["cancel"]})
-        hotels.append({"sheet_id": l["listing_id"], "name": l["name"], "address": l["address"], "phone": l["phone"], "lat": l["lat"], "lng": l["lng"],
-                       "star": l["star"], "rows": [x["row"] for x in l["_rows"]], **r,
-                       "options": [{"room_id": c["room_id"], "name": c["name"]} for c in _canonical(top["cluster_id"])] if top else [],
-                       "rooms": rooms})
+        target = {"kind": top["kind"], "cluster_id": top["cluster_id"]} if top and r["decision"] != "new" else None
+        names = [l["name"]] + target_names(target, imp_by_id)
+        by_room: dict = {}
+        for x in l["rates"]:
+            by_room.setdefault(room_key(x["room"]), []).append(x["price"])
+        rooms = []
+        for room in l["rooms"]:
+            m = map_room(room["name"], room.get("code"), target, names, imp_by_id)
+            if r["decision"] == "review" and m["status"] == "mapped":   # a suggestion only, until a person confirms the hotel
+                m.update(status="person", why=f"waiting for the hotel decision (would be {m['room']})", room_id=None, room=None)
+            prices = by_room.get(room_key(room["name"]), [])
+            rooms.append({**m, "rows": room.get("rows", []), "prices": room.get("prices", [])[:4], "extras": room.get("extras", {}),
+                          "rate_count": len(prices), "price_from": min(prices) if prices else None})
+        if l["name_from_file"] and r["decision"] == "matched":
+            r = {**r, "decision": "review", "why": "The sheet doesn't name the hotel (taken from the file name), so a person confirms it."}
+        hotels.append({"sheet_id": l["listing_id"], "name": l["name"], "name_from_file": l["name_from_file"], "address": l["address"],
+                       "phone": l["phone"], "lat": l["lat"], "lng": l["lng"], "star": l["star"], "rows": l["rows"], "tabs": l["tabs"],
+                       **r, "options": room_options(target or ({"kind": top["kind"], "cluster_id": top["cluster_id"]} if top else None), imp_by_id),
+                       "rooms": rooms, "rates": l["rates"], "conditions": l["conditions"]})
     # the same hotel twice in one sheet, under two names
     by_cluster: dict = {}
     for h in hotels:
@@ -329,9 +441,11 @@ def ingest(data: bytes, filename: str) -> dict:
                "review": sum(h["decision"] == "review" for h in hotels), "listed_twice": len(twice),
                "room_names": len(rooms_all), "rooms_mapped": sum(x["status"] == "mapped" for x in rooms_all),
                "rooms_person": sum(x["status"] == "person" for x in rooms_all), "rooms_new": sum(x["status"] == "new" for x in rooms_all),
-               "short_codes": sum(bool(h["candidates"]) and h["decision"] != "new" and " read as " in h["candidates"][0]["reasons"][0] for h in hotels)}
+               "short_codes": sum(bool(h["candidates"]) and h["decision"] != "new" and " read as " in h["candidates"][0]["reasons"][0] for h in hotels),
+               "rates": sum(len(h["rates"]) for h in hotels)}
     _, auto, gray = _model()
-    out = {"file": filename, "sheet": info, "summary": summary, "hotels": hotels, "listed_twice": twice,
+    out = {"file": filename, "layout": parsed["layout"], "currency": parsed["currency"], "tabs": parsed["tabs"], "warnings": parsed["warnings"],
+           "sheet": info, "summary": summary, "hotels": hotels, "listed_twice": twice,
            "thresholds": {"auto_merge": auto, "review_floor": gray}, "check": None}
     if hashlib.sha256(data).hexdigest() in sample_hashes():
         from samesame.eval.sheet_check import score         # the answer key lives in eval/, like every truth table
@@ -339,9 +453,13 @@ def ingest(data: bytes, filename: str) -> dict:
     return out
 
 
-# ------------------------------------------------------------------ Weaver's sample sheet
-def sample_path(fmt: str = "csv"):
-    return config.BUILD / "sheets" / f"weaver_rates.{fmt}"
+# ------------------------------------------------------------------ sample sheets (synthetic, built by the pipeline)
+SAMPLES = {"weaver": ("weaver_rates", "Weaver", "One row per rate, with coordinates and short codes"),
+           "plover": ("plover_group_rates", "Plover", "A price grid: seasons × weekdays, two rate-plan tabs, footnotes")}
+
+
+def sample_path(fmt: str = "csv", name: str = "weaver"):
+    return config.BUILD / "sheets" / f"{SAMPLES[name][0]}.{fmt}"
 
 
 @lru_cache
@@ -353,3 +471,11 @@ def sample_hashes() -> set[str]:
 def ingest_sample() -> dict:
     p = sample_path("csv")
     return ingest(p.read_bytes(), p.name)
+
+
+def to_csv(rows: list[dict], fields: list[str]) -> str:
+    buf = io.StringIO()
+    w = csv.DictWriter(buf, fieldnames=fields)
+    w.writeheader()
+    w.writerows(rows)
+    return buf.getvalue()

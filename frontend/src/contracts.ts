@@ -172,3 +172,51 @@ export interface SheetResult {
   check: null | { hotels: Record<string, number>; rooms: Record<string, number>; note: string };
 }
 export interface SheetSample { supplier: string; synthetic: boolean; rows: number; files: Record<string, string> }
+
+// ---------------------------------------------------------------- Canon: imports and the catalogue
+export type ImportStatus = "draft" | "applied" | "removed";
+export interface ImportMeta {
+  id: string; file: string; supplier: string; status: ImportStatus; uploaded_at: string; applied_at: string | null; removed_at: string | null;
+  checked_at: string; sha256: string; bytes: number; layout: string; summary: SheetResult["summary"] & { rates: number };
+}
+export interface Condition { kind: "discount" | "markup" | "min_stay" | "booking_window" | "dynamic_dates" | "rate_basis" | "note"; text: string;
+  percent?: number; min_nights?: number; max_nights?: number | null; fee?: number | null; from?: string | null; to?: string | null; source_supplier?: string }
+export interface ImportRoom extends SheetRoom { code: string | null; rate_count: number; price_from: number | null; extras: Record<string, string>; decided?: boolean; audit_id?: string }
+export interface ImportHotel extends Omit<SheetHotel, "rooms" | "candidates"> {
+  name_from_file: boolean; tabs: string[]; rooms: ImportRoom[]; conditions: Condition[]; rate_plans: string[]; seasons: number;
+  candidates: (SheetCandidate & { kind: "inventory" | "imported" })[];
+  final: null | { kind: "inventory" | "imported" | "new"; id: string | null; name: string };
+  by_person: boolean; audit_id: string | null;
+}
+export interface ImportView {
+  meta: ImportMeta; file: string; layout: string; currency: string | null; warnings: string[];
+  tabs: { tab: string; layout: string | null; hotels: number | null; rates: number | null }[];
+  summary: ImportMeta["summary"]; hotels: ImportHotel[]; thresholds: { auto_merge: number; review_floor: number };
+  check: SheetResult["check"]; progress: { hotels_resolved: number; hotels: number; rooms_resolved: number; rooms: number; waiting: number };
+}
+export interface ImportSample { name: string; supplier: string; description: string; files: Record<string, string> }
+export interface CatalogueSummary {
+  inventory_hotels: number; imported_hotels: number; listings: number; imports: Record<ImportStatus, number>;
+  sheet_rates: number; hotels_with_sheets: number; waiting: number;
+}
+export interface CatalogueItem {
+  id: string; kind: "inventory" | "imported"; name: string; star: number | null; suppliers: string[]; listings: number;
+  sheets: string[]; rooms: number; rates: number; offers: number; lat: number | null; lng: number | null;
+}
+export interface CatalogueList { total: number; shown: number; items: CatalogueItem[]; counts: { inventory: number; imported: number; with_sheets: number; listings: number } }
+export interface SheetRate {
+  room: string; code: string | null; plan: string; season_from: string | null; season_to: string | null; season: string | null;
+  days: string | null; occupancy: string | null; price: number; currency: string | null; room_id: string | null; room_name: string;
+  room_status: string; source_supplier: string; source_file: string; import_id: string; meal?: string | null; cancel?: string | null;
+}
+export interface CatalogueHotel {
+  id: string; kind: "inventory" | "imported"; name: string; star: number | null; address: string | null;
+  suppliers?: string[]; sources: { import_id: string; supplier: string; file: string; as_written: string }[];
+  rooms: { id: string; name: string; code: string | null; sources: string[]; extras?: Record<string, string>; from_sheet?: boolean }[];
+  rates: SheetRate[]; conditions: Condition[]; plans: string[]; lat?: number | null; lng?: number | null;
+}
+export interface PendingItem {
+  kind: "hotel" | "room"; import_id: string; supplier: string; file: string; import_status: ImportStatus; sheet_id: string; hotel_as_written: string;
+  why: string; candidates?: (SheetCandidate & { kind: string })[]; rooms?: number; rates?: number; address?: string | null;
+  room?: string; code?: string | null; options?: { room_id: string; name: string }[]; hotel?: string;
+}

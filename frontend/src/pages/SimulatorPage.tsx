@@ -74,7 +74,7 @@ export default function SimulatorPage() {
                       <div className="mb-1 font-semibold">{label as string}</div>
                       {res.arms.map((a) => (
                         <div key={a.arm} className="mb-1 flex items-center gap-3">
-                          <span className="w-24 text-sm text-ink-mute">{a.arm === "today" ? "Today" : "With Remix"}</span>
+                          <span className="w-24 text-sm text-ink-mute">{a.arm === "today" ? "Today" : "With Canon"}</span>
                           <div className="h-7 flex-1 rounded-full bg-paper-warm">
                             <div className={cn("h-7 rounded-full transition-all duration-500", a.arm === "today" ? "bg-sky-300" : "bg-accent-700")} style={{ width: `${(100 * a[key]) / max}%` }} />
                           </div>
@@ -88,16 +88,16 @@ export default function SimulatorPage() {
               {res.remix && (
                 <div className="mt-6 rounded-2xl border border-sun-500/50 bg-sun-50/40 p-4">
                   <div className="flex items-center justify-between gap-2">
-                    <div className="text-[16px] font-semibold text-ink">Remix, per 1,000 tour searches</div>
+                    <div className="text-[16px] font-semibold text-ink">Bundles, per 1,000 tour searches</div>
                     <span className="rounded-full bg-warn-50 px-2 py-0.5 text-xs font-bold uppercase text-warn-500">simulated</span>
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-3 md:grid-cols-4">
-                    <Small k="Searches a publishable Remix answers" v={`${(res.remix.matched_share * 100).toFixed(1)}%`} />
-                    <Small k="Remix bookings" v={res.remix.bookings_per_1000_searches.toFixed(1)} />
+                    <Small k="Searches a publishable bundle answers" v={`${(res.remix.matched_share * 100).toFixed(1)}%`} />
+                    <Small k="Bundle bookings" v={res.remix.bookings_per_1000_searches.toFixed(1)} />
                     <Small k="TBO margin" v={inr(res.remix.tbo_margin_per_1000_searches)} />
                     <Small k="Agents save" v={inr(res.remix.agent_saving_per_1000_searches)} />
                   </div>
-                  <div className="mt-2 text-xs text-ink-mute">{res.remix.publishable_remixes} publishable Remixes{res.remix.pessimistic ? " under the pessimistic preset" : ""}; {inr(res.remix.avg_margin_per_booking)} average margin per Remix booking. {res.remix.note}</div>
+                  <div className="mt-2 text-xs text-ink-mute">{res.remix.publishable_remixes} publishable bundles{res.remix.pessimistic ? " under the pessimistic preset" : ""}; {inr(res.remix.avg_margin_per_booking)} average margin per bundle booking. {res.remix.note}</div>
                 </div>
               )}
             </>

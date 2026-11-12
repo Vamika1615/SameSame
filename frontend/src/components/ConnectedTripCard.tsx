@@ -30,7 +30,7 @@ export const ConnectedTripCard = forwardRef<HTMLElement, { active: boolean }>(fu
   const rows = [
     { icon: PlaneLanding, label: "Airport arrival", what: d.arrival.title, sup: d.arrival.supplier_id, price: d.arrival.price, p: d.arrival.p_secure },
     { icon: BedDouble, label: `Hotel · ${d.hotel.nights} nights`, what: `${d.hotel.name} · ${d.hotel.offer.board} · ${d.hotel.offer.cancel_text}`, sup: d.hotel.offer.supplier_id, price: d.hotel.offer.price, p: d.hotel.p_secure },
-    { icon: Sparkles, label: "Activity · TBO Remix", what: `${d.activity.attraction} · ${d.activity.name}`, sup: null, price: d.activity.sticker ?? 0, p: d.activity.promise ?? 0 },
+    { icon: Sparkles, label: "Activity · TBO bundle", what: `${d.activity.attraction} · ${d.activity.name}`, sup: null, price: d.activity.sticker ?? 0, p: d.activity.promise ?? 0 },
     { icon: PlaneTakeoff, label: "Airport departure", what: d.departure.title, sup: d.departure.supplier_id, price: d.departure.price, p: d.departure.p_secure },
   ];
   return (

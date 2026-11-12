@@ -211,3 +211,62 @@ def write_sheet(rows: list[dict]) -> dict:
     except ImportError:
         pass
     return out
+
+
+# ------------------------------------------------------------------ Plover's group-rate workbook (price-grid layout)
+PLOVER_SEASONS = [("04 Jan 27", "05 Feb 27", 1.15), ("06 Feb 27", "28 Mar 27", 1.10), ("05 Apr 27", "18 Jun 27", 0.90),
+                  ("19 Jun 27", "31 Aug 27", 0.75), ("01 Sep 27", "31 Oct 27", 0.85), ("01 Nov 27", "17 Dec 27", 1.05)]
+INR_PER_USD = 88.0          # fixed for the sample; the import keeps the sheet's own currency
+
+
+def _plover_code(r: dict) -> str:
+    view = (r["view"] or "Standard")[0].upper()
+    return f"{r['tier'][:1].upper()}{'K1' if r['bed'] == 'King' else 'T2' if r['bed'] == 'Twin' else 'F4'}{view}"
+
+
+def plover_workbook(hotels, rooms_all, osm_reference, osm_duplicates, rng) -> tuple[bytes, list[dict]]:
+    """A synthetic group-rate workbook in the grid layout real supplier contracts use: a hotel-name row, a header row
+    with season date ranges, weekday and occupancy sub-headers, a code column, extra-guest columns and footnotes;
+    one tab per rate plan. Hotels: the golden-case hotel and three neighbours by their catalogue names, one by its
+    short code, and one real OSM hotel that isn't in the catalogue. Returns (xlsx bytes, answer key)."""
+    import openpyxl
+    from samesame.data.osm_base import DEMO
+    room_by_hotel: dict = {}
+    for r in rooms_all:
+        room_by_hotel.setdefault(r["hotel_id"], []).append(r)
+    near = sorted((h for h in hotels if not h["golden"]), key=lambda h: haversine_m(*DEMO, h["lat"], h["lng"]))
+    golden = next(h for h in hotels if h["golden"])
+    coded = next(h for h in near[6:] if short_code(h["name"]))
+    picked = [(golden, golden["name"]), (near[1], near[1]["name"]), (near[3], near[3]["name"]), (coded, short_code(coded["name"])[0])]
+    known = {h["osm_id"] for h in hotels} | {d["dropped"] for d in osm_duplicates}
+    fresh = next(o for o in sorted(osm_reference, key=lambda o: haversine_m(*DEMO, o["lat"], o["lng"]))
+                 if o["osm_id"] not in known and min(haversine_m(o["lat"], o["lng"], h["lat"], h["lng"]) for h in hotels) > 300)
+    blocks = [(h, name, sorted(room_by_hotel[h["hotel_id"]], key=lambda r: r["room_id"])[:4], h["base_rate"]) for h, name in picked]
+    blocks.append((None, fresh["name"], [{"room_id": "new:R1", "tier": "Standard", "bed": "King", "view": None, "tier_mult": 1.0},
+                                         {"room_id": "new:R2", "tier": "Deluxe", "bed": "Twin", "view": "City", "tier_mult": 1.15}], 7000.0))
+    key = [{"block": name, "hotel_id": h["hotel_id"] if h else None, "new_hotel": h is None, "osm_id": None if h else fresh["osm_id"]}
+           for h, name, _, _ in blocks]
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    for tab, factor in (("2027 Group Rates", 1.0), ("5 Nts+", 0.92)):
+        ws = wb.create_sheet(tab)
+        ws.append(["2027 USD Group Rates - Plover Travel (SYNTHETIC SAMPLE)"])
+        ws.append(["BW Jan 15 - Mar 31, 2027"])
+        ws.append([])
+        for h, name, rooms, base in blocks:
+            ws.append([name.upper() if h is None else name])
+            ws.append(["Code", "Room Type"] + [x for s in PLOVER_SEASONS for x in (f"{s[0]} - {s[1]}", None)] + ["EXTRA ADULT", "CHILD 4-11", "OCC MAX"])
+            ws.append([None, None] + ["SUN-WED", "THU-SAT"] * len(PLOVER_SEASONS))
+            ws.append([None, None] + ["SGL & DBL"] * (2 * len(PLOVER_SEASONS)))
+            for r in rooms:
+                name_r = "Family Room" if r["tier"] == "Family" else f"{r['tier']} {r['bed']}" + (f" {r['view']} View" if r["view"] else "")
+                usd = base * r.get("tier_mult", 1.0) / INR_PER_USD
+                prices = [round(usd * m * f * factor * float(np.exp(rng.normal(0, 0.02)))) for _, _, m in PLOVER_SEASONS for f in (1.0, 1.08)]
+                ws.append([_plover_code(r), name_r] + prices + [round(usd * 0.3) if r["tier"] != "Standard" else "NA", "FREE", 4 if r["tier"] == "Family" else 2])
+            ws.append([])
+        for note in ("* Rates are net, quoted in US dollars per room, per night.", "* 1-4 Nights: 5%", "* 5+ Nights: 8%",
+                     "* Rates must be marked up 20%", "* An additional fee of $60 per room, per night applies when the minimum length of stay is not met"):
+            ws.append([note])
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue(), key

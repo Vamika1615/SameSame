@@ -31,7 +31,7 @@ export default function SightseeingPage() {
   return (
     <div className="mx-auto max-w-[1400px] px-8 pb-10 pt-8">
       <PageHeader title="Tours, grouped into what's really on sale"
-        subtitle="Suppliers list the same tour many times with different words. Remix reads each listing and groups identical ones, keeping real differences (pickup, meals, time slot, cancellation) visible."
+        subtitle="Suppliers list the same tour many times with different words. Canon reads each listing and groups identical ones, keeping real differences (pickup, meals, time slot, cancellation) visible."
         right={<Segmented size="md" value={view} onChange={(v) => set("view", v)}
           options={[{ value: "samesame", label: "Grouped by product" }, { value: "today", label: "As suppliers list them" }]} />}>
         <div className="flex flex-wrap gap-1">
@@ -167,7 +167,7 @@ function VariantRow({ v }: { v: ActivityVariant }) {
   );
 }
 
-/** TBO's own Remix of this attraction, ranked above the packages when it passes every guardrail. */
+/** TBO's own bundle of this attraction, ranked above the packages when it passes every guardrail. */
 function RemixCards({ attraction }: { attraction?: string }) {
   const o = useApi<RemixOverview>("/api/remix");
   if (o.status !== "ready" || !attraction) return null;
@@ -177,7 +177,7 @@ function RemixCards({ attraction }: { attraction?: string }) {
       {mine.map((r) => (
         <Link key={r.variant_id} to={`/remix?v=${r.variant_id}`}
           className="flex items-center gap-5 rounded-2xl border border-sun-500/60 bg-sun-50/40 p-5 hover:bg-sun-50">
-          <span className="flex items-center gap-1.5 rounded-full bg-sun-500 px-2.5 py-0.5 text-xs font-semibold text-white"><Sparkles className="h-3.5 w-3.5" />TBO Remix</span>
+          <span className="flex items-center gap-1.5 rounded-full bg-sun-500 px-2.5 py-0.5 text-xs font-semibold text-white"><Sparkles className="h-3.5 w-3.5" />TBO bundle</span>
           <div className="min-w-0 flex-1">
             <div className="text-[18px] font-semibold text-ink">{r.target_dna.pickup !== "No transfer" ? r.target_dna.pickup : r.target_dna.meals} · built from {r.parts} parts by {r.suppliers?.length} suppliers</div>
             <div className="text-sm text-ink-soft">The SAME product as the package, cheaper on True Price: agent saves {inr(r.agent_saving_inr ?? 0)} ({((r.agent_saving ?? 0) * 100).toFixed(1)}%), TBO keeps {((r.margin ?? 0) * 100).toFixed(1)}%.</div>

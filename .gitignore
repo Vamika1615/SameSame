@@ -10,3 +10,4 @@ data/models/
 .env
 *.log
 *.tsbuildinfo
+data/imports/
