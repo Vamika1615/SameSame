@@ -14,6 +14,7 @@ MODELS = DATA / "models"        # sentence-transformers cache
 FRONTEND_DIST = ROOT / "frontend" / "dist"
 DB_PATH = BUILD / "samesame.duckdb"
 REMIX_APPROVALS_PATH = BUILD / "remix_approvals.jsonl"   # product-team decisions on Remixes (append-only, reversible)
+IMPORTS = DATA / "imports"          # supplier-sheet imports people upload: originals, results, decisions
 LABELS_PATH = BUILD / "review_labels.jsonl"   # human review labels: training feedback for the matcher
 
 SEED = 20261104

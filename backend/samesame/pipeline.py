@@ -51,6 +51,9 @@ def main(skip_images: bool = False):
     sheet, sheet_key = naming.weaver_sheet(hotels, rooms, osm_base.reference(), dups, _rng("weaver"))
     naming.write_sheet(sheet)
     _write("weaver_truth", sheet_key)
+    grid, grid_key = naming.plover_workbook(hotels, rooms, osm_base.reference(), dups, _rng("plover"))
+    (config.BUILD / "sheets" / "plover_group_rates.xlsx").write_bytes(grid)
+    _write("plover_truth", grid_key)
     data = dict(osm_reference=osm_base.reference(), base_hotels=hotels, osm_duplicates=dups, hard_negatives=hard, hotel_listings=listings, hotel_truth=truth,
                 rooms=rooms, supplier_rooms=sup_rooms, room_truth=room_truth, offers=offers, attractions=attractions, activity_variants=variants,
                 activity_listings=act_listings, activity_truth=act_truth, booking_log=log, images=imgs,
@@ -70,7 +73,7 @@ def main(skip_images: bool = False):
     from samesame.matching import run as matcher
     matcher.main()
     counts = {k: len(v) for k, v in data.items()}
-    manifest = {"built_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "seed": config.SEED, "stages": ["m0", "m2", "m3", "m4", "r1", "n1"],
+    manifest = {"built_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "seed": config.SEED, "stages": ["m0", "m2", "m3", "m4", "r1", "n1", "c1"],
                 "counts": counts, "seconds": None}
     (config.BUILD / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")   # the report reads the app's store
     from samesame.eval import report

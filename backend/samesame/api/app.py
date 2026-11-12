@@ -1,13 +1,16 @@
 """FastAPI app. Reads precomputed artifacts; in demo mode also serves the built frontend."""
 import json
+import threading
 from functools import lru_cache
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from samesame import city, config, images, placeholders, review, service, store
+from samesame.catalogue import imports as cat_imports
+from samesame.catalogue import view as catalogue
 from samesame.ingest import sheet as sheets
 from samesame.labelling.api import router as labelling_router
 from samesame.remix import approvals as remix_approvals
@@ -32,6 +35,7 @@ def _warm_remix():
         remix_trip.build()
         remix_trip.demo_seed()
         sheets.warm()
+        threading.Thread(target=catalogue.summary, daemon=True).start()      # names of every catalogue hotel, once
 
 
 @lru_cache
@@ -163,7 +167,124 @@ def remix_book_stats(variant_id: str, runs: int = 1000):
     return remix_book.stats(r, min(runs, 2000))
 
 
-# ------------------------------------------------------------------ Supplier Sheets
+# ------------------------------------------------------------------ Catalogue: past inventory + supplier-sheet imports
+def _resolve_new(data: bytes, filename: str):
+    return sheets.ingest(data, filename, catalogue.for_matching())
+
+
+def _import_or_404(fn, *a):
+    try:
+        return fn(*a)
+    except cat_imports.ImportError_ as e:
+        raise HTTPException(404 if "No such" in str(e) else 400, str(e))
+
+
+@app.get("/api/catalogue/summary")
+def catalogue_summary():
+    return catalogue.summary()
+
+
+@app.get("/api/catalogue/hotels")
+def catalogue_hotels(q: str | None = None, source: str | None = None):
+    return catalogue.hotels(q, source)
+
+
+@app.get("/api/catalogue/hotels/{hotel_id}")
+def catalogue_hotel(hotel_id: str):
+    h = catalogue.hotel(hotel_id)
+    if h is None:
+        raise HTTPException(404, "No such hotel in the catalogue.")
+    return h
+
+
+@app.get("/api/catalogue/pending")
+def catalogue_pending():
+    return catalogue.pending()
+
+
+@app.get("/api/imports")
+def imports_list():
+    return {"imports": cat_imports.list_meta(), "samples": [{"name": k, "supplier": v[1], "description": v[2],
+            "files": {f: f"/api/sheets/sample/{f}?name={k}" for f in ("csv", "xlsx") if sheets.sample_path(f, k).exists()}}
+            for k, v in sheets.SAMPLES.items()]}
+
+
+@app.post("/api/imports")
+async def imports_create(file: UploadFile = File(...), supplier: str | None = Form(None)):
+    data = await file.read()
+    if len(data) > 15_000_000:
+        raise HTTPException(413, "Sheets up to 15 MB, please.")
+    try:
+        m, created = cat_imports.create(data, file.filename or "sheet.csv", supplier, _resolve_new)
+    except sheets.SheetError as e:
+        raise HTTPException(400, str(e))
+    return {"created": created, "import": catalogue.import_view(m["id"])}
+
+
+@app.post("/api/imports/samples/{name}")
+def imports_sample(name: str):
+    if name not in sheets.SAMPLES:
+        raise HTTPException(404, "No such sample.")
+    p = sheets.sample_path("xlsx" if name == "plover" else "csv", name)
+    if not p.exists():
+        raise HTTPException(404, "Sample not built yet: run python start.py --rebuild")
+    m, created = cat_imports.create(p.read_bytes(), p.name, sheets.SAMPLES[name][1], _resolve_new)
+    return {"created": created, "import": catalogue.import_view(m["id"])}
+
+
+@app.get("/api/imports/decisions")
+def imports_decisions():
+    return cat_imports.history()
+
+
+@app.post("/api/imports/decisions/undo/{audit_id}")
+def imports_undo(audit_id: str):
+    return _import_or_404(cat_imports.undo, audit_id)
+
+
+@app.get("/api/imports/{import_id}")
+def imports_get(import_id: str):
+    return _import_or_404(catalogue.import_view, import_id)
+
+
+@app.get("/api/imports/{import_id}/source")
+def imports_source(import_id: str):
+    data, filename = _import_or_404(cat_imports.source, import_id)
+    return Response(data, media_type="application/octet-stream", headers={"Content-Disposition": f'attachment; filename="{filename}"'})
+
+
+class Decision(BaseModel):
+    sheet_id: str
+    kind: str
+    value: str
+    room: str | None = None
+
+
+@app.post("/api/imports/{import_id}/decide")
+def imports_decide(import_id: str, d: Decision):
+    _import_or_404(cat_imports.decide, import_id, d.sheet_id, d.kind, d.value, d.room)
+    return catalogue.import_view(import_id)
+
+
+@app.post("/api/imports/{import_id}/{action}")
+def imports_action(import_id: str, action: str):
+    if action == "apply":
+        _import_or_404(cat_imports.set_status, import_id, "applied")
+    elif action == "remove":
+        _import_or_404(cat_imports.set_status, import_id, "removed")
+    elif action == "restore":
+        _import_or_404(cat_imports.set_status, import_id, "draft")
+    elif action == "recheck":
+        try:
+            _import_or_404(cat_imports.recheck, import_id, lambda d, f: sheets.ingest(d, f, catalogue.for_matching(exclude=import_id)))
+        except sheets.SheetError as e:
+            raise HTTPException(400, str(e))
+    else:
+        raise HTTPException(404, "Unknown action.")
+    return catalogue.import_view(import_id)
+
+
+# ------------------------------------------------------------------ Supplier Sheets (single-file preview, kept for compatibility)
 @app.get("/api/sheets/sample")
 def sheets_sample():
     if not sheets.sample_path("csv").exists():
@@ -173,10 +294,10 @@ def sheets_sample():
 
 
 @app.get("/api/sheets/sample/{fmt}")
-def sheets_sample_file(fmt: str):
-    if fmt not in ("csv", "xlsx") or not sheets.sample_path(fmt).exists():
+def sheets_sample_file(fmt: str, name: str = "weaver"):
+    if fmt not in ("csv", "xlsx") or name not in sheets.SAMPLES or not sheets.sample_path(fmt, name).exists():
         raise HTTPException(404, "no such sample")
-    return FileResponse(sheets.sample_path(fmt), filename=f"weaver_rates_SYNTHETIC.{fmt}")
+    return FileResponse(sheets.sample_path(fmt, name), filename=f"{sheets.SAMPLES[name][0]}_SYNTHETIC.{fmt}")
 
 
 @app.post("/api/sheets/sample/ingest")
