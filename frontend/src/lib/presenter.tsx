@@ -2,18 +2,18 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-/** The eight demo beats. Keys 1-8 jump straight to each with its state in the URL;
+/** The eight demo beats (Canon: catalogue first, bundles last). Keys 1-8 jump straight to each with its state in the URL;
  *  ←/→ step; Space fires the beat's primary action; "." toggles the step indicator. */
 const BURJ = encodeURIComponent("burj khalifa");
 export const BEATS = [
-  { key: 1, path: `/sightseeing?q=${BURJ}&view=today`, title: "The problem: one experience, many packages", action: "Space → Variant DNA", owner: "A" },
-  { key: 2, path: "/remix", title: "Remix Studio: package vs Remix", action: "Space → show the arithmetic", owner: "B" },
-  { key: 3, path: "/remix?tp=1", title: "True Price proof + TBO margin", action: "Space → hide arithmetic", owner: "B" },
-  { key: 4, path: "/remix?book=1", title: "Book Remix live: a part fails over", action: "Space → Book Remix", owner: "B" },
-  { key: 5, path: "/remix/gaps", title: "Gap Remix: nobody sells this", action: "Space → next gap", owner: "C" },
-  { key: 6, path: "/hotels/demo?trip=1", title: "Connected Trip: hotel + transfer + tour", action: "Space → book the trip", owner: "C" },
-  { key: 7, path: "/ops?tab=remix", title: "Trust: approvals + held-out metrics", action: "A / R to approve or reject", owner: "A" },
-  { key: 8, path: "/simulator", title: "Business case", action: "Space → pessimistic preset", owner: "C" },
+  { key: 1, path: "/import", title: "Import a supplier's rate sheet", action: "Space → import the sample price grid", owner: "A" },
+  { key: 2, path: "/hotels?view=today", title: "86 listings become 20 hotels", action: "Space → one card per hotel", owner: "A" },
+  { key: 3, path: "/hotels/demo?tp=1", title: "Offers compared on True Price", action: "Space → toggle True Price", owner: "B" },
+  { key: 4, path: "/hotels/demo?book=1", title: "Book both: a failed booking fails over", action: "Space → Book both", owner: "B" },
+  { key: 5, path: `/sightseeing?q=${BURJ}&view=today`, title: "Tours: same tour, different product", action: "Space → grouped by product", owner: "C" },
+  { key: 6, path: "/catalogue/review", title: "Uncertain matches go to a person", action: "decide or undo", owner: "C" },
+  { key: 7, path: "/remix", title: "Bundles: what a clean catalogue makes possible", action: "Space → show the arithmetic", owner: "B" },
+  { key: 8, path: "/simulator", title: "Business case and matching quality", action: "Space → pessimistic preset", owner: "C" },
 ] as const;
 
 const ACTION = "remix:presenter-action";

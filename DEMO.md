@@ -1,69 +1,61 @@
-# DEMO: Remix, 4 minutes, 3 presenters (Dubai)
+# DEMO: Canon, 4 minutes, 3 presenters (Dubai)
 
-> Every number below is computed by the pipeline from synthetic suppliers over real OpenStreetMap hotels and real Dubai attractions; nothing is typed in. If a rebuild moves a number, the screen is right and this page is stale: rerun `python -m samesame.eval.report` and update from METRICS.md.
+> Every number below is computed by the app from synthetic suppliers over real OpenStreetMap hotels and real Dubai attractions; nothing is typed in. If a rebuild moves a number, the screen is right and this page is stale.
 >
-> Spoken line, never on screen: **"Skyscanner compares products. Remix makes new ones."**
+> One line to remember: **"Every supplier sheet, one clean catalogue."**
 
-Run `python3 start.py --demo` and open http://localhost:8000. The home page explains Remix in one line; the four sections are **Remix · Catalogue · Review · Insights**, each with sub-tabs.
+Run `python3 start.py --demo` and open http://localhost:8000. Before going on stage, delete `data/imports/` so the catalogue starts with no imports.
 - Press `.` for the step indicator.
-- **Keys 1–8** jump to a beat with its state loaded.
+- **Keys 1–8** jump to a beat.
 - **Space** fires the beat's one action.
 - **←/→** step between beats.
 
 | Key | Beat | Who | ~Time | Space does |
 |---|---|---|---|---|
-| 1 | The problem: one Burj Khalifa experience, many packages | A | 0:15 | → Variant DNA |
-| 2 | Remix → Rebuild packages: helicopter package vs the Remix | B | 0:35 | shows the arithmetic |
-| 3 | True Price proof: cheaper on True Price, and TBO keeps a margin | B | 0:30 | hides the arithmetic |
-| 4 | Book Remix live: a part fails, a SAME twin takes over | B | 0:30 | Book Remix |
-| 5 | Gap Remix: a product nobody sells, created | C | 0:30 | next gap |
-| 6 | Connected Trip: hotel + airport cars + tour, one product | C | 0:30 | book the trip |
-| 7 | Trust: approvals queue + held-out matching | A | 0:25 | (A / R keys) |
-| 8 | Business case (simulated) | C | 0:25 | pessimistic preset |
+| 1 | Import a supplier's rate sheet | A | 0:45 | imports the Plover sample |
+| 2 | 86 listings become 20 hotels | A | 0:30 | one card per hotel |
+| 3 | Offers compared on True Price | B | 0:30 | toggles True Price |
+| 4 | Book both: a failed booking fails over | B | 0:20 | Book both |
+| 5 | Tours: same tour, different product | C | 0:30 | grouped by product |
+| 6 | Uncertain matches go to a person | C | 0:20 | (click to decide) |
+| 7 | Bundles: what a clean catalogue makes possible | B | 0:30 | shows the arithmetic |
+| 8 | Business case and matching quality | C | 0:15 | pessimistic preset |
 
 ## Script
 
-**1 (A).** "Meera, an agent in Surat, searches Burj Khalifa: six listings from six suppliers." Press Space. "Variant DNA: four products, and it shows exactly how they differ: slot, lounge, cancellation. That's the foundation: we know when two things are the SAME. Now watch what that lets TBO do."
+**1 (A). Import.** Key 1, then Space.
+- "Suppliers send TBO rate sheets like this one: a price grid, a block per hotel, seasons across, Sun–Wed and Thu–Sat columns, a code per room, two tabs for two rate plans, terms in the footnotes. Synthetic, in the layout real contracts use."
+- Point at the summary: "**432 rates, 5 hotels.** Three are hotels we already sell, matched by name. One, 'WF Hotel', is a short code, so a person decides. One isn't in our catalogue at all."
+- Open **WF Hotel**, click **White Fort Hotel**: "Decided, logged, reversible." Then **Add to catalogue**.
+- Open Hyatt Place's rooms: "Every room maps by tier, bed and view: SK1S is our Superior King. The footnotes became terms: 5% off for 1–4 nights, mark up 20%, a $60 minimum-stay fee."
 
-**2 (B).** Remix → Rebuild packages opens on the **Helicopter Tour with private hotel pickup**. The engine chose it by rule: the publishable Remix with the largest rupee saving.
-- "Kestrel sells this as one package: ₹65,940 for two; True Price ₹67,341."
-- "Remix splits it into parts other suppliers already sell: Bulbul's ticket ₹46,380, a Mynah car out ₹1,960, a Sunbird car back ₹1,700. Three suppliers, and no single supplier sells this combination."
-- Point at the green checks: "SAME on every field the package states, never a VARIANT. If the package promises 'private' and no part says so, it isn't built."
-- Point at the note under the product list on the left: "30 multi-part products. 17 can be rebuilt identically, 10 are cheaper, and **4 pass every guardrail**. The package wins 7 times, and we show those too."
+**2 (A). One catalogue.** Key 2.
+- "The six suppliers we already have list this one area **86 times**." Space: "**20 real hotels.** It matches on name, location, phone, address and photos together."
+- Point at **Looks the same, isn't**: "Two Flora hotels, 198 m apart, different phones and streets: kept apart, because merging them sends a guest to the wrong building."
 
-**3 (B).** Press Space for the arithmetic.
-- "On True Price, not sticker: the agent pays ₹59,329 instead of ₹67,341, saving **₹8,011 (11.9%)**."
-- "TBO's expected cost is ₹51,099, including every part's price-change and failover risk, plus the risk of unwinding. TBO keeps **₹7,977 (13.5%)**."
-- "The split is a setting; so are the guardrails." Open **Publish rules** (top right), drag *Minimum TBO margin* past 14%: the product drops out of "Ready to sell". Reset to defaults.
+**3 (B). True Price.** Key 3.
+- "Hyatt Place, 11 offers from 6 suppliers: price, availability, cancellation, payment terms, reliability."
+- Space: "Kestrel's ₹18,600 looks cheapest but is non-refundable, without breakfast, from a supplier that honours 73% of bookings. On True Price it's **4th at ₹24,175**; Mynah's ₹20,100 with breakfast is really the best deal at **₹20,773**."
+- Click the **Sheet rates** tab: "And Plover's contracted rates sit right here, on this hotel's own rooms."
 
-**4 (B).** Key 4, then Space.
-- Riskiest part first: "Transfer out via Mynah failed → SAME transfer out via Heron, confirmed. Whole trip confirmed."
-- "Seed 22 is the first seed that shows a failover, and it says so on screen."
-- Press **Run 1,000×**: "Over a thousand draws the Remix confirms cleanly 82% of the time. 7% need unwinding, and then TBO buys the package, so the client still travels. We report that: the sandbox secures 93.0% against our 95.7% estimate."
+**4 (B). Book both.** Key 4, Space.
+- "Kestrel's booking fails, so it moves to **the identical room from Sunbird at ₹19,230**, never a different room. Mynah confirms first time."
 
-**5 (C).** Key 5, Remix → New products.
-- "Agents searched for the **Dubai Dolphinarium, standard seat, with private pickup from Deira** 86 times in 90 days, and nobody sells it."
-- "Remix builds it from three suppliers. Against booking the pieces yourself (₹9,425 True Price), the agent saves 4.9% and TBO keeps 5.2%."
-- Press Space to step through the next gaps: "18 of 78 searched-for gaps pass every guardrail."
+**5 (C). Tours.** Key 5, Space.
+- "Six Burj Khalifa listings are four products. The glowing parts are what really differs: time slot, lounge, cancellation."
 
-**6 (C).** Key 6: the golden-case hotel, Hyatt Place Baniyas Square, with the Connected Trip card on top.
-- "The hotel ranked #1 on True Price, airport cars both ways, and the helicopter Remix. One price, ₹83,146, against ₹93,438 booked separately."
-- Then the honest part: "**It's blocked.** Four independent parts multiply to a 92.9% Promise, under our 95% floor. Remix doesn't sell it, and the slider shows what it would take."
-- Press Space: the trip books, and the car fails over to a SAME twin.
+**6 (C). People decide the rest.** Key 6.
+- "Anything Canon isn't sure about waits here: hotels and rooms from imported sheets, and supplier listings the matcher couldn't call. Nothing uncertain is ever merged."
 
-**7 (A).** Key 7, Review → Remix approvals.
-- "Nothing is sold until a person approves it: recipe, suppliers, margin, Promise, cancellation."
-- Press **A** on the top card: "Logged, and reversible with undo. If a rebuild changes the numbers, it comes back to the queue."
-- Then Insights → Business case, bottom table: "The matching underneath: hotels 100% precision on held-out brand families. Labels are the generator's, so it's an upper bound, and we say so."
+**7 (B). Bundles.** Key 7, Space.
+- "Because the catalogue knows exactly what is the same, it can do one more thing: rebuild a supplier's package from other suppliers' parts. Helicopter tour: Kestrel's package at a True Price of ₹67,341 becomes **₹59,329**; the agent saves **11.9%**, and TBO keeps **13.5%**. Only 4 of 30 packages pass every rule, and we say so."
 
-**8 (C).** Key 8.
-- "Simulated, and labelled so. 18% of sightseeing searches hit a publishable Remix: about ₹52,000 TBO margin and ₹52,000 agent savings per 1,000 searches."
-- Press Space for the pessimistic preset: "Transfers dearer, parts failing 1.5× as often. Margin halves to ₹29,000, and the Remixes that survive are the ones with wide gaps."
+**8 (C). Evidence.** Key 8.
+- "On brand families the model never trained on, duplicate detection is **100% precise** for hotels, rooms and tours, and 0 of 42 real look-alike pairs were merged. We wrote both sides, so treat that as an upper bound."
+- Space for the pessimistic preset (bundle margin roughly halves).
 
 ## Fallbacks
-- **Laptop slow or the server not up:** the screens still load from the prebuilt data in `data/build` (no network). Say the numbers from this page.
-- **Book Remix shows a different story:** the seed on screen is the scenario. Press **Book Remix** again for seed 22, or say "fresh seed, fresh draw: that's the point".
-- **Someone changed a guardrail:** open **Publish rules** (a dot shows when changed) and press "Reset to defaults".
-- **Approvals already decided from a rehearsal:** undo from the decision log, or delete `data/build/remix_approvals.jsonl` before going on stage.
-- **Asked about supplier naming ("RP Room", "Radisson Room"):** open Catalogue → **Supplier sheets** and press **Try Weaver's sheet** (or Space). "HP Dubai Baniyas Square" resolves to Hyatt Place Dubai Baniyas Square ("HP read as Hyatt Place"), with the hotel's name struck out of each room name. Filter **Needs a person** to show what isn't guessed.
-- **Asked where the old hotel beats went:** the True Price flip and "Book both" on the hotel page still work at `/hotels/demo?tp=1&book=1`.
+- **The import shows "same file: same import":** it was imported before. Remove it on the import page, or delete `data/imports/` before the demo.
+- **Laptop slow or server not up:** the screens load from the prebuilt data in `data/build` (no network). Say the numbers from this page.
+- **Asked about real TBO sheets:** the reader was tested locally on TBO's sample sheets: AVA Cancún (CSV and a 4-tab workbook), Hard Rock (5 hotels, about 5,100 rates), UNICO and a rotated-grid file. The 2027 AVA sheet attached to the hotel the 2026 sheet created. A contract workbook mixing rack, net and promo columns is refused clearly. None of those files are in the repo or the demo.
+- **Someone changed a bundle guardrail:** open **Publish rules** and press "Reset to defaults".

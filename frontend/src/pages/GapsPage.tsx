@@ -31,7 +31,7 @@ export default function GapsPage() {
   return (
     <div className="mx-auto max-w-[1400px] px-8 pb-10 pt-8">
       <PageHeader title="New products agents ask for"
-        subtitle="Agents search for combinations that no supplier sells as one product, like a ticket with a private pickup. Remix builds them from parts, priced against what the agent does today: book each piece separately." />
+        subtitle="Agents search for combinations that no supplier sells as one product, like a ticket with a private pickup. Canon builds them from parts, priced against what the agent does today: book each piece separately." />
       <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[300px_minmax(0,1fr)]">
         <GapList items={items} active={sel?.variant_id ?? null} onPick={pick} total={res.data.counts.gaps} />
         {sel && <GapView r={sel} />}
@@ -89,7 +89,7 @@ function GapView({ r }: { r: RemixResult }) {
             </div>
             <ArrowRight className="hidden h-6 w-6 text-ink-mute md:block" />
             <div>
-              <div className="text-sm font-medium text-sun-600">TBO Remix · one booking</div>
+              <div className="text-sm font-medium text-sun-600">TBO bundle · one booking</div>
               <div className="font-display text-[34px] font-semibold tabular-nums text-ink">{inr(r.agent_true_price!.total)}</div>
               <div className="text-sm text-ink-mute">sold to the agent at {inr(r.sell)} for 2</div>
             </div>

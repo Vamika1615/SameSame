@@ -42,7 +42,7 @@ export default function RemixStudioPage() {
   return (
     <div className="mx-auto max-w-[1400px] px-8 pb-10 pt-8">
       <PageHeader title="Rebuild supplier packages for less"
-        subtitle="Each tour package is rebuilt from the same parts other suppliers sell separately. A Remix is offered only when it is the same experience, cheaper for the agent, and leaves TBO a margin."
+        subtitle="Each tour package is rebuilt from the same parts other suppliers sell separately. A bundle is offered only when it is the same experience, cheaper for the agent, and leaves TBO a margin."
         right={<button onClick={() => setRulesOpen(true)} className="relative flex items-center gap-2 rounded-full border border-paper-line bg-paper px-4 py-2 text-sm font-medium text-ink-soft hover:border-accent-500">
           <SlidersHorizontal className="h-4 w-4" />Publish rules{changed && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-sun-500" />}</button>} />
       <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[300px_minmax(0,1fr)]">
@@ -132,7 +132,7 @@ function RemixView({ r, showTp, onToggleTp, bookBeat, seed, seedNote, isDemo }:
             </div>
             <ArrowRight className="hidden h-6 w-6 text-ink-mute md:block" />
             <div>
-              <div className="text-sm font-medium text-sun-600">TBO Remix · {r.parts!.length} parts, {r.suppliers?.length} suppliers</div>
+              <div className="text-sm font-medium text-sun-600">TBO bundle · {r.parts!.length} parts, {r.suppliers?.length} suppliers</div>
               <div className="font-display text-[34px] font-semibold tabular-nums text-ink">{inr(r.agent_true_price!.total)}</div>
               <div className="text-sm text-ink-mute">sold to the agent at {inr(r.sell!)} for 2</div>
             </div>
@@ -143,7 +143,7 @@ function RemixView({ r, showTp, onToggleTp, bookBeat, seed, seedNote, isDemo }:
             <Metric label="Books first time" value={pct(r.promise)} sub={`cancel: ${r.cancel}`} />
           </div>
           <div className="mt-5 flex flex-wrap items-center gap-3">
-            <button onClick={() => setBookTick((t) => t + 1)} className="rounded-full bg-accent-700 px-6 py-2.5 font-semibold text-white hover:bg-accent-900">Book Remix</button>
+            <button onClick={() => setBookTick((t) => t + 1)} className="rounded-full bg-accent-700 px-6 py-2.5 font-semibold text-white hover:bg-accent-900">Book bundle</button>
             <button onClick={onToggleTp} className="rounded-full px-4 py-2.5 text-sm font-medium text-ink-soft hover:bg-paper-warm">{showTp ? "Hide" : "How is this priced?"}</button>
             <Tip content="True Price = the listed price plus what its risks are expected to cost: cancellation, price changes and failed bookings. Prices compare on True Price, never on sticker alone.">
               <span className="cursor-help text-xs text-ink-mute underline decoration-dotted">Prices shown are True Prices</span>
@@ -160,7 +160,7 @@ function RemixView({ r, showTp, onToggleTp, bookBeat, seed, seedNote, isDemo }:
 
       {r.parts && (
         <section className="rounded-3xl border border-paper-line bg-paper p-6">
-          <h3 className="text-[16px] font-semibold text-ink">What's in the Remix</h3>
+          <h3 className="text-[16px] font-semibold text-ink">What's in the bundle</h3>
           <ul className="mt-3 divide-y divide-paper-line">{r.parts.map((p) => <PartRow key={p.leg} p={p} />)}</ul>
           {r.timeline && <Timeline r={r} />}
         </section>
@@ -370,7 +370,7 @@ export function BookRemix({ r, active, demoSeed, seedNote, withStats = true, tri
           <p className="text-sm text-ink-mute">The riskiest part is booked first. If a part fails, an identical part from another supplier takes over; if none is left, TBO cancels and buys the package so the client still travels.</p>
         </div>
         <div className="flex flex-wrap items-center gap-1">
-          <button onClick={() => run(demoSeed)} className="rounded-full bg-accent-700 px-4 py-2 text-sm font-semibold text-white hover:bg-accent-900">{res ? "Book again" : "Book Remix"}</button>
+          <button onClick={() => run(demoSeed)} className="rounded-full bg-accent-700 px-4 py-2 text-sm font-semibold text-white hover:bg-accent-900">{res ? "Book again" : "Book bundle"}</button>
           <button onClick={() => run(Math.floor(Math.random() * 1e6))} className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-ink-soft hover:bg-paper-warm"><Dice5 className="h-4 w-4" />Fresh seed</button>
           {withStats && <button onClick={async () => setStats(await getJSON<RemixStats>(`/api/remix/book/stats?variant_id=${r.variant_id}&runs=1000`))}
             className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-ink-soft hover:bg-paper-warm"><BarChart3 className="h-4 w-4" />Run 1,000×</button>}

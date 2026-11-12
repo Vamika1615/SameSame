@@ -117,6 +117,22 @@ Only the gap finder reads them. The demand behind each gap Remix is a count of t
   - 2–4 rooms per hotel, in the same naming styles; Room Only, plus Bed & Breakfast 60% of the time.
   - The answer key (`weaver_truth.parquet`) is read only by `eval/sheet_check.py`.
 
+## Plover's group-rate workbook (synthetic, C1)
+`backend/samesame/data/naming.py: plover_workbook`, written to `data/build/sheets/plover_group_rates.xlsx`.
+- Uses the price-grid layout real supplier contracts use:
+  - a title and a booking-window row, then a block per hotel (name row, a `Code | Room Type | <season ranges> | EXTRA ADULT | CHILD 4-11 | OCC MAX` header, SUN-WED / THU-SAT and SGL & DBL sub-headers);
+  - six 2027 seasons;
+  - two tabs: base rates, and "5 Nts+" at 8% less;
+  - footnotes: net USD per room per night, 1–4 nights 5%, 5+ nights 8%, mark up 20%, a $60 minimum-stay fee.
+- Hotels: the golden-case hotel and two near it (catalogue names), one by its short code ("WF Hotel"), and one real OpenStreetMap hotel not in the catalogue.
+- Prices: the hotel's base rate ÷ 88 INR per USD × the room's tier multiplier × a season factor, × 1.08 for Thu–Sat, with ±2% noise.
+- Room codes are made up (tier initial + K1/T2/F4 + view initial).
+- The answer key (`plover_truth.parquet`) is not read by the app.
+
+## Imported sheets and TBO's real samples
+- Sheets uploaded on the Import page are stored only in `data/imports/` on the machine running Canon (git-ignored).
+- TBO's real sample rate sheets were used only to test the reader locally. They are not in the repository, the samples or the demo.
+
 ## Held-out partition
 `config.is_holdout()` holds out about 15% of brand families. In Dubai none of the 42 look-alike pairs fall in a held-out family, so that number is scored out-of-fold only. The held-out evaluation set has 128 pairs: 58 hotel, 40 room, 30 activity.
 

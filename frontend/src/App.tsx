@@ -1,5 +1,5 @@
 import { Info } from "lucide-react";
-import { Link, NavLink, Route, Routes, useLocation } from "react-router-dom";
+import { Link, NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useApi } from "@/lib/api";
 import { Presenter } from "@/lib/presenter";
 import type { Meta } from "@/contracts";
@@ -8,45 +8,65 @@ import HomePage from "@/pages/HomePage";
 import HotelsPage from "@/pages/HotelsPage";
 import HotelDetailPage from "@/pages/HotelDetailPage";
 import SightseeingPage from "@/pages/SightseeingPage";
-import OpsPage from "@/pages/OpsPage";
+import { ApprovalsPage } from "@/pages/OpsPage";
 import SimulatorPage from "@/pages/SimulatorPage";
 import SuppliersPage from "@/pages/SuppliersPage";
 import LabelPage from "@/pages/LabelPage";
 import RemixStudioPage from "@/pages/RemixStudioPage";
 import GapsPage from "@/pages/GapsPage";
-import SheetsPage from "@/pages/SheetsPage";
+import ImportPage from "@/pages/ImportPage";
+import CataloguePage from "@/pages/CataloguePage";
+import CatalogueHotelPage from "@/pages/CatalogueHotelPage";
+import ReviewPage from "@/pages/ReviewPage";
 import { Empty } from "@/components/States";
 
-/** Four sections. Each groups the pages that answer one job; the sub-tabs are the pages. */
+/** Three sections. The catalogue is the product; Bundles is what a clean catalogue makes possible. */
 export const SECTIONS = [
-  { key: "remix", label: "Remix", home: "/remix", tabs: [
-    { to: "/remix", label: "Rebuild packages", end: true },
-    { to: "/remix/gaps", label: "New products" },
-  ] },
-  { key: "catalogue", label: "Catalogue", home: "/hotels", tabs: [
-    { to: "/hotels", label: "Hotels" },
+  { key: "catalogue", label: "Catalogue", home: "/import", tabs: [
+    { to: "/import", label: "Import sheets" },
+    { to: "/catalogue", label: "All hotels", end: true },
+    { to: "/hotels", label: "Agent search" },
     { to: "/sightseeing", label: "Tours" },
-    { to: "/sheets", label: "Supplier sheets" },
-  ] },
-  { key: "review", label: "Review", home: "/ops", tabs: [
-    { to: "/ops?tab=remix", label: "Remix approvals" },
-    { to: "/ops?tab=twin", label: "Uncertain matches" },
+    { to: "/catalogue/review", label: "Uncertain matches" },
   ] },
   { key: "insights", label: "Insights", home: "/suppliers", tabs: [
     { to: "/suppliers", label: "Supplier reliability" },
     { to: "/simulator", label: "Business case" },
   ] },
+  { key: "bundles", label: "Bundles", home: "/remix", tabs: [
+    { to: "/remix", label: "Rebuild packages", end: true },
+    { to: "/remix/gaps", label: "New products" },
+    { to: "/bundles/approvals", label: "Approvals" },
+  ] },
 ] as const;
 
 function sectionOf(path: string) {
-  if (path.startsWith("/remix")) return "remix";
-  if (path.startsWith("/hotels") || path.startsWith("/sightseeing") || path.startsWith("/sheets")) return "catalogue";
-  if (path.startsWith("/ops") || path.startsWith("/label")) return "review";
+  if (path.startsWith("/remix") || path.startsWith("/bundles")) return "bundles";
+  if (["/import", "/catalogue", "/hotels", "/sightseeing", "/sheets", "/label"].some((p) => path.startsWith(p))) return "catalogue";
   if (path.startsWith("/suppliers") || path.startsWith("/simulator")) return "insights";
   return null;
 }
 
-/** A small sun: the brand mark. */
+/** Old addresses keep working. */
+function OpsRedirect() {
+  const loc = useLocation();
+  return <Navigate to={loc.search.includes("tab=twin") ? "/catalogue/review?tab=listings" : "/bundles/approvals"} replace />;
+}
+
+/** Canon's mark: many lines folded into one. */
+export function CanonMark({ className = "h-7 w-7" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className} aria-hidden>
+      <rect x="3" y="6" width="11" height="3" rx="1.5" fill="#e07b2e" opacity=".55" />
+      <rect x="3" y="14.5" width="11" height="3" rx="1.5" fill="#e07b2e" opacity=".75" />
+      <rect x="3" y="23" width="11" height="3" rx="1.5" fill="#e07b2e" />
+      <path d="M15 7.5 C21 7.5 20 16 25 16 M15 16 H25 M15 24.5 C21 24.5 20 16 25 16" stroke="#163a6b" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+      <circle cx="26.5" cy="16" r="3" fill="#163a6b" />
+    </svg>
+  );
+}
+
+/** A small sun: the old brand mark (kept for the bundle pages' accents). */
 export function SunMark({ className = "h-7 w-7" }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" className={className} aria-hidden>
@@ -86,6 +106,7 @@ function SubNav({ section }: { section: string }) {
   const isActive = (to: string, end?: boolean) => {
     const [p, q] = to.split("?");
     if (q) return loc.pathname === p && (here.includes(q) || (q === "tab=remix" && !loc.search.includes("tab=")));
+    if (p === "/catalogue" && loc.pathname.startsWith("/catalogue/hotels")) return true;
     return end ? loc.pathname === p : loc.pathname === p || loc.pathname.startsWith(p + "/");
   };
   return (
@@ -111,9 +132,9 @@ export default function App() {
       <header className="sticky top-0 z-40 bg-paper/90 backdrop-blur-md">
         <div className="border-b border-paper-line">
           <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-10 px-8">
-            <NavLink to="/" className="flex items-center gap-2" title="Remix: new products from parts suppliers already sell">
-              <SunMark className="h-6 w-6" />
-              <span className="font-display text-[22px] font-semibold leading-none tracking-tight text-accent-700">Re<span className="italic text-sun-500">mix</span></span>
+            <NavLink to="/" className="flex items-center gap-2" title="Canon: one clean catalogue from every supplier sheet">
+              <CanonMark className="h-6 w-6" />
+              <span className="font-display text-[22px] font-semibold leading-none tracking-tight text-accent-700">Canon</span>
             </NavLink>
             <nav className="flex h-full items-stretch gap-1">
               {SECTIONS.map((s) => (
@@ -132,20 +153,25 @@ export default function App() {
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/remix" element={<RemixStudioPage />} />
-          <Route path="/remix/gaps" element={<GapsPage />} />
+          <Route path="/import" element={<ImportPage />} />
+          <Route path="/catalogue" element={<CataloguePage />} />
+          <Route path="/catalogue/hotels/:id" element={<CatalogueHotelPage />} />
+          <Route path="/catalogue/review" element={<ReviewPage />} />
           <Route path="/hotels" element={<HotelsPage />} />
           <Route path="/hotels/:id" element={<HotelDetailPage />} />
-          <Route path="/sheets" element={<SheetsPage />} />
           <Route path="/sightseeing" element={<SightseeingPage />} />
-          <Route path="/ops" element={<OpsPage />} />
+          <Route path="/remix" element={<RemixStudioPage />} />
+          <Route path="/remix/gaps" element={<GapsPage />} />
+          <Route path="/bundles/approvals" element={<ApprovalsPage />} />
           <Route path="/suppliers" element={<SuppliersPage />} />
           <Route path="/simulator" element={<SimulatorPage />} />
           <Route path="/label" element={<LabelPage />} />
+          <Route path="/sheets" element={<Navigate to="/import" replace />} />
+          <Route path="/ops" element={<OpsRedirect />} />
           <Route path="*" element={<Empty title="Page not found" />} />
         </Routes>
         <footer className="mx-auto max-w-[1400px] px-8 pb-8 pt-10 text-xs text-ink-mute">
-          Remix · built for TBO · Track 2. Fictional suppliers, synthetic data. Photos: Wikimedia Commons (credited on hover). Map data © OpenStreetMap contributors, ODbL.
+          Canon · built for TBO · Track 2. Catalogue suppliers are fictional and their data synthetic; sheets you import stay on this machine. Photos: Wikimedia Commons (credited on hover). Map data © OpenStreetMap contributors, ODbL.
         </footer>
       </main>
       <Presenter />

@@ -33,7 +33,7 @@ We call this set **held-out**, not blind: the model never trained on these famil
 ## Routing
 
 - Candidate hotel pairs after blocking: 11,498; 2,281 scored above the gray-zone floor.
-- Auto-merged: 2,118 pairs. 162 pairs (7.1%) fell in the gray zone or were blocked; after grouping they become **31 review items** (one per pair of clusters, skipping pairs joined through stronger links).
+- Auto-merged: 2,118 pairs. 161 pairs (7.1%) fell in the gray zone or were blocked; after grouping they become **31 review items** (one per pair of clusters, skipping pairs joined through stronger links).
 - Never compared: 17 of 2,241 true twin pairs were dropped by blocking before scoring (counted as missed above).
 - LLM: off (every uncertain pair goes to the human queue). Share to LLM: 0.000; to humans: 0.071.
 - Scores are out-of-fold, 5 folds grouped by hotel: every hotel's pairs were scored by a model that never saw that hotel's labels.
@@ -143,8 +143,8 @@ Suppliers write one hotel as "Hilton Garden Inn Dubai Deira" and "HGI Dubai Deir
 | room names carrying the hotel's name | 93 | 1.000 | 0.975 | 0 | 6 | — |
 
 - Room names that are only the hotel ("Hyatt Place Room"): 14; 14 sent to a person as unmapped, never pooled with another room.
-- **Weaver's sample sheet** (a fictional 7th supplier, not in the catalogue): 136 rows → 33 hotel names → 30 hotels. 27 matched automatically, 4 new to TBO, 2 to a person, 3 listed twice under two names. Rooms: 87 names → 63 mapped, 16 to a person, 8 new.
-- Against Weaver's answer key: hotels 27/27 automatic matches right, 4/4 new-hotel calls right; rooms 63/63 automatic mappings right. We wrote the generator, the matcher and this sheet, so treat these as an upper bound.
+- **Weaver's sample sheet** (a fictional 7th supplier, not in the catalogue): 136 rows → 33 hotel names → 30 hotels. 28 matched automatically, 4 new to TBO, 1 to a person, 3 listed twice under two names. Rooms: 87 names → 67 mapped, 12 to a person, 8 new.
+- Against Weaver's answer key: hotels 28/28 automatic matches right, 4/4 new-hotel calls right; rooms 67/67 automatic mappings right. We wrote the generator, the matcher and this sheet, so treat these as an upper bound.
 
 ## Caveats (read before quoting any number above)
 

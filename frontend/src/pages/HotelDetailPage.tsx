@@ -2,7 +2,7 @@ import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { AlertTriangle, ArrowDown, ArrowLeft, ArrowUp, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import type { HotelDetail, Offer, SourcedFact, Reference } from "@/contracts";
+import type { CatalogueHotel, HotelDetail, Offer, SourcedFact, Reference } from "@/contracts";
 import { inr, useApi } from "@/lib/api";
 import { usePresenterAction } from "@/lib/presenter";
 import { ErrorState, Loading } from "@/components/States";
@@ -10,6 +10,7 @@ import { FlipBoard, Illustrative, PromiseMeter, Segmented, SupplierBadge, Tip, c
 import { BookingPanel } from "@/components/BookingPanel";
 import { ConnectedTripCard } from "@/components/ConnectedTripCard";
 import { PageHeader } from "@/components/PageHeader";
+import { RateGrid, Terms } from "@/components/RateGrid";
 
 export default function HotelDetailPage() {
   const { id } = useParams();
@@ -19,7 +20,7 @@ export default function HotelDetailPage() {
   return <Detail d={res.data} demo={id === "demo"} />;
 }
 
-type Tab = "offers" | "about" | "rooms" | "trip";
+type Tab = "offers" | "sheets" | "about" | "rooms" | "trip";
 
 function Detail({ d, demo }: { d: HotelDetail; demo: boolean }) {
   const [params, setParams] = useSearchParams();
@@ -38,10 +39,13 @@ function Detail({ d, demo }: { d: HotelDetail; demo: boolean }) {
 
   const fact = (k: string) => d.facts.find((f) => f.key === k);
   const p = d.params;
-  const tabs: [Tab, string][] = [["offers", `Offers · ${d.offers.length}`], ["about", "About the hotel"], ["rooms", `Rooms · ${d.rooms.length}`], ...(demo ? [["trip", "Trip package"] as [Tab, string]] : [])];
+  const cat = useApi<CatalogueHotel>(`/api/catalogue/hotels/${d.cluster_id}`);
+  const sheetRates = cat.status === "ready" ? cat.data.rates.length : 0;
+  const tabs: [Tab, string][] = [["offers", `Offers · ${d.offers.length}`], ...(sheetRates ? [["sheets", `Sheet rates · ${sheetRates.toLocaleString("en-IN")}`] as [Tab, string]] : []),
+    ["about", "About the hotel"], ["rooms", `Rooms · ${d.rooms.length}`], ...(demo ? [["trip", "Trip package"] as [Tab, string]] : [])];
   return (
     <div className="mx-auto max-w-[1400px] px-8 pb-24 pt-6">
-      <Link to="/hotels" className="inline-flex items-center gap-1 text-sm text-ink-mute hover:text-ink"><ArrowLeft className="h-4 w-4" />All hotels</Link>
+      <Link to="/catalogue" className="inline-flex items-center gap-1 text-sm text-ink-mute hover:text-ink"><ArrowLeft className="h-4 w-4" />All hotels</Link>
       <div className="mt-3">
         <PageHeader title={d.name}
           subtitle={<span className="flex flex-wrap items-center gap-x-2">
@@ -92,6 +96,21 @@ function Detail({ d, demo }: { d: HotelDetail; demo: boolean }) {
         </>
       )}
       {tab === "rooms" && <section className="mt-6"><RoomsSection d={d} /></section>}
+      {tab === "sheets" && cat.status === "ready" && (
+        <section className="mt-6 space-y-6">
+          <div className="flex flex-wrap gap-2">
+            {cat.data.sources.map((x) => (
+              <Link key={x.import_id + x.as_written} to={`/import?id=${x.import_id}`} className="rounded-full border border-paper-line bg-paper px-3 py-1 text-sm text-ink-soft hover:border-accent-500">
+                <b className="text-ink">{x.supplier}</b> · {x.file}{x.as_written !== d.name ? ` · as “${x.as_written}”` : ""}</Link>))}
+          </div>
+          <div className="rounded-2xl border border-paper-line bg-paper p-5">
+            <h2 className="text-xl text-ink">Contracted rates from imported sheets</h2>
+            <p className="text-sm text-ink-mute">Each sheet's rooms are mapped onto this hotel's rooms, so these rates line up with the supplier offers.</p>
+            <div className="mt-3"><RateGrid rates={cat.data.rates} /></div>
+          </div>
+          <div className="rounded-2xl border border-paper-line bg-paper p-5"><h2 className="text-xl text-ink">Terms</h2><div className="mt-3"><Terms conditions={cat.data.conditions} /></div></div>
+        </section>
+      )}
       {tab === "trip" && demo && <ConnectedTripCard active={trip} />}
     </div>
   );

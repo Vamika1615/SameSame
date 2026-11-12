@@ -7,13 +7,13 @@ import { Empty, ErrorState, Loading } from "@/components/States";
 import { Illustrative, SupplierBadge, cn } from "@/components/ui";
 import { PageHeader } from "@/components/PageHeader";
 import { RemixApprovals } from "@/components/RemixApprovals";
-import { useSearchParams } from "react-router-dom";
 
 type Audit = { audit_id: string; pair_id: string; label: string; reviewer: string; truth: string; correct: boolean; undone?: boolean };
 const LABEL = { S: "SAME", V: "VARIANT", D: "DIFFERENT" } as const;
 const ROUTE = { gray_zone: "Gray zone: below the auto-merge bar", llm_unsure: "LLM unsure", constraint_block: "Blocked by a never-merge rule" };
 
-function TwinQueue() {
+/** Pairs of supplier listings the matcher was not sure about (Catalogue, Uncertain matches). */
+export function TwinQueue({ embedded = false }: { embedded?: boolean }) {
   const [queue, setQueue] = useState<ReviewItem[] | null>(null);
   const [audit, setAudit] = useState<Audit[]>([]);
   const [err, setErr] = useState<string | null>(null);
@@ -65,9 +65,9 @@ function TwinQueue() {
   const item = ack?.item ?? current;
 
   return (
-    <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-8 px-8 pb-20 pt-8 xl:grid-cols-[1fr_320px]">
+    <div className={cn("grid grid-cols-1 gap-8 xl:grid-cols-[1fr_320px]", !embedded && "mx-auto max-w-[1400px] px-8 pb-20 pt-8")}>
       <div>
-        <PageHeader title="Are these the same?"
+        <PageHeader title={embedded ? "Are these two listings the same hotel?" : "Are these the same?"}
           subtitle={<>The matcher wasn't sure enough to merge these, so a person decides. Your answer is used by the next build. Keys: S same · V variant · D different · U undo.</>}
           right={<div className="text-sm text-ink-mute"><b className="text-ink">{queue.length}</b> waiting{streak > 1 && <> · <Flame className="inline h-4 w-4 text-sun-500" />{streak} in a row</>}</div>} />
 
@@ -161,14 +161,12 @@ function Side({ s, other }: { s: ReviewSide; other: ReviewSide }) {
   );
 }
 
-/** Review: Remix approvals (product team) and uncertain matches (ops). The section sub-tabs switch between them. */
-export default function OpsPage() {
-  const [params] = useSearchParams();
-  if (params.get("tab") === "twin") return <TwinQueue />;
+/** Bundles: Approvals. Nothing is sold until a person approves it. */
+export function ApprovalsPage() {
   return (
     <div className="mx-auto max-w-[1400px] px-8 pb-20 pt-8">
-      <PageHeader title="Approve Remixes before they're sold"
-        subtitle="Every Remix that passes the publish rules waits here. Approve or reject it (A / R for the top one). Every decision is logged and can be undone." />
+      <PageHeader title="Approve bundles before they're sold"
+        subtitle="Every bundle that passes the publish rules waits here. Approve or reject it (A / R for the top one). Every decision is logged and can be undone." />
       <RemixApprovals />
     </div>
   );

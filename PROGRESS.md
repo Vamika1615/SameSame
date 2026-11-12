@@ -2,7 +2,44 @@
 
 _Update after every milestone. Newest first._
 
-## Status: Remix done and merged; N1 (supplier naming + Supplier Sheets) done
+## Status: Canon (C1 + C2) on branch `canon`: the catalogue is the product, supplier sheets are the way in
+
+### Done: C1 + C2, Canon (2026-11-12)
+The team decided the catalogue is the product and Remix is secondary, and asked for supplier sheets to be the main entry point. The product is renamed **Canon** ("every supplier sheet, one clean catalogue"). Remix is now **Bundles**, the last section.
+- **Layout reader (`ingest/layouts.py`):** flat sheets, price grids and rotated grids.
+  - Price grids: seasons × weekday × occupancy columns, a code column, extra-guest columns, merged headers, several hotels per sheet, and one tab per rate plan.
+  - Footnotes are classified into discount tiers, mark-up, minimum-stay fee, booking window and dynamic dates.
+  - Contract workbooks (rack, net and promo side by side) are refused with a clear message.
+- **Import engine (`ingest/sheet.py`):**
+  - **Sheets with no location** (real grids never give one) are matched by name, writing out only the sheet's own short codes.
+  - **Auto-match rule:** only an identical name shared by exactly one catalogue hotel matches on its own; names that are close go to a person.
+  - **Name score:** token_set averaged with token_sort, so "Riviera Hotel" isn't 100% like "Hard Rock Hotel Riviera Maya".
+  - **Hotels created by earlier imports** are matched too, so next year's sheet attaches to this year's hotel.
+  - **Rooms** map by code, then name, then tier + bed + view. A new hotel's rooms are kept as written.
+- **Persistence (`catalogue/imports.py`, `catalogue/view.py`):**
+  - Each import is stored in `data/imports/` (git-ignored): the original file, the result, and a status of draft, applied or removed.
+  - Decisions go to an append-only log, with undo.
+  - The catalogue is past inventory, plus applied imports in the order they were applied, plus decisions. Re-check, remove and restore all work.
+  - **Bug found by tests:** two imports applied in the same second tied on the timestamp and created a duplicate hotel. Timestamps now carry microseconds.
+- **API:** `/api/imports` (upload, samples, apply, remove, restore, recheck, decide, undo, download the original) and `/api/catalogue` (summary, hotels, hotel, pending).
+- **UI:**
+  - Navigation: **Catalogue** (Import sheets · All hotels · Agent search · Tours · Uncertain matches) · **Insights** · **Bundles** (Rebuild packages · New products · Approvals). The Review section is gone.
+  - New pages: Import sheets (upload, samples, import history, per-hotel and per-room decisions, add/remove), All hotels (search and filters), a page for hotels added from sheets (rate grid, rooms, terms), and Uncertain matches (sheet decisions and listing pairs).
+  - Hotel pages get a **Sheet rates** tab.
+  - Presenter beats now tell the catalogue story first.
+- **Samples:**
+  - **Plover**, a synthetic two-tab grid with 5 Dubai hotels: 3 matched, 1 short code for a person, 1 new, all right against its answer key.
+  - **Weaver** now scores 28/28 automatic hotel matches (was 27/27, because a name-only match is now allowed) and 67/67 rooms (was 63/63).
+- **Real TBO sample sheets (tested locally only, never committed):** 6 of 7 distinct files import.
+  - AVA Cancún: CSV, and a 4-tab workbook that attaches to the hotel the CSV created.
+  - Hard Rock: 5 hotels, about 5,100 rates.
+  - UNICO: two properties, kept apart.
+  - HXA: rotated grid; the hotel is named after the file, with a warning.
+  - The USA-market contract workbook is refused.
+  - Overall: 9 hotels and 7,836 rates, with no false match against the Dubai catalogue.
+
+**Tests: 96 passing** (6 new in `test_catalogue.py`: layouts, the import lifecycle, errors).
+
 
 ### Done: N1, supplier naming and the Supplier Sheets page (2026-11-09)
 Prompted by TBO's CTO: suppliers send spreadsheets where one hotel is "Radisson Plaza Room", "Radisson Room" or "RP Room".

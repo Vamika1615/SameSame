@@ -1,67 +1,58 @@
-# Remix
+# Canon
 
-**Remix makes new products from parts suppliers already sell.**
+**Every supplier sheet, one clean catalogue.**
 
-Remix splits every supplier's tour into parts (entry ticket, transfers, lunch) and assembles TBO's own version from the cheapest *reliable* parts across suppliers. A Remix is published only if it is all of these:
-- the **SAME** experience as a package, by Variant DNA, or something agents search for that **nobody sells**;
-- **cheaper on True Price**, not just sticker;
-- leaves TBO a **margin**;
-- clears a **Promise** floor;
-- **approved by a person**.
+TBO buys the same hotels and tours from many suppliers. Each supplier sends rate sheets in its own layout and names the same hotel and room its own way ("Hyatt Place", "HP", "HYATT PLACE DXB"; "HP SUP KG CV", "Superior Room, 1 King Bed"). Canon turns all of it into one catalogue:
 
-Where the package is cheaper, Remix says so.
+1. **Import any rate sheet** (Catalogue → Import sheets). CSV or Excel, in the layouts suppliers really send:
+   - **price grids**: a block per hotel, seasons across, Sun–Wed / Thu–Sat and SGL / DBL sub-columns, a room-code column, extra-guest columns, one tab per rate plan (base, "5 Nts+", "6% OFF"), several hotels per sheet, merged headers;
+   - **one row per rate** (hotel, room, price columns found by their usual spellings);
+   - **rotated grids** (rooms across, seasons down).
+   
+   The footnotes become terms: discount tiers ("1–4 nights 20%"), mark-up ("rates must be marked up 25%"), minimum-stay fees, the booking window.
+2. **Match it to what you already sell.** Each hotel is matched to the catalogue (Twin Finder's trained model when the sheet has a location; names, with short codes written out, when it doesn't), to a hotel an earlier sheet added (next year's sheet attaches to this year's hotel), or added as new. Each room maps by its code, its name, or tier + bed + view with the hotel's own name removed.
+3. **A person decides only what's uncertain** (Catalogue → Uncertain matches). Every decision is logged and can be undone. An import is a draft until you add it; removing it takes its hotels and rates back out.
+4. **One catalogue** (Catalogue → All hotels): the suppliers' feeds consolidated (1,267 listings → 319 hotels, look-alikes kept apart) plus everything imported. A hotel's page shows supplier offers ranked on **True Price**, and a **Sheet rates** tab with every imported rate mapped onto its rooms.
 
-Built for the TBO Tek hackathon, Track 2 (Multi-supplier Inventory), Dubai. All supplier data is **synthetic**; hotels and attractions are real (OpenStreetMap, Wikimedia, Wikipedia).
+**Then, because the catalogue knows exactly what is the same:** *Bundles* rebuilds a supplier's tour package from other suppliers' parts, cheaper for the agent and still profitable for TBO (4 of 30 packages pass every rule; 18 products agents search for that nobody sells).
+
+Built for the TBO Tek hackathon, Track 2 (Multi-supplier Inventory), Dubai. The six catalogue suppliers are fictional and their data is **synthetic**; hotels and attractions are real (OpenStreetMap, Wikimedia, Wikipedia). Sheets you import are stored only on your machine, in `data/imports/` (not in git).
 
 ## How it works
 
 ```mermaid
-flowchart TB
-  subgraph Data["Synthetic supplier layer (DATA.md)"]
-    F[6 supplier feeds: hotels, tours] --- P[Parts: tickets, transfers, lunch<br/>resale_terms, slots, timetables]
-    L[Booking log: 30,000 attempts] --- S[Agent searches: 5,000]
+flowchart LR
+  subgraph In["What suppliers send"]
+    S[Rate sheets: grids, flat, rotated; CSV / XLSX] 
+    F[6 supplier feeds: hotels, rooms, offers, tours]
   end
-  subgraph Engines["Existing engines"]
-    TF[Twin Finder<br/>hotels and rooms]
-    VD[Variant DNA<br/>SAME vs VARIANT]
-    PM[Promise model<br/>hierarchical Beta-binomial]
-    TP[True Price]
-    SB[Failover sandbox<br/>SAME twins only]
+  subgraph Canon["Canon"]
+    L[Layout reader<br/>seasons, weekdays, occupancy, tabs, terms]
+    M[Matching<br/>Twin Finder model, short codes, names, earlier imports]
+    R[Room mapping<br/>code, name, tier + bed + view]
+    P[People decide<br/>uncertain hotels and rooms, undo]
+    C[(One catalogue<br/>past inventory + imports + decisions)]
   end
-  subgraph Remix["Remix engine (backend/samesame/remix)"]
-    RS[Recipe search: SAME DNA, bundleable,<br/>meeting point + timing]
-    PR[Pricing: part True Prices + assembly risk;<br/>agent share of the gap; guardrails]
-    GP[Gap finder: searched-for, nobody sells]
-    CT[Connected Trip: hotel + airport cars + tour]
-    BK[Book Remix: riskiest first,<br/>per-part failover, compensation]
-    AP[Approvals queue: logged, reversible]
+  subgraph Out["What it enables"]
+    T[Offers on True Price, failover to SAME twins only]
+    V[Tours grouped by Variant DNA]
+    B[Bundles: cheaper rebuilds of packages]
   end
-  F --> TF & VD
-  L --> PM
-  P --> VD
-  VD --> RS
-  PM --> PR
-  TP --> PR
-  RS --> PR --> AP
-  S --> GP --> PR
-  TF --> CT
-  PR --> CT
-  SB --> BK
+  S --> L --> M --> R --> C
+  F --> M
+  M -. unsure .-> P --> C
+  C --> T & V & B
 ```
 
-- **Recipe search:** for each packaged product, try every ticket × outbound car × return car (× lunch voucher). Keep only bundleable parts that are SAME on every field the package states, drop off at the ticket's meeting point, and arrive ≥ 20 min before the slot. Then take the cheapest assembly that passes every guardrail.
-- **Pricing:**
-  - TBO's cost = each part's True Price (sticker + price-change + failover risk, from its supplier's fitted Promise) + assembly risk (unwind and buy the package).
-  - The agent's True Price = sell price + cancellation risk under the strictest part's rule.
-  - The agent gets a share of the gap; TBO keeps the rest.
-- **Results** (METRICS.md, rebuilt every build):
-  - **4 of 30** multi-part packages pass every guardrail. Agents save 4.0–11.9% and TBO keeps 4.1–13.5%.
-  - The package is cheaper in 7, and they're listed.
-  - **18** gap Remixes pass, out of 78 combinations agents searched for that nobody sells.
+| Section | Pages |
+|---|---|
+| **Catalogue** | Import sheets · All hotels · Agent search (86 listings → 20 hotels, True Price, Book both) · Tours (Variant DNA) · Uncertain matches |
+| **Insights** | Supplier reliability (Promise model) · Business case and matching quality |
+| **Bundles** | Rebuild packages · New products · Approvals |
 
-- **Supplier naming:** suppliers write one hotel as "Hilton Garden Inn" or "HGI", and one room as "HP SUP KG CV" or just "Hyatt Place Room". Twin Finder writes short codes out before comparing names, and the room parser removes the hotel's own name before reading the room. The **Supplier Sheets** page (`/sheets`) takes a supplier's CSV or Excel rate sheet and resolves every row to one catalogue hotel and room, marks it new to TBO, or sends it to a person. On Weaver's synthetic 136-row sheet, 27/27 automatic hotel matches and 63/63 automatic room mappings are right.
+Samples to try (synthetic, built by the pipeline): **Plover**, a two-tab price grid with five Dubai hotels (one by short code, one not in the catalogue), and **Weaver**, a 136-row flat sheet whose answer key scores the import (28/28 automatic hotel matches and 67/67 room mappings right).
 
-Docs: [DEMO.md](DEMO.md) (4-minute script) · [QA.md](QA.md) · [METRICS.md](METRICS.md) · [DATA.md](DATA.md) · [PROGRESS.md](PROGRESS.md) · [REMIX_PLAN.md](REMIX_PLAN.md). The Python package keeps its original name, `samesame`.
+Docs: [DEMO.md](DEMO.md) · [VIDEO_SCRIPT.md](VIDEO_SCRIPT.md) · [QA.md](QA.md) · [METRICS.md](METRICS.md) · [DATA.md](DATA.md) · [PROGRESS.md](PROGRESS.md). The Python package keeps its original name, `samesame`.
 
 ## Run it
 
@@ -87,12 +78,12 @@ py start.py
 
 **macOS + LightGBM:** if `lightgbm` fails to import, run `brew install libomp`. `start.py` also tries an automatic venv-only fallback that uses the libomp bundled with scikit-learn.
 
-**LLM (optional):** set `LLM_API_KEY` (and optionally `LLM_MODEL`, default `anthropic/claude-haiku-5-5`). Without a key, everything still runs: gray-zone pairs go to the human review queue, extraction is rules-only, and diff sentences use templates. The pills at the top right of every page show which mode is active.
+**LLM (optional):** set `LLM_API_KEY` (and optionally `LLM_MODEL`, default `anthropic/claude-haiku-5-5`). Without a key, everything still runs: gray-zone pairs go to the human review queue, extraction is rules-only, and diff sentences use templates. The badge at the top right of every page shows which mode is active.
 
 ## Data provenance and licences
 
 - Hotel base truth, river, roads and district outlines: © OpenStreetMap contributors, licensed under the [ODbL 1.0](https://opendatacommons.org/licenses/odbl/). Snapshot in `data/raw/osm/` (see `SNAPSHOT.txt` for timestamps and queries). Pulled once with `backend/scripts/pull_osm.py`.
-- Supplier feeds, room names, offers, activities, **Remix parts (tickets, transfers, lunch vouchers, airport cars), booking logs and agent searches**: synthetic, generated with a fixed seed by `python -m samesame.pipeline` (~25 s; `start.py` runs it when needed). Part prices come from disclosed tariffs (DATA.md), set before any Remix result was computed.
+- Supplier feeds, room names, offers, activities, the **Plover and Weaver sample sheets**, **bundle parts (tickets, transfers, lunch vouchers, airport cars), booking logs and agent searches**: synthetic, generated with a fixed seed by `python -m samesame.pipeline` (~25 s; `start.py` runs it when needed). Part prices come from disclosed tariffs (DATA.md), set before any Remix result was computed.
 - Images: Wikimedia Commons photos (credited, licences in `data/raw/wiki`), stock photos labelled "not this exact place", and procedural fallbacks labelled "illustrative".
 - **[DATA.md](DATA.md)** lists exactly what is real, what is synthetic, and the few fixed inputs (the brief's golden-case offers).
 - The first build downloads the MiniLM sentence-embedding model (87 MB) into `data/models/` once; after that everything runs offline. Without network the matcher drops that one feature and records it in `data/build/matcher.json`.
